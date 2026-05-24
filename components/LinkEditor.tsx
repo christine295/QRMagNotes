@@ -69,7 +69,7 @@ export default function LinkEditor({ links, onChange }: Props) {
               <option value="link">Link</option>
               <option value="phone">Phone</option>
               <option value="note">Note</option>
-              <option value="file">File (image/pdf)</option>
+              <option value="photo">File (image/pdf)</option>
             </select>
 
             {link.type === 'link' && (
