@@ -215,7 +215,7 @@ export default function HubForm({ hub, existingLinks, userId }: Props) {
       try {
         linksWithFiles = await Promise.all(
           links.map(async (l, i) => {
-            if (l.type === "file" && l.file) {
+            if (l.type === "photo" && l.file) {
               const url = await uploadPhoto(l.file, hubId!, i)
               if (!url) {
                 setError("File upload failed: Could not get public URL. Check console for details.")
