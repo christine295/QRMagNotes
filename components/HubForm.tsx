@@ -18,7 +18,7 @@ const THEME_COLORS = [
   { value: '#64748B', label: 'Slate' },
 ]
 
-type LinkDraft = Omit<HubLink, 'id' | 'hub_id'>
+type LinkDraft = Omit<HubLink, 'id' | 'hub_id'> & { file?: File }
 
 type Template = {
   id: string
