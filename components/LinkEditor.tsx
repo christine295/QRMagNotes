@@ -126,7 +126,7 @@ export default function LinkEditor({ links, onChange }: Props) {
                 />
               </>
             )}
-            {link.type === 'file' && (
+            {link.type === 'photo' && (
               <>
                 <input
                   type="text"
