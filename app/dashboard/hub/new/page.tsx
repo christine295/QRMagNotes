@@ -1,11 +1,10 @@
 
+"use client";
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import HubForm from '@/components/HubForm'
 import { useSearchParams } from 'next/navigation'
-
- "use client";
 
 export default function NewHubPage() {
   const router = useRouter()
