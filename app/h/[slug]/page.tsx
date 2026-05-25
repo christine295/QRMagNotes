@@ -13,6 +13,21 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
 
   if (!hub) notFound()
 
+  if (hub.privacy_mode === 'private') {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || user.id !== hub.user_id) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center px-4">
+            <div className="text-5xl mb-4 select-none">&#128274;</div>
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">This hub is private</h1>
+            <p className="text-sm text-gray-500">Sign in as the owner to view this hub.</p>
+          </div>
+        </div>
+      )
+    }
+  }
+
   if (hub.mode === 'redirect' && hub.redirect_url) {
     redirect(hub.redirect_url)
   }

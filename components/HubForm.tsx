@@ -108,6 +108,9 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
       sort_order: l.sort_order
     })) ?? []
   )
+  const [privacyMode, setPrivacyMode] = useState<'public' | 'unlisted' | 'private'>(
+    hub?.privacy_mode ?? 'public'
+  )
   const [error, setError] = useState('')
   const [slugError, setSlugError] = useState('')
 
@@ -176,6 +179,7 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
             image_url: mode === "landing" ? imageUrl || null : null,
             theme_color: themeColor,
             collection_id: collectionId || null,
+            privacy_mode: privacyMode,
           })
           .eq("id", hub.id)
 
@@ -204,6 +208,7 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
             image_url: mode === "landing" ? imageUrl || null : null,
             theme_color: themeColor,
             collection_id: collectionId || null,
+            privacy_mode: privacyMode,
           })
           .select()
           .single()
@@ -347,6 +352,34 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
             </div>
             <div className="text-xs text-gray-400 mt-0.5">Send visitors to a URL</div>
           </button>
+        </div>
+      </div>
+
+      {/* Visibility */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Visibility</label>
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            { value: 'public', label: 'Public', description: 'Anyone with the link' },
+            { value: 'unlisted', label: 'Unlisted', description: 'Not listed publicly' },
+            { value: 'private', label: 'Private', description: 'Only you can view' },
+          ] as const).map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setPrivacyMode(opt.value)}
+              className={`border rounded-xl p-3 text-left transition-colors ${
+                privacyMode === opt.value
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <div className={`font-medium text-xs ${privacyMode === opt.value ? 'text-blue-700' : 'text-gray-700'}`}>
+                {opt.label}
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5 leading-tight">{opt.description}</div>
+            </button>
+          ))}
         </div>
       </div>
 

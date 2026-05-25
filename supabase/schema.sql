@@ -182,3 +182,24 @@ create policy "Users can manage own content_blocks"
 -- ==================
 alter table public.hubs add column if not exists collection_id uuid references public.collections(id) on delete set null;
 alter table public.hubs add column if not exists privacy_mode text not null default 'public' check (privacy_mode in ('public', 'unlisted', 'private'));
+
+-- ==================
+-- Privacy Mode RLS
+-- ==================
+-- Replace open hub read policy with privacy-aware one:
+drop policy if exists "Anyone can view hubs" on public.hubs;
+create policy "View hubs based on privacy"
+  on public.hubs for select
+  using (privacy_mode in ('public', 'unlisted') or auth.uid() = user_id);
+
+-- Restrict hub_links to match hub privacy:
+drop policy if exists "Anyone can view hub_links" on public.hub_links;
+create policy "View hub_links based on hub privacy"
+  on public.hub_links for select
+  using (
+    exists (
+      select 1 from public.hubs
+      where hubs.id = hub_links.hub_id
+        and (hubs.privacy_mode in ('public', 'unlisted') or hubs.user_id = auth.uid())
+    )
+  );
