@@ -359,9 +359,9 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   if (createdHubId) {
     return (
       <div className="space-y-6">
+        {title && <h2 className="text-lg font-semibold text-gray-900">{title}</h2>}
         <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
           <p className="text-sm font-medium text-green-800">Hub created! Add content blocks below.</p>
-          <p className="text-xs text-green-600 mt-0.5">You can always add more later from the edit page.</p>
         </div>
         <ContentBlocksEditor hubId={createdHubId} />
         <div className="flex gap-3 pt-2">
@@ -704,6 +704,9 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   }
 
   // ── Create mode ─────────────────────────────────────────────────────────
+  const tagPlaceholder = selectedTemplateId === 'ritual'
+    ? 'Type a tag and press Enter — e.g. sabbat, full moon'
+    : 'Type a tag and press Enter — e.g. seasonal, car, kitchen'
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Collection */}
@@ -871,7 +874,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
           onChange={e => setTagInput(e.target.value)}
           onKeyDown={handleTagKeyDown}
           onBlur={() => { if (tagInput.trim()) addTag(tagInput) }}
-          placeholder="Type a tag and press Enter — e.g. seasonal, car, kitchen"
+          placeholder={tagPlaceholder}
           className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p className="text-xs text-gray-400 mt-1">Press Enter or comma to add. Used for filtering in your dashboard.</p>

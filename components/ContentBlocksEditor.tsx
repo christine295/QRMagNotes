@@ -22,7 +22,7 @@ type TextData      = { label: string; text: string; date?: string }
 type ChecklistData = { label: string; items: { id: string; text: string }[] }
 type ImageData     = { caption: string; url: string }
 type TimelineData  = { label: string; events: { id: string; date: string; text: string }[] }
-type AudioData     = { label: string; url: string }
+type AudioData     = { label: string; url: string; date?: string }
 type LinkData      = { label: string; url: string }
 type PhoneData     = { label: string; url: string }
 type FileData      = { label: string; url: string }
@@ -488,13 +488,14 @@ function TimelineForm({ onSave, onCancel, initialData }: { onSave: (d: TimelineD
 
 // ── Audio form ────────────────────────────────────────────────────────────────
 
-const AUDIO_SUGGESTIONS = ['Artist Reflection', 'Family Story', 'Voice Instructions', 'Welcome Message', 'Care Notes', 'Recipe Story']
+const AUDIO_SUGGESTIONS = ['Intention', 'Sacred Space', 'In the Moment', 'Signs & Synchronicities', 'Ritual Reflection', 'Messages Received', 'Things to Revisit', 'Shadow Work']
 
 function formatTime(s: number) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
 
 function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; onSave: (d: AudioData) => Promise<any>; onCancel: () => void; initialData?: AudioData }) {
   const [mode, setMode] = useState<'record' | 'upload'>('record')
   const [label, setLabel] = useState(initialData?.label ?? '')
+  const [date, setDate] = useState(initialData?.date ?? '')
   const [existingUrl] = useState(initialData?.url ?? '')
   const [recording, setRecording] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
@@ -539,7 +540,7 @@ function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; on
   async function saveExisting() {
     if (!label.trim()) { setError('Please add a label.'); return }
     setSaving(true)
-    const res = await onSave({ label: label.trim(), url: existingUrl })
+    const res = await onSave({ label: label.trim(), url: existingUrl, date: date || undefined })
     if (res.error) { setError(res.error); setSaving(false) }
   }
 
@@ -550,7 +551,7 @@ function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; on
     const { uploadAudio } = await import('@/lib/supabase/uploadAudio')
     const url = await uploadAudio(file, hubId)
     if (!url) { setError('Upload failed. Check the hub-audio bucket in Supabase.'); setSaving(false); return }
-    const res = await onSave({ label: label.trim(), url })
+    const res = await onSave({ label: label.trim(), url, date: date || undefined })
     if (res.error) { setError(res.error); setSaving(false) }
   }
 
@@ -561,7 +562,7 @@ function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; on
           type="text"
           value={label}
           onChange={e => setLabel(e.target.value)}
-          placeholder="Label — e.g. Artist Reflection"
+          placeholder="Label — e.g. Ritual Reflection"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex flex-wrap gap-1 mt-1.5">
@@ -571,6 +572,16 @@ function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; on
             </button>
           ))}
         </div>
+      </div>
+      <div>
+        <label className="block text-xs text-gray-500 mb-1">Date <span className="text-gray-400">(optional)</span></label>
+        <input
+          type="date"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          title="Date of recording"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {existingUrl && !recordedUrl && (

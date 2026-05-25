@@ -141,7 +141,12 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
             if (block.type === 'audio') {
               return (
                 <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                  {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
+                  {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color }}>{d.label}</p>}
+                  {d.date && (
+                    <p className="text-xs text-gray-400 mb-2">
+                      {new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
                   <audio src={d.url} controls className="w-full" />
                 </div>
               )
