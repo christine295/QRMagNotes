@@ -3,8 +3,8 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import HubForm from '@/components/HubForm'
-
 import DeleteHubForm from '@/components/DeleteHubForm'
+import AudioBlockEditor from '@/components/AudioBlockEditor'
 
 export default async function EditHubPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -55,8 +55,14 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </header>
-      <main className="max-w-xl mx-auto px-4 py-8">
+      <main className="max-w-xl mx-auto px-4 py-8 space-y-8">
         <HubForm hub={hub} existingLinks={links ?? []} userId={user.id} />
+        {hub.mode === 'landing' && (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="text-sm font-medium text-gray-700 mb-4">Voice Notes</h2>
+            <AudioBlockEditor hubId={hub.id} />
+          </div>
+        )}
       </main>
     </div>
   )

@@ -55,6 +55,13 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
     .eq('hub_id', hub.id)
     .order('sort_order')
 
+  const { data: contentBlocks } = await supabase
+    .from('content_blocks')
+    .select('*')
+    .eq('hub_id', hub.id)
+    .eq('type', 'audio')
+    .order('sort_order')
+
   const color = hub.theme_color ?? '#3B82F6'
 
   return (
@@ -76,6 +83,21 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
       </div>
 
       <main className="max-w-sm mx-auto px-4 py-6 space-y-3">
+        {contentBlocks && contentBlocks.length > 0 && (
+          <div className="space-y-3 pb-3">
+            {contentBlocks.map(block => {
+              const d = block.data as { label: string; url: string }
+              return (
+                <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>
+                    {d.label}
+                  </p>
+                  <audio src={d.url} controls className="w-full" />
+                </div>
+              )
+            })}
+          </div>
+        )}
         {links && links.length > 0 ? (
           links.map(link => {
             // Phone: clickable tel: link
