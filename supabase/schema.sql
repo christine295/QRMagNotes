@@ -150,7 +150,7 @@ create policy "Users can delete own collections"
 create table public.content_blocks (
   id uuid primary key default gen_random_uuid(),
   hub_id uuid not null references public.hubs(id) on delete cascade,
-  type text not null check (type in ('text', 'image', 'audio', 'file', 'links', 'phone', 'checklist', 'timeline', 'note')),
+  type text not null check (type in ('text', 'image', 'audio', 'file', 'link', 'phone', 'checklist', 'timeline', 'note')),
   data jsonb not null,
   sort_order integer not null default 0,
   created_at timestamp with time zone default now(),
