@@ -68,6 +68,7 @@ type Props = {
   hub?: Hub
   existingLinks?: HubLink[]
   userId: string
+  initialCollectionId?: string
 }
 
 function slugify(val: string) {
@@ -78,10 +79,10 @@ function slugify(val: string) {
     .replace(/^-|-$/g, '')
 }
 
-export default function HubForm({ hub, existingLinks, userId }: Props) {
+export default function HubForm({ hub, existingLinks, userId, initialCollectionId }: Props) {
     // Fetch collections for the user
     const { collections, loading: collectionsLoading } = useCollections(userId)
-    const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? null)
+    const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? initialCollectionId ?? null)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const supabase = createClient()

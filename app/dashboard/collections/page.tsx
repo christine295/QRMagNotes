@@ -137,7 +137,15 @@ export default function CollectionsPage() {
                   {collection.hubs && collection.hubs.length > 0 ? (
                     collection.hubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)
                   ) : (
-                    <div className="text-gray-400 text-sm">No hubs in this collection.</div>
+                    <div className="flex flex-col gap-2 items-start">
+                      <div className="text-gray-400 text-sm">No hubs in this collection.</div>
+                      <Link
+                        href={`/dashboard/hub/new?collection=${collection.id}`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                      >
+                        + Add Hub
+                      </Link>
+                    </div>
                   )}
                 </div>
               </div>
