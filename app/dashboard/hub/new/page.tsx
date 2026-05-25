@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 "use client";
 export const dynamic = "force-dynamic";
 import { useState, useEffect } from 'react';
@@ -7,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import HubForm from '@/components/HubForm'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function NewHubPage() {
+function NewHubPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const collectionId = searchParams.get('collection') || undefined
@@ -46,5 +47,13 @@ export default function NewHubPage() {
         <HubForm userId={userId} initialCollectionId={collectionId} />
       </main>
     </div>
+  )
+}
+
+export default function NewHubPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading...</div>}>
+      <NewHubPageContent />
+    </Suspense>
   )
 }
