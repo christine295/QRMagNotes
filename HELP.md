@@ -145,4 +145,4 @@ Creates **11 content blocks** via `Promise.all` to the API route (RLS requires s
 - **Sort order gaps**: If a block insert fails (e.g., during bulk template creation), sort_order numbering can have gaps. When two blocks share the same sort_order, `moveBlock()` swaps equal values and does nothing. Fix: normalize sort_orders after every move (reassign 0,1,2,… from array position). Deferred — only manifests after a failed partial template insert.
 - **Multi-user slugs**: Current URL is `/h/[slug]`. Future plan: `/h/[username]/[slug]` for multi-tenant. Deferred until before real users print QR codes.
 - **Free tier limits**: 3 hubs / 1 collection not yet enforced.
-- **Image uploads**: Images are URL-only. No upload UI — users must host images externally.
+- **Image uploads**: Supported directly from the image block editor. Uploaded files are stored in Supabase Storage. A public URL can also be pasted instead.
