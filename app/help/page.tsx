@@ -3,51 +3,43 @@ import Link from 'next/link'
 const BLOCK_TYPES = [
   {
     name: 'Text / Note',
-    icon: '📝',
-    description: 'Rich written content — overviews, instructions, reflections, descriptions. Supports multi-line whitespace-preserved text. Accepts an optional label and date.',
-    ritualUse: 'Ritual Overview, Correspondences, Invocation, Ritual Notes',
+    description: 'Written content — overviews, instructions, descriptions, FAQs, notes. Supports multi-line whitespace-preserved text. Accepts an optional label and date.',
+    examples: 'product overviews, care instructions, artist statements, property notes, service descriptions, how-to guides',
   },
   {
     name: 'Checklist',
-    icon: '☑',
-    description: 'Step-by-step list with tap-to-complete items. Checked state is stored locally per device — visitors can track their own progress. "Begin again" resets all items.',
-    ritualUse: 'Ritual Setup, Ritual Steps, Follow-Up tasks',
+    description: 'Step-by-step list with tap-to-complete items. Checked state is stored locally per device — each visitor tracks their own progress independently. "Begin again" resets all items.',
+    examples: 'setup steps, maintenance checklists, packing lists, onboarding flows, inspection notes, house rules',
   },
   {
     name: 'Audio / Voice Note',
-    icon: '🎙',
-    description: 'Embedded audio player for any hosted audio URL. Supports an optional label and recording date. Ideal for voice reflections or ambient recordings captured during ritual.',
-    ritualUse: 'Voice Reflections, In the Moment recordings',
+    description: 'Embedded audio player for any hosted audio URL. Supports an optional label and recording date. Record directly in the editor or upload a file.',
+    examples: 'welcome messages, voice instructions, property tours, product demonstrations, narrated context',
   },
   {
     name: 'Link',
-    icon: '🔗',
-    description: 'A tappable external URL row — opens in a new tab. The label is shown instead of the raw URL. Use for Spotify playlists, reference websites, or any web resource.',
-    ritualUse: 'Ritual Playlist, reference materials',
+    description: 'A tappable external URL row — opens in a new tab. The label is shown instead of the raw URL.',
+    examples: 'websites, booking pages, product listings, maps, playlists, reference guides, support portals, documentation',
   },
   {
     name: 'Phone',
-    icon: '📞',
-    description: 'A tap-to-call phone number. Tapping opens the device dialer. Good for emergency contacts, schedulers, or service numbers attached to a physical item.',
-    ritualUse: 'Contact references',
+    description: 'A tap-to-call phone number. Tapping opens the device dialer.',
+    examples: 'support lines, contact numbers, service providers, emergency contacts, reservation lines',
   },
   {
     name: 'File',
-    icon: '📄',
-    description: 'A downloadable file — any publicly hosted URL (PDF, image, etc.). Shown as a tappable row with a label.',
-    ritualUse: 'Printable guides, ceremony sheets, permission forms',
+    description: 'A downloadable file from any publicly hosted URL (PDF, doc, etc.). Shown as a tappable row with a label.',
+    examples: 'care guides, user manuals, warranties, floor plans, menus, spec sheets, printable forms',
   },
   {
     name: 'Image',
-    icon: '🖼',
-    description: 'An inline photo or image from any public URL. Displayed edge-to-edge within the content column with an optional caption beneath.',
-    ritualUse: 'Altar photos, sacred imagery, ritual documentation',
+    description: 'An inline photo uploaded directly or linked from a public URL. Displayed within the content column with an optional caption.',
+    examples: 'product photos, before/after shots, diagrams, artwork, property exteriors, team photos, instructional images',
   },
   {
     name: 'Timeline',
-    icon: '📅',
-    description: 'A vertical sequence of dated events with accent-color dot markers. Each event has an optional date and a text description. Good for history, milestones, or ritual lineage.',
-    ritualUse: 'Ritual history, seasonal progression, tradition lineage',
+    description: 'A vertical sequence of dated entries with accent-color dot markers. Each entry has an optional date and a text description.',
+    examples: 'service history, project milestones, renovation log, ownership history, product lineage, event sequence',
   },
 ]
 
@@ -123,7 +115,7 @@ export default function HelpPage() {
           <div className="prose-sm text-stone-600 leading-[1.7] space-y-3 max-w-prose">
             <p>
               Each hub has a permanent URL at <code className="text-stone-700 bg-stone-100 px-1 py-0.5 rounded text-xs">/h/your-slug</code>.
-              You print a QR code pointing to that URL and attach it to something physical — an artwork, a ritual space, a jar, a journal.
+              You print a QR code pointing to that URL and attach it to something physical — a product, an artwork, a piece of equipment, a property, a vehicle, or any physical space.
               The content behind the QR can be updated at any time without reprinting the code.
             </p>
             <p>
@@ -144,18 +136,18 @@ export default function HelpPage() {
                 </div>
                 <p className="text-sm text-stone-600 leading-[1.65] mb-1">{b.description}</p>
                 <p className="text-xs text-stone-400">
-                  <span className="font-medium">Used for:</span> {b.ritualUse}
+                  <span className="font-medium">Examples:</span> {b.examples}
                 </p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Ceremonial text */}
+        {/* Accent text */}
         <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-3">Ceremonial text styling</h2>
+          <h2 className="text-lg font-semibold text-stone-800 mb-3">Styled quote / passage text</h2>
           <p className="text-sm text-stone-600 leading-[1.65] mb-4 max-w-prose">
-            Any <strong>Text</strong> block whose label contains one of the following words will automatically render in italic with a thin accent-color left border — styled like sacred or poetic text rather than standard body copy:
+            Any <strong>Text</strong> block whose label contains one of the following words automatically renders in italic with a thin accent-color left border — useful for quotes, poetry, featured passages, spoken text, or any content that should feel set apart from body copy:
           </p>
           <div className="flex flex-wrap gap-2">
             {CEREMONIAL_LABELS.map(w => (

@@ -2,7 +2,7 @@
 
 ## How it works
 
-Each hub has a permanent URL at `/h/[slug]`. You print a QR code pointing to that URL and attach it to something physical — artwork, a ritual space, a jar, a journal. The content behind the QR can be updated at any time without reprinting.
+Each hub has a permanent URL at `/h/[slug]`. You print a QR code pointing to that URL and attach it to something physical — a product, an artwork, a piece of equipment, a property, a vehicle, or any physical space. The content behind the QR can be updated at any time without reprinting.
 
 **Hub modes:**
 - `landing` — Shows a content page with blocks
@@ -34,35 +34,35 @@ All blocks are stored in `content_blocks` as `type` + `data` (JSONB) + `sort_ord
 
 ```json
 // text
-{ "label": "Ritual Overview", "text": "...", "date": "2026-05-25" }
+{ "label": "Product Overview", "text": "...", "date": "2026-05-25" }
 
 // checklist
-{ "label": "Ritual Setup", "items": [{ "id": "rs-1", "text": "Cleanse the space" }] }
+{ "label": "Setup Steps", "items": [{ "id": "s-1", "text": "Step one" }] }
 
 // audio
-{ "label": "Voice Reflections", "url": "https://...", "date": "2026-05-25" }
+{ "label": "Welcome Message", "url": "https://...", "date": "2026-05-25" }
 
 // link
-{ "label": "Ritual Playlist", "url": "https://spotify.com/..." }
+{ "label": "Product Page", "url": "https://example.com/..." }
 
 // phone
 { "label": "Support Line", "url": "+1-555-000-0000" }
 
 // file
-{ "label": "Ceremony Guide", "url": "https://..." }
+{ "label": "User Manual", "url": "https://..." }
 
 // image
-{ "url": "https://...", "caption": "Altar setup" }
+{ "url": "https://...", "caption": "Product photo" }
 
 // timeline
-{ "label": "Ritual History", "events": [{ "id": "e1", "date": "Samhain 2024", "text": "First working" }] }
+{ "label": "Service History", "events": [{ "id": "e1", "date": "2024-01-15", "text": "Oil change" }] }
 ```
 
 ---
 
-## Ceremonial text styling
+## Styled quote / passage text
 
-Any `text` block whose label contains one of these words renders in **italic** with a thin accent-colored left border (like a blockquote):
+Any `text` block whose label contains one of these words renders in **italic** with a thin accent-colored left border — useful for quotes, poetry, featured passages, spoken text, or any content that should feel set apart from body copy:
 
 ```
 invocation  |  words to speak  |  quote  |  passage  |  poem  |  prayer  |  sacred
