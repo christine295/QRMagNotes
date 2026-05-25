@@ -1,18 +1,36 @@
 
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 import HubForm from '@/components/HubForm'
 import { useSearchParams } from 'next/navigation'
 
-export default async function NewHubPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+ "use client";
 
-  // Read ?collection= param
-  const searchParams = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search)
-  const collectionId = searchParams?.get('collection') || undefined
+export default function NewHubPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const collectionId = searchParams.get('collection') || undefined
+  const [userId, setUserId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.replace('/login')
+        return
+      }
+      setUserId(user.id)
+      setLoading(false)
+    }
+    fetchUser()
+  }, [router])
+
+  if (loading || !userId) {
+    return <div className="p-8 text-center text-gray-400">Loading...</div>
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
