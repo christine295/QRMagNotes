@@ -1,12 +1,12 @@
-import { Suspense } from 'react';
 "use client";
+import { Suspense, useState, useEffect } from 'react';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import HubForm from '@/components/HubForm';
+import { useRouter, useSearchParams } from 'next/navigation';
+
 export const dynamic = "force-dynamic";
-import { useState, useEffect } from 'react';
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
-import HubForm from '@/components/HubForm'
-import { useRouter, useSearchParams } from 'next/navigation'
 
 function NewHubPageContent() {
   const router = useRouter()
