@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import ChecklistBlock from '@/components/ChecklistBlock'
 
 export default async function PublicHubPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -59,7 +60,6 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
     .from('content_blocks')
     .select('*')
     .eq('hub_id', hub.id)
-    .eq('type', 'audio')
     .order('sort_order')
 
   const color = hub.theme_color ?? '#3B82F6'
@@ -86,15 +86,65 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
         {contentBlocks && contentBlocks.length > 0 && (
           <div className="space-y-3 pb-3">
             {contentBlocks.map(block => {
-              const d = block.data as { label: string; url: string }
-              return (
-                <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>
-                    {d.label}
-                  </p>
-                  <audio src={d.url} controls className="w-full" />
-                </div>
-              )
+              const d = block.data as any
+
+              if (block.type === 'audio') {
+                return (
+                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
+                    <audio src={d.url} controls className="w-full" />
+                  </div>
+                )
+              }
+
+              if (block.type === 'text') {
+                return (
+                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
+                    <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{d.text}</p>
+                  </div>
+                )
+              }
+
+              if (block.type === 'checklist') {
+                return (
+                  <ChecklistBlock
+                    key={block.id}
+                    blockId={block.id}
+                    label={d.label ?? ''}
+                    items={d.items ?? []}
+                    color={color}
+                  />
+                )
+              }
+
+              if (block.type === 'image') {
+                return (
+                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <img src={d.url} alt={d.caption || ''} className="w-full object-cover" />
+                    {d.caption && <p className="text-xs text-gray-500 px-4 py-2">{d.caption}</p>}
+                  </div>
+                )
+              }
+
+              if (block.type === 'timeline') {
+                return (
+                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color }}>{d.label}</p>}
+                    <div className="relative pl-5 border-l-2" style={{ borderColor: color + '40' }}>
+                      {(d.events ?? []).map((event: any, i: number) => (
+                        <div key={event.id ?? i} className="mb-3 last:mb-0 relative">
+                          <span className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: color }} />
+                          {event.date && <p className="text-xs text-gray-400 mb-0.5">{event.date}</p>}
+                          <p className="text-sm text-gray-700">{event.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+
+              return null
             })}
           </div>
         )}
