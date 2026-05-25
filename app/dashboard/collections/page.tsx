@@ -6,32 +6,45 @@ import { createClient } from '@/lib/supabase/client'
 import HubCard from '@/components/HubCard'
 import { useState, useEffect } from 'react'
 
+
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<any[]>([])
+  const [uncategorizedHubs, setUncategorizedHubs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
 
-  // Fetch collections on mount
+  // Fetch collections and uncategorized hubs on mount
   useEffect(() => {
-    async function fetchCollections() {
+    async function fetchData() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         redirect('/login')
         return
       }
-      const { data } = await supabase
+      // Fetch collections with hubs
+      const { data: collectionsData } = await supabase
         .from('collections')
         .select('*, hubs(*)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-      setCollections(data || [])
+      setCollections(collectionsData || [])
+
+      // Fetch uncategorized hubs
+      const { data: hubsData } = await supabase
+        .from('hubs')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('collection_id', null)
+        .order('created_at', { ascending: false })
+      setUncategorizedHubs(hubsData || [])
+
       setLoading(false)
     }
-    fetchCollections()
+    fetchData()
   }, [])
 
   async function handleCreateCollection(e: React.FormEvent) {
@@ -79,6 +92,18 @@ export default function CollectionsPage() {
         </div>
       </header>
       <main className="max-w-2xl mx-auto px-4 py-8">
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center">
+            <div className="text-2xl font-bold text-blue-700">{collections.reduce((acc, c) => acc + (c.hubs?.length || 0), 0) + uncategorizedHubs.length}</div>
+            <div className="text-xs text-gray-500">Total Hubs</div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center">
+            <div className="text-2xl font-bold text-blue-700">{collections.length}</div>
+            <div className="text-xs text-gray-500">Collections</div>
+          </div>
+        </div>
+
         <div className="mb-8 flex justify-end">
           <button
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
@@ -120,61 +145,92 @@ export default function CollectionsPage() {
         )}
         {loading ? (
           <div className="text-center text-gray-400">Loading...</div>
-        ) : collections && collections.length > 0 ? (
-          <div className="space-y-8">
-            {collections.map((collection: any) => (
-              <div key={collection.id} className="bg-white rounded-xl border border-gray-200 shadow p-5">
-                <div className="flex items-center gap-4 mb-2 justify-between">
-                  <div className="flex items-center gap-4">
-                    {collection.cover_image && (
-                      <img src={collection.cover_image} alt="cover" className="w-12 h-12 rounded object-cover" />
-                    )}
-                    <div>
-                      <h2 className="font-semibold text-lg text-gray-900">{collection.title}</h2>
-                      {collection.description && <p className="text-gray-500 text-sm">{collection.description}</p>}
+        ) : (
+          <>
+            {/* Collections */}
+            {collections && collections.length > 0 && (
+              <div className="space-y-8 mb-12">
+                {collections.map((collection: any) => (
+                  <div key={collection.id} className="bg-white rounded-xl border border-gray-200 shadow p-5">
+                    <div className="flex items-center gap-4 mb-2 justify-between">
+                      <div className="flex items-center gap-4">
+                        {collection.cover_image && (
+                          <img src={collection.cover_image} alt="cover" className="w-12 h-12 rounded object-cover" />
+                        )}
+                        <div>
+                          <h2 className="font-semibold text-lg text-gray-900">{collection.title}</h2>
+                          {collection.description && <p className="text-gray-500 text-sm">{collection.description}</p>}
+                        </div>
+                      </div>
+                      {collection.hubs && collection.hubs.length > 0 && (
+                        <Link
+                          href={`/dashboard/hub/new?collection=${collection.id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-auto"
+                        >
+                          + Add Hub
+                        </Link>
+                      )}
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      {collection.hubs && collection.hubs.length > 0 ? (
+                        collection.hubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)
+                      ) : (
+                        <div className="flex flex-col gap-2 items-start">
+                          <div className="text-gray-400 text-sm">No hubs in this collection.</div>
+                          <Link
+                            href={`/dashboard/hub/new?collection=${collection.id}`}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                          >
+                            + Add Hub
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {collection.hubs && collection.hubs.length > 0 && (
-                    <Link
-                      href={`/dashboard/hub/new?collection=${collection.id}`}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-auto"
-                    >
-                      + Add Hub
-                    </Link>
-                  )}
+                ))}
+              </div>
+            )}
+
+            {/* Uncategorized Hubs */}
+            {uncategorizedHubs && uncategorizedHubs.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-200 shadow p-5 mb-12">
+                <div className="flex items-center gap-4 mb-2 justify-between">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <h2 className="font-semibold text-lg text-gray-900">Uncategorized</h2>
+                      <p className="text-gray-500 text-sm">Hubs not assigned to any collection</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard/hub/new"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-auto"
+                  >
+                    + Add Hub
+                  </Link>
                 </div>
                 <div className="mt-4 space-y-2">
-                  {collection.hubs && collection.hubs.length > 0 ? (
-                    collection.hubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)
-                  ) : (
-                    <div className="flex flex-col gap-2 items-start">
-                      <div className="text-gray-400 text-sm">No hubs in this collection.</div>
-                      <Link
-                        href={`/dashboard/hub/new?collection=${collection.id}`}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                      >
-                        + Add Hub
-                      </Link>
-                    </div>
-                  )}
+                  {uncategorizedHubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)}
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 px-4">
-            <div className="text-5xl mb-4">📁</div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No collections yet</h3>
-            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
-              Organize your hubs into collections for easier management.
-            </p>
-            <Link
-              href="/dashboard"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              Back to Dashboard
-            </Link>
-          </div>
+            )}
+
+            {/* Empty State */}
+            {(!collections || collections.length === 0) && (!uncategorizedHubs || uncategorizedHubs.length === 0) && (
+              <div className="text-center py-20 px-4">
+                <div className="text-5xl mb-4">📁</div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">No collections or hubs yet</h3>
+                <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
+                  Organize your hubs into collections for easier management.
+                </p>
+                <Link
+                  href="/dashboard"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  Back to Dashboard
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
