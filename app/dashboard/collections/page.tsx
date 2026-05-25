@@ -105,16 +105,21 @@ export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [modeFilter, setModeFilter] = useState<'all' | 'landing' | 'redirect'>('all')
   const [privacyFilter, setPrivacyFilter] = useState<'all' | 'public' | 'unlisted' | 'private'>('all')
+  const [tagFilter, setTagFilter] = useState('')
 
   function hubMatches(hub: any) {
     const q = searchQuery.toLowerCase()
-    const matchesSearch = !q || hub.title.toLowerCase().includes(q) || hub.slug.toLowerCase().includes(q)
+    const matchesSearch = !q ||
+      hub.title.toLowerCase().includes(q) ||
+      hub.slug.toLowerCase().includes(q) ||
+      (hub.tags ?? []).some((t: string) => t.includes(q))
     const matchesMode = modeFilter === 'all' || hub.mode === modeFilter
     const matchesPrivacy = privacyFilter === 'all' || hub.privacy_mode === privacyFilter
-    return matchesSearch && matchesMode && matchesPrivacy
+    const matchesTag = !tagFilter || (hub.tags ?? []).includes(tagFilter)
+    return matchesSearch && matchesMode && matchesPrivacy && matchesTag
   }
 
-  const isFiltering = searchQuery || modeFilter !== 'all' || privacyFilter !== 'all'
+  const isFiltering = searchQuery || modeFilter !== 'all' || privacyFilter !== 'all' || tagFilter
 
   // Fetch collections and uncategorized hubs on mount
   useEffect(() => {
@@ -218,6 +223,15 @@ export default function CollectionsPage() {
             placeholder="Search hubs by title or slug…"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {tagFilter && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">Filtering by tag:</span>
+              <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                #{tagFilter}
+                <button type="button" onClick={() => setTagFilter('')} className="hover:text-blue-900 leading-none">×</button>
+              </span>
+            </div>
+          )}
           <div className="flex gap-2">
             <select
               value={modeFilter}
@@ -245,6 +259,7 @@ export default function CollectionsPage() {
 
         <div className="mb-8 flex justify-end">
           <button
+            type="button"
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             onClick={() => setShowForm(!showForm)}
           >
@@ -259,6 +274,7 @@ export default function CollectionsPage() {
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
+                placeholder="Collection title"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -268,6 +284,7 @@ export default function CollectionsPage() {
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
+                placeholder="Optional description"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={2}
               />
@@ -307,12 +324,14 @@ export default function CollectionsPage() {
                         </div>
                         <div className="flex items-center gap-2 ml-auto">
                           <button
+                            type="button"
                             className="text-xs text-blue-600 border border-blue-100 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
                             onClick={() => setExpanded(e => ({ ...e, [collection.id]: !isOpen }))}
                           >
                             {isOpen ? 'Hide Hubs' : 'Show Hubs'}
                           </button>
                           <button
+                            type="button"
                             className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 hover:bg-gray-100 transition-colors"
                             onClick={() => { setEditCollection(collection); setEditOpen(true); }}
                           >
@@ -336,6 +355,7 @@ export default function CollectionsPage() {
                                     }}
                                   />
                           <button
+                            type="button"
                             className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50 transition-colors"
                             onClick={() => { setConfirmCollection(collection); setConfirmOpen(true); }}
                           >
@@ -393,7 +413,7 @@ export default function CollectionsPage() {
                       {isOpen && (
                         <div className="mt-4 space-y-2">
                           {matchingHubs.length > 0 ? (
-                            matchingHubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)
+                            matchingHubs.map((hub: any) => <HubCard key={hub.id} hub={hub} onTagClick={setTagFilter} />)
                           ) : (
                             <div className="flex flex-col gap-2 items-start">
                               <div className="text-gray-400 text-sm">No hubs in this collection.</div>
@@ -435,7 +455,7 @@ export default function CollectionsPage() {
                     </Link>
                   </div>
                   <div className="mt-4 space-y-2">
-                    {matchingUncategorized.map((hub: any) => <HubCard key={hub.id} hub={hub} />)}
+                    {matchingUncategorized.map((hub: any) => <HubCard key={hub.id} hub={hub} onTagClick={setTagFilter} />)}
                   </div>
                 </div>
               )

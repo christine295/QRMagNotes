@@ -8,7 +8,7 @@ function formatDate(iso: string) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso))
 }
 
-export default function HubCard({ hub }: { hub: Hub }) {
+export default function HubCard({ hub, onTagClick }: { hub: Hub; onTagClick?: (tag: string) => void }) {
   const publicUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/h/${hub.slug}`
 
   async function copyLink() {
@@ -25,6 +25,20 @@ export default function HubCard({ hub }: { hub: Hub }) {
           <p className="text-xs text-gray-300 mt-1">
             Created {formatDate(hub.created_at)} · Updated {formatDate(hub.updated_at)}
           </p>
+          {hub.tags && hub.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {hub.tags.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => onTagClick?.(tag)}
+                  className="text-xs bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-500 px-2 py-0.5 rounded-full transition-colors"
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1">
           <span

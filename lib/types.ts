@@ -16,6 +16,7 @@ export type Hub = {
   theme_color: string | null
   collection_id?: string | null
   privacy_mode: 'public' | 'unlisted' | 'private'
+  tags: string[]
   created_at: string
   updated_at: string
 }

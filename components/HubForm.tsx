@@ -86,8 +86,21 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   const [privacyMode, setPrivacyMode] = useState<'public' | 'unlisted' | 'private'>(
     hub?.privacy_mode ?? 'public'
   )
+  const [tags, setTags] = useState<string[]>(hub?.tags ?? [])
+  const [tagInput, setTagInput] = useState('')
   const [error, setError] = useState('')
   const [slugError, setSlugError] = useState('')
+
+  function addTag(val: string) {
+    const cleaned = val.trim().toLowerCase().replace(/^#/, '').replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+    if (cleaned && !tags.includes(cleaned)) setTags(prev => [...prev, cleaned])
+    setTagInput('')
+  }
+
+  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(tagInput) }
+    else if (e.key === 'Backspace' && !tagInput && tags.length > 0) setTags(prev => prev.slice(0, -1))
+  }
 
   function applyTemplate(t: Template) {
     setTitle(t.title)
@@ -153,6 +166,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             theme_color: themeColor,
             collection_id: collectionId || null,
             privacy_mode: privacyMode,
+            tags,
           })
           .eq('id', hub.id)
 
@@ -175,6 +189,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             theme_color: themeColor,
             collection_id: collectionId || null,
             privacy_mode: privacyMode,
+            tags,
           })
 
         if (hubError) {
@@ -308,6 +323,31 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Tags */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Tags <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {tags.map(tag => (
+            <span key={tag} className="flex items-center gap-1 bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full">
+              #{tag}
+              <button type="button" onClick={() => setTags(prev => prev.filter(t => t !== tag))} className="text-gray-400 hover:text-gray-700 leading-none">×</button>
+            </span>
+          ))}
+        </div>
+        <input
+          type="text"
+          value={tagInput}
+          onChange={e => setTagInput(e.target.value)}
+          onKeyDown={handleTagKeyDown}
+          onBlur={() => { if (tagInput.trim()) addTag(tagInput) }}
+          placeholder="Type a tag and press Enter — e.g. seasonal, car, kitchen"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p className="text-xs text-gray-400 mt-1">Press Enter or comma to add. Used for filtering in your dashboard.</p>
       </div>
 
       {/* Redirect mode fields */}
