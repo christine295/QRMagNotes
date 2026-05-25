@@ -46,12 +46,13 @@ function blockSummary(block: ContentBlock): string {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
+export default function ContentBlocksEditor({ hubId, hubTitle }: { hubId: string; hubTitle?: string }) {
   const [blocks, setBlocks] = useState<ContentBlock[]>([])
   const [loading, setLoading] = useState(true)
   const [pickingType, setPickingType] = useState(false)
   const [addingType, setAddingType] = useState<BlockType | null>(null)
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null)
+  const [savedBlockId, setSavedBlockId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/hub/${hubId}/content_blocks`)
@@ -84,6 +85,8 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
     if (!json.error) {
       setBlocks(prev => prev.map(b => b.id === id ? { ...b, data } : b))
       setEditingBlockId(null)
+      setSavedBlockId(id)
+      setTimeout(() => setSavedBlockId(s => s === id ? null : s), 2500)
     }
     return json
   }
@@ -126,6 +129,9 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
 
   return (
     <div className="space-y-3">
+      {hubTitle && (
+        <h2 className="text-base font-semibold text-gray-800 pb-1 border-b border-gray-100">{hubTitle}</h2>
+      )}
       {/* Existing blocks */}
       {blocks.map((block, index) => {
         const d = block.data as any
@@ -171,13 +177,19 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
               </span>
               <span className="text-sm text-gray-700">{blockSummary(block)}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditingBlockId(block.id)}
-              className="text-xs text-gray-400 hover:text-blue-500 border border-gray-200 hover:border-blue-300 rounded px-2 py-1 flex-shrink-0 transition-colors"
-            >
-              Edit
-            </button>
+            {savedBlockId === block.id ? (
+              <span className="text-xs text-green-600 font-medium flex-shrink-0 border border-green-200 bg-green-50 rounded px-2 py-1">
+                ✓ Saved
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingBlockId(block.id)}
+                className="text-xs text-gray-400 hover:text-blue-500 border border-gray-200 hover:border-blue-300 rounded px-2 py-1 flex-shrink-0 transition-colors"
+              >
+                Edit
+              </button>
+            )}
             <button
               type="button"
               onClick={() => deleteBlock(block.id)}

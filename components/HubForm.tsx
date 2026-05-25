@@ -363,7 +363,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
         <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
           <p className="text-sm font-medium text-green-800">Hub created! Add content blocks below.</p>
         </div>
-        <ContentBlocksEditor hubId={createdHubId} />
+        <ContentBlocksEditor hubId={createdHubId} hubTitle={title} />
         <div className="flex gap-3 pt-2">
           <button
             type="button"
@@ -415,7 +415,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
 
         {activeTab === 'content' && (
           mode === 'landing' ? (
-            <ContentBlocksEditor hubId={hub.id} />
+            <ContentBlocksEditor hubId={hub.id} hubTitle={hub.title} />
           ) : (
             <p className="text-sm text-gray-400 py-12 text-center">Content blocks are not available in redirect mode.</p>
           )

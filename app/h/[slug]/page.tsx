@@ -179,6 +179,7 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
             }
 
             if (block.type === 'image') {
+              if (!d.url) return null
               return (
                 <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <img src={d.url} alt={d.caption || ''} className="w-full object-cover" />

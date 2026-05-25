@@ -35,7 +35,10 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
             <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">
               ← Back
             </Link>
-            <h1 className="text-lg font-semibold text-gray-900">Edit Hub</h1>
+            <div>
+              <p className="text-xs text-gray-400 leading-none mb-0.5">Editing</p>
+              <h1 className="text-base font-semibold text-gray-900 leading-none">{hub.title}</h1>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Link
