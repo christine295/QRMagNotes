@@ -8,9 +8,12 @@ export async function PATCH(
   const { blockId } = await context.params
   const supabase = await createClient()
   const body = await req.json()
+  const updates: Record<string, any> = {}
+  if (body.sort_order !== undefined) updates.sort_order = body.sort_order
+  if (body.data !== undefined) updates.data = body.data
   const { error } = await supabase
     .from('content_blocks')
-    .update({ sort_order: body.sort_order })
+    .update(updates)
     .eq('id', blockId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

@@ -51,6 +51,7 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
   const [loading, setLoading] = useState(true)
   const [pickingType, setPickingType] = useState(false)
   const [addingType, setAddingType] = useState<BlockType | null>(null)
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/hub/${hubId}/content_blocks`)
@@ -69,6 +70,20 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
       setBlocks(prev => [...prev, json.content_block])
       setAddingType(null)
       setPickingType(false)
+    }
+    return json
+  }
+
+  async function updateBlock(id: string, data: object) {
+    const res = await fetch(`/api/hub/${hubId}/content_blocks/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data }),
+    })
+    const json = await res.json()
+    if (!json.error) {
+      setBlocks(prev => prev.map(b => b.id === id ? { ...b, data } : b))
+      setEditingBlockId(null)
     }
     return json
   }
@@ -112,41 +127,67 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
   return (
     <div className="space-y-3">
       {/* Existing blocks */}
-      {blocks.map((block, index) => (
-        <div key={block.id} className="flex items-center border border-gray-200 rounded-xl px-3 py-3 bg-white gap-2">
-          <div className="flex flex-col gap-0.5 flex-shrink-0">
+      {blocks.map((block, index) => {
+        const d = block.data as any
+        if (editingBlockId === block.id) {
+          const cancel = () => setEditingBlockId(null)
+          const save = (data: object) => updateBlock(block.id, data)
+          return (
+            <div key={block.id}>
+              {block.type === 'text'      && <TextForm      initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'checklist' && <ChecklistForm initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
+              {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} onSave={save} onCancel={cancel} />}
+              {block.type === 'link'      && <LinkForm      initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'phone'     && <PhoneForm     initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'file'      && <FileForm      initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
+            </div>
+          )
+        }
+        return (
+          <div key={block.id} className="flex items-center border border-gray-200 rounded-xl px-3 py-3 bg-white gap-2">
+            <div className="flex flex-col gap-0.5 flex-shrink-0">
+              <button
+                type="button"
+                disabled={index === 0}
+                onClick={() => moveBlock(index, 'up')}
+                className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+              >
+                ▲
+              </button>
+              <button
+                type="button"
+                disabled={index === blocks.length - 1}
+                onClick={() => moveBlock(index, 'down')}
+                className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+              >
+                ▼
+              </button>
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide mr-2">
+                {BLOCK_TYPE_META[block.type as BlockType]?.label ?? block.type}
+              </span>
+              <span className="text-sm text-gray-700">{blockSummary(block)}</span>
+            </div>
             <button
               type="button"
-              disabled={index === 0}
-              onClick={() => moveBlock(index, 'up')}
-              className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+              onClick={() => setEditingBlockId(block.id)}
+              className="text-xs text-gray-400 hover:text-blue-500 border border-gray-200 hover:border-blue-300 rounded px-2 py-1 flex-shrink-0 transition-colors"
             >
-              ▲
+              Edit
             </button>
             <button
               type="button"
-              disabled={index === blocks.length - 1}
-              onClick={() => moveBlock(index, 'down')}
-              className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+              onClick={() => deleteBlock(block.id)}
+              className="text-gray-300 hover:text-red-400 text-xl flex-shrink-0 transition-colors leading-none"
             >
-              ▼
+              ×
             </button>
           </div>
-          <div className="min-w-0 flex-1">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide mr-2">
-              {BLOCK_TYPE_META[block.type as BlockType]?.label ?? block.type}
-            </span>
-            <span className="text-sm text-gray-700">{blockSummary(block)}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => deleteBlock(block.id)}
-            className="text-gray-300 hover:text-red-400 text-xl flex-shrink-0 transition-colors leading-none"
-          >
-            ×
-          </button>
-        </div>
-      ))}
+        )
+      })}
 
       {/* Add block */}
       {!pickingType && !addingType && (
@@ -221,10 +262,10 @@ function SaveButton({ saving, disabled }: { saving: boolean; disabled?: boolean 
 
 // ── Text form ─────────────────────────────────────────────────────────────────
 
-function TextForm({ onSave, onCancel }: { onSave: (d: TextData) => Promise<any>; onCancel: () => void }) {
-  const [label, setLabel] = useState('')
-  const [text, setText] = useState('')
-  const [date, setDate] = useState('')
+function TextForm({ onSave, onCancel, initialData }: { onSave: (d: TextData) => Promise<any>; onCancel: () => void; initialData?: TextData }) {
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [text, setText] = useState(initialData?.text ?? '')
+  const [date, setDate] = useState(initialData?.date ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -269,9 +310,9 @@ function TextForm({ onSave, onCancel }: { onSave: (d: TextData) => Promise<any>;
 
 // ── Checklist form ────────────────────────────────────────────────────────────
 
-function ChecklistForm({ onSave, onCancel }: { onSave: (d: ChecklistData) => Promise<any>; onCancel: () => void }) {
-  const [label, setLabel] = useState('')
-  const [items, setItems] = useState([{ id: uid(), text: '' }])
+function ChecklistForm({ onSave, onCancel, initialData }: { onSave: (d: ChecklistData) => Promise<any>; onCancel: () => void; initialData?: ChecklistData }) {
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [items, setItems] = useState(initialData?.items?.length ? initialData.items : [{ id: uid(), text: '' }])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -324,9 +365,9 @@ function ChecklistForm({ onSave, onCancel }: { onSave: (d: ChecklistData) => Pro
 
 // ── Image form ────────────────────────────────────────────────────────────────
 
-function ImageForm({ hubId, blockIndex, onSave, onCancel }: { hubId: string; blockIndex: number; onSave: (d: ImageData) => Promise<any>; onCancel: () => void }) {
-  const [caption, setCaption] = useState('')
-  const [url, setUrl] = useState('')
+function ImageForm({ hubId, blockIndex, onSave, onCancel, initialData }: { hubId: string; blockIndex: number; onSave: (d: ImageData) => Promise<any>; onCancel: () => void; initialData?: ImageData }) {
+  const [caption, setCaption] = useState(initialData?.caption ?? '')
+  const [url, setUrl] = useState(initialData?.url ?? '')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -384,9 +425,9 @@ function ImageForm({ hubId, blockIndex, onSave, onCancel }: { hubId: string; blo
 
 // ── Timeline form ─────────────────────────────────────────────────────────────
 
-function TimelineForm({ onSave, onCancel }: { onSave: (d: TimelineData) => Promise<any>; onCancel: () => void }) {
-  const [label, setLabel] = useState('')
-  const [events, setEvents] = useState([{ id: uid(), date: '', text: '' }])
+function TimelineForm({ onSave, onCancel, initialData }: { onSave: (d: TimelineData) => Promise<any>; onCancel: () => void; initialData?: TimelineData }) {
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [events, setEvents] = useState(initialData?.events?.length ? initialData.events : [{ id: uid(), date: '', text: '' }])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -451,9 +492,10 @@ const AUDIO_SUGGESTIONS = ['Artist Reflection', 'Family Story', 'Voice Instructi
 
 function formatTime(s: number) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
 
-function AudioForm({ hubId, onSave, onCancel }: { hubId: string; onSave: (d: AudioData) => Promise<any>; onCancel: () => void }) {
+function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; onSave: (d: AudioData) => Promise<any>; onCancel: () => void; initialData?: AudioData }) {
   const [mode, setMode] = useState<'record' | 'upload'>('record')
-  const [label, setLabel] = useState('')
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [existingUrl] = useState(initialData?.url ?? '')
   const [recording, setRecording] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
   const [recordedUrl, setRecordedUrl] = useState('')
@@ -494,6 +536,13 @@ function AudioForm({ hubId, onSave, onCancel }: { hubId: string; onSave: (d: Aud
     if (timerRef.current) clearInterval(timerRef.current)
   }
 
+  async function saveExisting() {
+    if (!label.trim()) { setError('Please add a label.'); return }
+    setSaving(true)
+    const res = await onSave({ label: label.trim(), url: existingUrl })
+    if (res.error) { setError(res.error); setSaving(false) }
+  }
+
   async function save(file: Blob | File) {
     if (!label.trim()) { setError('Please add a label.'); return }
     setSaving(true)
@@ -523,6 +572,18 @@ function AudioForm({ hubId, onSave, onCancel }: { hubId: string; onSave: (d: Aud
           ))}
         </div>
       </div>
+
+      {existingUrl && !recordedUrl && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500">Current audio:</p>
+          <audio src={existingUrl} controls className="w-full" />
+          <button type="button" onClick={saveExisting} disabled={saving}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            {saving ? 'Saving…' : 'Save changes'}
+          </button>
+          <p className="text-xs text-gray-400 text-center">— or replace audio —</p>
+        </div>
+      )}
 
       <div className="flex gap-2">
         {(['record', 'upload'] as const).map(m => (
@@ -572,9 +633,9 @@ function AudioForm({ hubId, onSave, onCancel }: { hubId: string; onSave: (d: Aud
 
 // ── Link form ─────────────────────────────────────────────────────────────────
 
-function LinkForm({ onSave, onCancel }: { onSave: (d: LinkData) => Promise<any>; onCancel: () => void }) {
-  const [label, setLabel] = useState('')
-  const [url, setUrl] = useState('')
+function LinkForm({ onSave, onCancel, initialData }: { onSave: (d: LinkData) => Promise<any>; onCancel: () => void; initialData?: LinkData }) {
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [url, setUrl] = useState(initialData?.url ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -609,9 +670,9 @@ function LinkForm({ onSave, onCancel }: { onSave: (d: LinkData) => Promise<any>;
 
 // ── Phone form ────────────────────────────────────────────────────────────────
 
-function PhoneForm({ onSave, onCancel }: { onSave: (d: PhoneData) => Promise<any>; onCancel: () => void }) {
-  const [label, setLabel] = useState('')
-  const [phone, setPhone] = useState('')
+function PhoneForm({ onSave, onCancel, initialData }: { onSave: (d: PhoneData) => Promise<any>; onCancel: () => void; initialData?: PhoneData }) {
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [phone, setPhone] = useState(initialData?.url ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -646,9 +707,9 @@ function PhoneForm({ onSave, onCancel }: { onSave: (d: PhoneData) => Promise<any
 
 // ── File form ─────────────────────────────────────────────────────────────────
 
-function FileForm({ hubId, blockIndex, onSave, onCancel }: { hubId: string; blockIndex: number; onSave: (d: FileData) => Promise<any>; onCancel: () => void }) {
-  const [label, setLabel] = useState('')
-  const [url, setUrl] = useState('')
+function FileForm({ hubId, blockIndex, onSave, onCancel, initialData }: { hubId: string; blockIndex: number; onSave: (d: FileData) => Promise<any>; onCancel: () => void; initialData?: FileData }) {
+  const [label, setLabel] = useState(initialData?.label ?? '')
+  const [url, setUrl] = useState(initialData?.url ?? '')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -688,7 +749,7 @@ function FileForm({ hubId, blockIndex, onSave, onCancel }: { hubId: string; bloc
           className="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:text-gray-600 file:bg-white hover:file:bg-gray-50"
         />
         {uploading && <p className="text-xs text-gray-400">Uploading…</p>}
-        {url && <p className="text-xs text-green-600">File uploaded successfully.</p>}
+        {url && !uploading && <p className="text-xs text-green-600">{url === initialData?.url ? 'Current file will be kept.' : 'File uploaded successfully.'}</p>}
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} disabled={uploading || !url} /></div>
