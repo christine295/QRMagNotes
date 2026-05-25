@@ -76,6 +76,10 @@ function formatDate(s: string) {
   })
 }
 
+function isCeremonial(label: string) {
+  return /invocation|words to speak|quote|passage|poem|prayer|sacred/i.test(label)
+}
+
 function defaultOpen(type: string, label: string): boolean {
   const l = label.toLowerCase()
   if (l.includes('overview') || l.includes('step') || l.includes('note') || l.includes('invocation') || l.includes('words')) return true
@@ -157,13 +161,13 @@ function Section({ type, label, open, onToggle, children }: {
   return (
     <div>
       <button type="button" onClick={onToggle}
-        className="w-full flex items-center gap-2.5 py-2.5 text-left"
+        className="w-full flex items-center gap-3 py-3 text-left"
       >
-        <span className={`flex-shrink-0 transition-colors duration-200 ${open ? 'text-stone-400' : 'text-stone-300'}`}>
+        <span className={`flex-shrink-0 transition-colors duration-200 ${open ? 'text-stone-500' : 'text-stone-300'}`}>
           <BlockIcon type={type} />
         </span>
-        <span className={`flex-1 text-[0.8125rem] tracking-[-0.005em] transition-colors duration-200 ${
-          open ? 'font-medium text-stone-700' : 'font-normal text-stone-400'
+        <span className={`flex-1 text-sm tracking-[-0.005em] transition-colors duration-200 ${
+          open ? 'font-semibold text-stone-800' : 'font-medium text-stone-500'
         }`}>
           {label}
         </span>
@@ -177,7 +181,7 @@ function Section({ type, label, open, onToggle, children }: {
       </button>
 
       <div className={`overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-[4000px]' : 'max-h-0'}`}>
-        <div className="pl-6 pb-7 pt-0.5">
+        <div className="pl-6 pb-5 pt-0.5">
           {children}
         </div>
       </div>
@@ -318,9 +322,17 @@ export default function HubView({ hub, blocks, color, isOwner }: {
                   {block.type === 'text' && (
                     <>
                       {d.date && <p className="text-xs text-stone-400 mb-3">{formatDate(d.date)}</p>}
-                      <p className="text-[0.9375rem] text-stone-600 whitespace-pre-line leading-[1.7] tracking-[-0.005em]">
-                        {d.text || <em className="text-stone-300 not-italic">Nothing written yet.</em>}
-                      </p>
+                      {isCeremonial(d.label ?? '') ? (
+                        <div className="border-l-2 pl-4" style={{ borderColor: `${color}35` }}>
+                          <p className="text-[0.9375rem] text-stone-600 whitespace-pre-line leading-[1.85] italic">
+                            {d.text || <em className="text-stone-300 not-italic">Nothing written yet.</em>}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[0.9375rem] text-stone-700 whitespace-pre-line leading-[1.65] tracking-[-0.005em]">
+                          {d.text || <em className="text-stone-300 not-italic">Nothing written yet.</em>}
+                        </p>
+                      )}
                     </>
                   )}
 
@@ -365,7 +377,7 @@ export default function HubView({ hub, blocks, color, isOwner }: {
         )}
       </main>
 
-      <footer className="text-center py-10 text-[0.6875rem] text-stone-200">
+      <footer className="text-center py-10 text-[0.6875rem] text-stone-400">
         © 2026 QRMagNotes | Developed by{' '}
         <a href="https://websketching.com" target="_blank" rel="noopener noreferrer"
           className="hover:text-stone-400 transition-colors underline underline-offset-2">

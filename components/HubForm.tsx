@@ -117,6 +117,13 @@ const RITUAL_BLOCKS = [
     },
   },
   {
+    type: 'text' as const,
+    data: {
+      label: 'Quote / Passage',
+      text: '',
+    },
+  },
+  {
     type: 'link' as const,
     data: {
       label: 'Ritual Playlist',
