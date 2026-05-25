@@ -19,5 +19,5 @@ export function useCollections(userId: string) {
     fetchCollections()
   }, [userId])
 
-  return { collections, loading }
+  return { collections, setCollections, loading }
 }

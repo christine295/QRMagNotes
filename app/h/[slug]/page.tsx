@@ -14,8 +14,10 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
 
   if (!hub) notFound()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const isOwner = user?.id === hub.user_id
+
   if (hub.privacy_mode === 'private') {
-    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -60,6 +62,17 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {isOwner && (
+        <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+          <span className="text-xs text-gray-400">You are viewing your hub</span>
+          <a
+            href={`/dashboard/hub/${hub.id}/edit`}
+            className="text-xs font-medium text-blue-600 border border-blue-200 rounded-lg px-3 py-1.5 hover:bg-blue-50 transition-colors"
+          >
+            Edit hub
+          </a>
+        </div>
+      )}
       <div className="px-4 py-10 text-center text-white" style={{ backgroundColor: color }}>
         {hub.image_url && (
           <img
@@ -138,6 +151,11 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
               return (
                 <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
                   {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
+                  {d.date && (
+                    <p className="text-xs text-gray-400 mb-2">
+                      {new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{d.text}</p>
                 </div>
               )

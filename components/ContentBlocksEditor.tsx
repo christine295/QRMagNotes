@@ -18,7 +18,7 @@ const BLOCK_TYPE_META: Record<BlockType, { label: string; summary: string }> = {
   file:      { label: 'File / PDF',   summary: 'Upload a PDF or file' },
 }
 
-type TextData      = { label: string; text: string }
+type TextData      = { label: string; text: string; date?: string }
 type ChecklistData = { label: string; items: { id: string; text: string }[] }
 type ImageData     = { caption: string; url: string }
 type TimelineData  = { label: string; events: { id: string; date: string; text: string }[] }
@@ -224,13 +224,14 @@ function SaveButton({ saving, disabled }: { saving: boolean; disabled?: boolean 
 function TextForm({ onSave, onCancel }: { onSave: (d: TextData) => Promise<any>; onCancel: () => void }) {
   const [label, setLabel] = useState('')
   const [text, setText] = useState('')
+  const [date, setDate] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   async function submit() {
     if (!text.trim()) { setError('Text is required.'); return }
     setSaving(true)
-    const res = await onSave({ label: label.trim(), text: text.trim() })
+    const res = await onSave({ label: label.trim(), text: text.trim(), date: date || undefined })
     if (res.error) { setError(res.error); setSaving(false) }
   }
 
@@ -250,6 +251,16 @@ function TextForm({ onSave, onCancel }: { onSave: (d: TextData) => Promise<any>;
         rows={5}
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
       />
+      <div className="flex items-center gap-2">
+        <label className="text-xs text-gray-500 whitespace-nowrap">Date (optional)</label>
+        <input
+          type="date"
+          value={date}
+          title="Date (optional)"
+          onChange={e => setDate(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} /></div>
     </FormShell>

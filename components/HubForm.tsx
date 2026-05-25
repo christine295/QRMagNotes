@@ -65,8 +65,11 @@ function slugify(val: string) {
 }
 
 export default function HubForm({ hub, userId, initialCollectionId }: Props) {
-  const { collections, loading: collectionsLoading } = useCollections(userId)
+  const { collections, setCollections, loading: collectionsLoading } = useCollections(userId)
   const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? initialCollectionId ?? null)
+  const [showNewCollection, setShowNewCollection] = useState(false)
+  const [newCollectionTitle, setNewCollectionTitle] = useState('')
+  const [creatingCollection, setCreatingCollection] = useState(false)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const supabase = createClient()
@@ -90,6 +93,23 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   const [tagInput, setTagInput] = useState('')
   const [error, setError] = useState('')
   const [slugError, setSlugError] = useState('')
+
+  async function createCollection() {
+    if (!newCollectionTitle.trim()) return
+    setCreatingCollection(true)
+    const { data, error } = await supabase
+      .from('collections')
+      .insert({ user_id: userId, title: newCollectionTitle.trim() })
+      .select()
+      .single()
+    if (!error && data) {
+      setCollections(prev => [data, ...prev])
+      setCollectionId(data.id)
+    }
+    setNewCollectionTitle('')
+    setShowNewCollection(false)
+    setCreatingCollection(false)
+  }
 
   function addTag(val: string) {
     const cleaned = val.trim().toLowerCase().replace(/^#/, '').replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
@@ -176,7 +196,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
           return
         }
       } else {
-        const { error: hubError } = await supabase
+        const { data: newHub, error: hubError } = await supabase
           .from('hubs')
           .insert({
             user_id: userId,
@@ -191,12 +211,18 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             privacy_mode: privacyMode,
             tags,
           })
+          .select()
+          .single()
 
         if (hubError) {
           if (hubError.code === '23505') setSlugError('That slug is already taken')
           else setError(hubError.message)
           return
         }
+
+        router.push(`/dashboard/hub/${newHub.id}/edit`)
+        router.refresh()
+        return
       }
 
       router.push('/dashboard')
@@ -209,18 +235,55 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
       {/* Collection selector */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Collection</label>
-        <select
-          value={collectionId ?? ''}
-          onChange={e => setCollectionId(e.target.value || null)}
-          title="Collection"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={collectionsLoading}
-        >
-          <option value="">No Collection</option>
-          {collections.map((c: Collection) => (
-            <option key={c.id} value={c.id}>{c.title}</option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={collectionId ?? ''}
+            onChange={e => setCollectionId(e.target.value || null)}
+            title="Collection"
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={collectionsLoading}
+          >
+            <option value="">No Collection</option>
+            {collections.map((c: Collection) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setShowNewCollection(v => !v)}
+            className="text-sm text-blue-600 border border-blue-200 rounded-lg px-3 py-2 hover:bg-blue-50 transition-colors whitespace-nowrap"
+          >
+            + New
+          </button>
+        </div>
+        {showNewCollection && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={newCollectionTitle}
+              onChange={e => setNewCollectionTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); createCollection() } }}
+              placeholder="Collection name"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={createCollection}
+              disabled={creatingCollection || !newCollectionTitle.trim()}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+            >
+              {creatingCollection ? '…' : 'Create'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowNewCollection(false); setNewCollectionTitle('') }}
+              className="text-sm text-gray-400 hover:text-gray-600 px-2"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Title */}
@@ -238,9 +301,11 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
 
       {/* Slug */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-          <span className="px-3 py-2.5 bg-gray-50 text-gray-400 text-sm border-r border-gray-300 select-none">
+        <label className={`block text-sm font-medium mb-1 ${isEditing ? 'text-gray-400' : 'text-gray-700'}`}>
+          Slug {isEditing && <span className="text-xs font-normal text-amber-500">⚠ changing this breaks printed QR codes</span>}
+        </label>
+        <div className={`flex items-center border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 ${isEditing ? 'border-gray-200 bg-gray-50' : 'border-gray-300'}`}>
+          <span className="px-3 py-2.5 bg-gray-100 text-gray-400 text-sm border-r border-gray-200 select-none">
             /h/
           </span>
           <input
@@ -249,16 +314,12 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             value={slug}
             onChange={e => handleSlugChange(e.target.value)}
             placeholder="our-home"
-            className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
+            className={`flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent ${isEditing ? 'text-gray-400' : 'text-gray-900'}`}
           />
         </div>
-        {slugError ? (
-          <p className="text-red-500 text-xs mt-1">{slugError}</p>
-        ) : (
-          <p className="text-gray-400 text-xs mt-1">
-            The permanent URL your QR code will always point to.
-            {isEditing && ' Changing the slug will break existing printed QR codes.'}
-          </p>
+        {slugError && <p className="text-red-500 text-xs mt-1">{slugError}</p>}
+        {!slugError && !isEditing && (
+          <p className="text-gray-400 text-xs mt-1">The permanent URL your QR code will always point to.</p>
         )}
       </div>
 
