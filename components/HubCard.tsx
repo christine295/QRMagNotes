@@ -64,6 +64,12 @@ export default function HubCard({ hub }: { hub: Hub }) {
           Copy Link
         </button>
         <QRButton slug={hub.slug} />
+        <Link
+          href={`/dashboard/hub/${hub.id}/print`}
+          className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+        >
+          Print Card
+        </Link>
       </div>
     </div>
   )
