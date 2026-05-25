@@ -5,7 +5,7 @@ import { ContentBlock } from '@/lib/types'
 
 // ── Types & metadata ─────────────────────────────────────────────────────────
 
-type BlockType = 'text' | 'checklist' | 'image' | 'timeline' | 'audio'
+type BlockType = 'text' | 'checklist' | 'image' | 'timeline' | 'audio' | 'link' | 'phone' | 'file'
 
 const BLOCK_TYPE_META: Record<BlockType, { label: string; summary: string }> = {
   text:      { label: 'Text / Note',  summary: 'Paragraphs, stories, instructions' },
@@ -13,6 +13,9 @@ const BLOCK_TYPE_META: Record<BlockType, { label: string; summary: string }> = {
   image:     { label: 'Image',        summary: 'Photo with optional caption' },
   timeline:  { label: 'Timeline',     summary: 'Dated events or history log' },
   audio:     { label: 'Voice Note',   summary: 'Record or upload audio' },
+  link:      { label: 'Link Button',  summary: 'Clickable link or URL button' },
+  phone:     { label: 'Phone Number', summary: 'Tap-to-call button' },
+  file:      { label: 'File / PDF',   summary: 'Upload a PDF or file' },
 }
 
 type TextData      = { label: string; text: string }
@@ -20,6 +23,9 @@ type ChecklistData = { label: string; items: { id: string; text: string }[] }
 type ImageData     = { caption: string; url: string }
 type TimelineData  = { label: string; events: { id: string; date: string; text: string }[] }
 type AudioData     = { label: string; url: string }
+type LinkData      = { label: string; url: string }
+type PhoneData     = { label: string; url: string }
+type FileData      = { label: string; url: string }
 
 function uid() { return Math.random().toString(36).slice(2) }
 
@@ -31,6 +37,9 @@ function blockSummary(block: ContentBlock): string {
     case 'image':     return d.caption || 'Image'
     case 'timeline':  return `${d.label || 'Timeline'} — ${d.events?.length ?? 0} events`
     case 'audio':     return d.label || 'Voice note'
+    case 'link':      return d.label || d.url || 'Link'
+    case 'phone':     return d.label || d.url || 'Phone'
+    case 'file':      return d.label || 'File'
     default:          return block.type
   }
 }
@@ -69,14 +78,61 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
     setBlocks(prev => prev.filter(b => b.id !== id))
   }
 
+  async function moveBlock(index: number, direction: 'up' | 'down') {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= blocks.length) return
+
+    const newBlocks = [...blocks]
+    const a = newBlocks[index]
+    const b = newBlocks[targetIndex]
+    const aOrder = a.sort_order
+    const bOrder = b.sort_order
+
+    newBlocks[index] = { ...a, sort_order: bOrder }
+    newBlocks[targetIndex] = { ...b, sort_order: aOrder }
+    newBlocks.sort((x, y) => x.sort_order - y.sort_order)
+    setBlocks(newBlocks)
+
+    await Promise.all([
+      fetch(`/api/hub/${hubId}/content_blocks/${a.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sort_order: bOrder }),
+      }),
+      fetch(`/api/hub/${hubId}/content_blocks/${b.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sort_order: aOrder }),
+      }),
+    ])
+  }
+
   if (loading) return <div className="text-sm text-gray-400">Loading…</div>
 
   return (
     <div className="space-y-3">
       {/* Existing blocks */}
-      {blocks.map(block => (
-        <div key={block.id} className="flex items-center justify-between border border-gray-200 rounded-xl px-4 py-3 bg-white gap-3">
-          <div className="min-w-0">
+      {blocks.map((block, index) => (
+        <div key={block.id} className="flex items-center border border-gray-200 rounded-xl px-3 py-3 bg-white gap-2">
+          <div className="flex flex-col gap-0.5 flex-shrink-0">
+            <button
+              type="button"
+              disabled={index === 0}
+              onClick={() => moveBlock(index, 'up')}
+              className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              disabled={index === blocks.length - 1}
+              onClick={() => moveBlock(index, 'down')}
+              className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+            >
+              ▼
+            </button>
+          </div>
+          <div className="min-w-0 flex-1">
             <span className="text-xs font-medium text-gray-400 uppercase tracking-wide mr-2">
               {BLOCK_TYPE_META[block.type as BlockType]?.label ?? block.type}
             </span>
@@ -130,6 +186,9 @@ export default function ContentBlocksEditor({ hubId }: { hubId: string }) {
       {addingType === 'image'     && <ImageForm     hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('image', d)} onCancel={() => setAddingType(null)} />}
       {addingType === 'timeline'  && <TimelineForm  onSave={d => saveBlock('timeline', d)}  onCancel={() => setAddingType(null)} />}
       {addingType === 'audio'     && <AudioForm     hubId={hubId} onSave={d => saveBlock('audio', d)} onCancel={() => setAddingType(null)} />}
+      {addingType === 'link'      && <LinkForm      onSave={d => saveBlock('link', d)}      onCancel={() => setAddingType(null)} />}
+      {addingType === 'phone'     && <PhoneForm     onSave={d => saveBlock('phone', d)}     onCancel={() => setAddingType(null)} />}
+      {addingType === 'file'      && <FileForm      hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('file', d)} onCancel={() => setAddingType(null)} />}
     </div>
   )
 }
@@ -284,6 +343,7 @@ function ImageForm({ hubId, blockIndex, onSave, onCancel }: { hubId: string; blo
         <input
           type="file"
           accept="image/*"
+          title="Upload image"
           disabled={uploading}
           onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }}
           className="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:text-gray-600 file:bg-white hover:file:bg-gray-50"
@@ -488,13 +548,139 @@ function AudioForm({ hubId, onSave, onCancel }: { hubId: string; onSave: (d: Aud
       )}
 
       {mode === 'upload' && (
-        <input type="file" accept="audio/*" disabled={saving}
+        <input type="file" accept="audio/*" title="Upload audio file" disabled={saving}
           onChange={async e => { const f = e.target.files?.[0]; if (f) await save(f) }}
           className="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:text-gray-600 file:bg-white hover:file:bg-gray-50"
         />
       )}
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
+    </FormShell>
+  )
+}
+
+// ── Link form ─────────────────────────────────────────────────────────────────
+
+function LinkForm({ onSave, onCancel }: { onSave: (d: LinkData) => Promise<any>; onCancel: () => void }) {
+  const [label, setLabel] = useState('')
+  const [url, setUrl] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit() {
+    if (!url.trim()) { setError('URL is required.'); return }
+    setSaving(true)
+    const res = await onSave({ label: label.trim(), url: url.trim() })
+    if (res.error) { setError(res.error); setSaving(false) }
+  }
+
+  return (
+    <FormShell title="Link Button" onCancel={onCancel}>
+      <input
+        type="text"
+        value={label}
+        onChange={e => setLabel(e.target.value)}
+        placeholder="Button label — e.g. Visit Website"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <input
+        type="url"
+        value={url}
+        onChange={e => setUrl(e.target.value)}
+        placeholder="https://example.com"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} /></div>
+    </FormShell>
+  )
+}
+
+// ── Phone form ────────────────────────────────────────────────────────────────
+
+function PhoneForm({ onSave, onCancel }: { onSave: (d: PhoneData) => Promise<any>; onCancel: () => void }) {
+  const [label, setLabel] = useState('')
+  const [phone, setPhone] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit() {
+    if (!phone.trim()) { setError('Phone number is required.'); return }
+    setSaving(true)
+    const res = await onSave({ label: label.trim(), url: phone.trim() })
+    if (res.error) { setError(res.error); setSaving(false) }
+  }
+
+  return (
+    <FormShell title="Phone Number" onCancel={onCancel}>
+      <input
+        type="text"
+        value={label}
+        onChange={e => setLabel(e.target.value)}
+        placeholder="Button label — e.g. Call Us"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <input
+        type="tel"
+        value={phone}
+        onChange={e => setPhone(e.target.value)}
+        placeholder="555-123-4567"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} /></div>
+    </FormShell>
+  )
+}
+
+// ── File form ─────────────────────────────────────────────────────────────────
+
+function FileForm({ hubId, blockIndex, onSave, onCancel }: { hubId: string; blockIndex: number; onSave: (d: FileData) => Promise<any>; onCancel: () => void }) {
+  const [label, setLabel] = useState('')
+  const [url, setUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleUpload(file: File) {
+    setUploading(true)
+    const { uploadPhoto } = await import('@/lib/supabase/uploadPhoto')
+    const uploaded = await uploadPhoto(file, hubId, blockIndex)
+    if (uploaded) setUrl(uploaded)
+    else setError('Upload failed.')
+    setUploading(false)
+  }
+
+  async function submit() {
+    if (!url.trim()) { setError('Please upload a file first.'); return }
+    setSaving(true)
+    const res = await onSave({ label: label.trim(), url: url.trim() })
+    if (res.error) { setError(res.error); setSaving(false) }
+  }
+
+  return (
+    <FormShell title="File / PDF" onCancel={onCancel}>
+      <input
+        type="text"
+        value={label}
+        onChange={e => setLabel(e.target.value)}
+        placeholder="Button label — e.g. Care Instructions PDF"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <div className="space-y-2">
+        <input
+          type="file"
+          accept="application/pdf,image/*,.doc,.docx"
+          title="Upload file"
+          disabled={uploading}
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }}
+          className="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:text-gray-600 file:bg-white hover:file:bg-gray-50"
+        />
+        {uploading && <p className="text-xs text-gray-400">Uploading…</p>}
+        {url && <p className="text-xs text-green-600">File uploaded successfully.</p>}
+      </div>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} disabled={uploading || !url} /></div>
     </FormShell>
   )
 }

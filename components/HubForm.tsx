@@ -3,9 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Hub, HubLink, Collection } from '@/lib/types'
+import { Hub, Collection } from '@/lib/types'
 import { useCollections } from './useCollections'
-import LinkEditor from './LinkEditor'
 import ContentBlocksEditor from './ContentBlocksEditor'
 import { uploadPhoto } from '@/lib/supabase/uploadPhoto'
 
@@ -20,8 +19,6 @@ const THEME_COLORS = [
   { value: '#64748B', label: 'Slate' },
 ]
 
-type LinkDraft = Omit<HubLink, 'id' | 'hub_id'> & { file?: File | null }
-
 type Template = {
   id: string
   label: string
@@ -30,7 +27,6 @@ type Template = {
   title: string
   hubDescription: string
   themeColor: string
-  links: LinkDraft[]
 }
 
 const TEMPLATES: Template[] = [
@@ -42,7 +38,6 @@ const TEMPLATES: Template[] = [
     title: '',
     hubDescription: '',
     themeColor: '#3B82F6',
-    links: [],
   },
   {
     id: 'artwork',
@@ -52,22 +47,11 @@ const TEMPLATES: Template[] = [
     title: 'Artwork Memory Hub',
     hubDescription: 'The story, songs, symbols, and notes connected to this piece.',
     themeColor: '#8B5CF6',
-    links: [
-      { label: 'Spotify Playlist', url: '', sort_order: 0, type: 'link' },
-      { label: 'Artist Notes', url: '', sort_order: 1, type: 'link' },
-      { label: 'Moon Phase', url: '', sort_order: 2, type: 'link' },
-      { label: 'Inspiration', url: '', sort_order: 3, type: 'link' },
-      { label: 'Color Palette', url: '', sort_order: 4, type: 'link' },
-      { label: 'Process Photos', url: '', sort_order: 5, type: 'link' },
-      { label: 'Materials Used', url: '', sort_order: 6, type: 'link' },
-      { label: 'Private Notes', url: '', sort_order: 7, type: 'link' },
-    ],
   },
 ]
 
 type Props = {
   hub?: Hub
-  existingLinks?: HubLink[]
   userId: string
   initialCollectionId?: string
 }
@@ -80,10 +64,9 @@ function slugify(val: string) {
     .replace(/^-|-$/g, '')
 }
 
-export default function HubForm({ hub, existingLinks, userId, initialCollectionId }: Props) {
-    // Fetch collections for the user
-    const { collections, loading: collectionsLoading } = useCollections(userId)
-    const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? initialCollectionId ?? null)
+export default function HubForm({ hub, userId, initialCollectionId }: Props) {
+  const { collections, loading: collectionsLoading } = useCollections(userId)
+  const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? initialCollectionId ?? null)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const supabase = createClient()
@@ -100,15 +83,6 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
   const [description, setDescription] = useState(hub?.description ?? '')
   const [imageUrl, setImageUrl] = useState(hub?.image_url ?? '')
   const [themeColor, setThemeColor] = useState(hub?.theme_color ?? '#3B82F6')
-  const [links, setLinks] = useState<LinkDraft[]>(
-    existingLinks?.map(l => ({
-      label: l.label,
-      url: l.url,
-      type: l.type ?? 'link',
-      image_url: l.image_url,
-      sort_order: l.sort_order
-    })) ?? []
-  )
   const [privacyMode, setPrivacyMode] = useState<'public' | 'unlisted' | 'private'>(
     hub?.privacy_mode ?? 'public'
   )
@@ -120,7 +94,6 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
     setSlug(slugify(t.title))
     setDescription(t.hubDescription)
     setThemeColor(t.themeColor)
-    setLinks(t.links)
     setTemplateChosen(true)
   }
 
@@ -158,130 +131,83 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError("")
-    setSlugError("")
+    setError('')
+    setSlugError('')
 
     if (!slug) {
-      setSlugError("Slug is required")
+      setSlugError('Slug is required')
       return
     }
 
     startTransition(async () => {
-      let hubId = hub?.id
       if (isEditing) {
         const { error: hubError } = await supabase
-          .from("hubs")
+          .from('hubs')
           .update({
             title,
             slug,
             mode,
-            redirect_url: mode === "redirect" ? redirectUrl : null,
-            description: mode === "landing" ? description || null : null,
-            image_url: mode === "landing" ? imageUrl || null : null,
+            redirect_url: mode === 'redirect' ? redirectUrl : null,
+            description: mode === 'landing' ? description || null : null,
+            image_url: mode === 'landing' ? imageUrl || null : null,
             theme_color: themeColor,
             collection_id: collectionId || null,
             privacy_mode: privacyMode,
           })
-          .eq("id", hub.id)
+          .eq('id', hub.id)
 
         if (hubError) {
-          if (hubError.code === "23505") setSlugError("That slug is already taken")
+          if (hubError.code === '23505') setSlugError('That slug is already taken')
           else setError(hubError.message)
           return
         }
-
-        // Always delete old links before inserting new
-        const { error: deleteLinksError } = await supabase.from("hub_links").delete().eq("hub_id", hub.id)
-        if (deleteLinksError) {
-          setError("Failed to delete old links: " + deleteLinksError.message)
-          return
-        }
       } else {
-        const { data: newHub, error: hubError } = await supabase
-          .from("hubs")
+        const { error: hubError } = await supabase
+          .from('hubs')
           .insert({
             user_id: userId,
             title,
             slug,
             mode,
-            redirect_url: mode === "redirect" ? redirectUrl : null,
-            description: mode === "landing" ? description || null : null,
-            image_url: mode === "landing" ? imageUrl || null : null,
+            redirect_url: mode === 'redirect' ? redirectUrl : null,
+            description: mode === 'landing' ? description || null : null,
+            image_url: mode === 'landing' ? imageUrl || null : null,
             theme_color: themeColor,
             collection_id: collectionId || null,
             privacy_mode: privacyMode,
           })
-          .select()
-          .single()
 
         if (hubError) {
-          if (hubError.code === "23505") setSlugError("That slug is already taken")
+          if (hubError.code === '23505') setSlugError('That slug is already taken')
           else setError(hubError.message)
           return
         }
-        hubId = newHub.id
       }
 
-      // Upload photos and prepare links
-
-      let linksWithFiles: LinkDraft[] = []
-      try {
-        linksWithFiles = await Promise.all(
-          links.map(async (l, i) => {
-            if (l.type === "photo" && l.file) {
-              const url = await uploadPhoto(l.file, hubId!, i)
-              if (!url) {
-                setError("File upload failed: Could not get public URL. Check console for details.")
-                throw new Error("File upload failed")
-              }
-              const { file, ...rest } = l
-              return { ...rest, url: null, image_url: url }
-            }
-            // Always remove the file property before saving
-            const { file, ...rest } = l
-            return rest
-          })
-        )
-      } catch (err: any) {
-        setError("File upload failed: " + (err?.message || err))
-        console.error('File upload error:', err)
-        return
-      }
-
-      // Always attempt to insert links (even if empty, to clear old)
-
-      if (hubId) {
-        const { error: insertLinksError } = await supabase.from("hub_links").insert(
-          linksWithFiles.map((l, i) => ({ ...l, hub_id: hubId, sort_order: i }))
-        )
-        if (insertLinksError) {
-          setError("Failed to save links: " + insertLinksError.message)
-          return
-        }
-      }
-
-      router.push("/dashboard")
+      router.push('/dashboard')
       router.refresh()
     })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Collection selector */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Collection</label>
-              <select
-                value={collectionId ?? ''}
-                onChange={e => setCollectionId(e.target.value || null)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={collectionsLoading}
-              >
-                <option value="">No Collection</option>
-                {collections.map((c: Collection) => (
-                  <option key={c.id} value={c.id}>{c.title}</option>
-                ))}
-              </select>
-            </div>
+      {/* Collection selector */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Collection</label>
+        <select
+          value={collectionId ?? ''}
+          onChange={e => setCollectionId(e.target.value || null)}
+          title="Collection"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={collectionsLoading}
+        >
+          <option value="">No Collection</option>
+          {collections.map((c: Collection) => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Hub title</label>
@@ -423,13 +349,14 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
               <input
                 type="file"
                 accept="image/*"
+                title="Upload hub image"
                 onChange={async e => {
                   const file = e.target.files?.[0]
                   if (file) {
-                    setError("")
+                    setError('')
                     const url = await uploadPhoto(file, slug || 'temp', 0)
                     if (url) setImageUrl(url)
-                    else setError("Image upload failed. Check console for details.")
+                    else setError('Image upload failed. Check console for details.')
                   }
                 }}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -465,11 +392,6 @@ export default function HubForm({ hub, existingLinks, userId, initialCollectionI
                 />
               ))}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Links</label>
-            <LinkEditor links={links} onChange={setLinks} />
           </div>
         </>
       )}

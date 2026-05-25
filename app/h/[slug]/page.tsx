@@ -50,12 +50,6 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
     redirect(hub.redirect_url)
   }
 
-  const { data: links } = await supabase
-    .from('hub_links')
-    .select('*')
-    .eq('hub_id', hub.id)
-    .order('sort_order')
-
   const { data: contentBlocks } = await supabase
     .from('content_blocks')
     .select('*')
@@ -83,149 +77,114 @@ export default async function PublicHubPage({ params }: { params: Promise<{ slug
       </div>
 
       <main className="max-w-sm mx-auto px-4 py-6 space-y-3">
-        {contentBlocks && contentBlocks.length > 0 && (
-          <div className="space-y-3 pb-3">
-            {contentBlocks.map(block => {
-              const d = block.data as any
+        {contentBlocks && contentBlocks.length > 0 ? (
+          contentBlocks.map(block => {
+            const d = block.data as any
 
-              if (block.type === 'audio') {
-                return (
-                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                    {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
-                    <audio src={d.url} controls className="w-full" />
-                  </div>
-                )
-              }
-
-              if (block.type === 'text') {
-                return (
-                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                    {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
-                    <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{d.text}</p>
-                  </div>
-                )
-              }
-
-              if (block.type === 'checklist') {
-                return (
-                  <ChecklistBlock
-                    key={block.id}
-                    blockId={block.id}
-                    label={d.label ?? ''}
-                    items={d.items ?? []}
-                    color={color}
-                  />
-                )
-              }
-
-              if (block.type === 'image') {
-                return (
-                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                    <img src={d.url} alt={d.caption || ''} className="w-full object-cover" />
-                    {d.caption && <p className="text-xs text-gray-500 px-4 py-2">{d.caption}</p>}
-                  </div>
-                )
-              }
-
-              if (block.type === 'timeline') {
-                return (
-                  <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                    {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color }}>{d.label}</p>}
-                    <div className="relative pl-5 border-l-2" style={{ borderColor: color + '40' }}>
-                      {(d.events ?? []).map((event: any, i: number) => (
-                        <div key={event.id ?? i} className="mb-3 last:mb-0 relative">
-                          <span className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: color }} />
-                          {event.date && <p className="text-xs text-gray-400 mb-0.5">{event.date}</p>}
-                          <p className="text-sm text-gray-700">{event.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              }
-
-              return null
-            })}
-          </div>
-        )}
-        {links && links.length > 0 ? (
-          links.map(link => {
-            // Phone: clickable tel: link
-            if (link.type === 'phone' && link.url) {
+            if (block.type === 'link') {
               return (
                 <a
-                  key={link.id}
-                  href={`tel:${link.url}`}
+                  key={block.id}
+                  href={d.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center w-full font-medium py-4 px-6 rounded-xl shadow-sm text-white text-base transition-opacity active:opacity-80"
                   style={{ backgroundColor: color }}
                 >
-                  {link.label || link.url}
+                  {d.label || d.url}
                 </a>
               )
             }
-            // File: show preview or download link
-            if (link.type === 'file' && link.image_url) {
-              const isPDF = link.image_url.endsWith('.pdf')
+
+            if (block.type === 'phone') {
               return (
                 <a
-                  key={link.id}
-                  href={link.image_url}
+                  key={block.id}
+                  href={`tel:${d.url}`}
+                  className="flex items-center justify-center w-full font-medium py-4 px-6 rounded-xl shadow-sm text-white text-base transition-opacity active:opacity-80"
+                  style={{ backgroundColor: color }}
+                >
+                  {d.label || d.url}
+                </a>
+              )
+            }
+
+            if (block.type === 'file') {
+              const isPDF = d.url?.toLowerCase().endsWith('.pdf')
+              return (
+                <a
+                  key={block.id}
+                  href={d.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-full font-medium py-4 px-6 rounded-xl shadow-sm text-white text-base transition-opacity active:opacity-80 gap-2"
                   style={{ backgroundColor: color }}
                 >
-                  {isPDF ? (
-                    <span>📄 {link.label || 'PDF File'}</span>
-                  ) : (
-                    <>
-                      <img src={link.image_url} alt={link.label || ''} className="h-6 w-6 rounded object-cover mr-2" />
-                      {link.label || 'Image'}
-                    </>
-                  )}
+                  {isPDF ? `📄 ${d.label || 'PDF File'}` : (d.label || 'File')}
                 </a>
               )
             }
-            // Note: render as non-clickable
-            if (link.type === 'note') {
+
+            if (block.type === 'audio') {
               return (
-                <div
-                  key={link.id}
-                  className="flex flex-col items-start w-full font-medium py-4 px-6 rounded-xl border-2 text-gray-600 text-base"
-                  style={{ borderColor: color, color }}
-                >
-                  {link.label && <div className="font-semibold mb-1">{link.label}</div>}
-                  <div className="whitespace-pre-line text-sm text-gray-700">{link.url}</div>
+                <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                  {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
+                  <audio src={d.url} controls className="w-full" />
                 </div>
               )
             }
-            // Default: clickable link or label
-            if (link.url) {
+
+            if (block.type === 'text') {
               return (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-full font-medium py-4 px-6 rounded-xl shadow-sm text-white text-base transition-opacity active:opacity-80"
-                  style={{ backgroundColor: color }}
-                >
-                  {link.label}
-                </a>
+                <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                  {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color }}>{d.label}</p>}
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{d.text}</p>
+                </div>
               )
             }
-            return (
-              <div
-                key={link.id}
-                className="flex items-center justify-center w-full font-medium py-4 px-6 rounded-xl border-2 text-gray-600 text-base"
-                style={{ borderColor: color, color }}
-              >
-                {link.label}
-              </div>
-            )
+
+            if (block.type === 'checklist') {
+              return (
+                <ChecklistBlock
+                  key={block.id}
+                  blockId={block.id}
+                  label={d.label ?? ''}
+                  items={d.items ?? []}
+                  color={color}
+                />
+              )
+            }
+
+            if (block.type === 'image') {
+              return (
+                <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <img src={d.url} alt={d.caption || ''} className="w-full object-cover" />
+                  {d.caption && <p className="text-xs text-gray-500 px-4 py-2">{d.caption}</p>}
+                </div>
+              )
+            }
+
+            if (block.type === 'timeline') {
+              return (
+                <div key={block.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                  {d.label && <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color }}>{d.label}</p>}
+                  <div className="relative pl-5 border-l-2" style={{ borderColor: color + '40' }}>
+                    {(d.events ?? []).map((event: any, i: number) => (
+                      <div key={event.id ?? i} className="mb-3 last:mb-0 relative">
+                        <span className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: color }} />
+                        {event.date && <p className="text-xs text-gray-400 mb-0.5">{event.date}</p>}
+                        <p className="text-sm text-gray-700">{event.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+
+            return null
           })
         ) : (
-          <p className="text-center text-gray-400 text-sm py-12">No links added yet.</p>
+          <p className="text-center text-gray-400 text-sm py-12">No content added yet.</p>
         )}
       </main>
 

@@ -20,12 +20,6 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
 
   if (!hub) notFound()
 
-  const { data: links } = await supabase
-    .from('hub_links')
-    .select('*')
-    .eq('hub_id', hub.id)
-    .order('sort_order')
-
   async function deleteHub() {
     'use server'
     const supabase = await createClient()
@@ -55,7 +49,7 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
         </div>
       </header>
       <main className="max-w-xl mx-auto px-4 py-8">
-        <HubForm hub={hub} existingLinks={links ?? []} userId={user.id} />
+        <HubForm hub={hub} userId={user.id} />
       </main>
     </div>
   )
