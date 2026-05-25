@@ -5,9 +5,40 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import HubCard from '@/components/HubCard'
 import { useState, useEffect } from 'react'
+// Simple modal for confirmation
+function ConfirmModal({ open, onClose, onDelete, onMove, collectionTitle }: any) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+      <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-xs">
+        <h3 className="font-semibold text-lg mb-2">Delete Collection</h3>
+        <p className="text-gray-700 text-sm mb-4">What should happen to the hubs in <span className="font-bold">{collectionTitle}</span>?</p>
+        <div className="flex flex-col gap-2">
+          <button
+            className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+            onClick={onDelete}
+          >
+            Delete collection & all hubs
+          </button>
+          <button
+            className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium px-4 py-2 rounded-lg"
+            onClick={onMove}
+          >
+            Move hubs to Uncategorized
+          </button>
+          <button
+            className="mt-2 text-gray-500 hover:text-gray-700 text-xs underline"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 
-export default function CollectionsPage() {
   const [collections, setCollections] = useState<any[]>([])
   const [uncategorizedHubs, setUncategorizedHubs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -15,6 +46,9 @@ export default function CollectionsPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
+  const [expanded, setExpanded] = useState<{ [id: string]: boolean }>({})
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmCollection, setConfirmCollection] = useState<any>(null)
 
   // Fetch collections and uncategorized hubs on mount
   useEffect(() => {
@@ -150,44 +184,108 @@ export default function CollectionsPage() {
             {/* Collections */}
             {collections && collections.length > 0 && (
               <div className="space-y-8 mb-12">
-                {collections.map((collection: any) => (
-                  <div key={collection.id} className="bg-white rounded-xl border border-gray-200 shadow p-5">
-                    <div className="flex items-center gap-4 mb-2 justify-between">
-                      <div className="flex items-center gap-4">
-                        {collection.cover_image && (
-                          <img src={collection.cover_image} alt="cover" className="w-12 h-12 rounded object-cover" />
-                        )}
-                        <div>
-                          <h2 className="font-semibold text-lg text-gray-900">{collection.title}</h2>
-                          {collection.description && <p className="text-gray-500 text-sm">{collection.description}</p>}
+                {collections.map((collection: any) => {
+                  const isOpen = expanded[collection.id] ?? true;
+                  return (
+                    <div key={collection.id} className="bg-white rounded-xl border border-gray-200 shadow p-5">
+                      <div className="flex items-center gap-4 mb-2 justify-between">
+                        <div className="flex items-center gap-4">
+                          {collection.cover_image && (
+                            <img src={collection.cover_image} alt="cover" className="w-12 h-12 rounded object-cover" />
+                          )}
+                          <div>
+                            <h2 className="font-semibold text-lg text-gray-900">{collection.title}</h2>
+                            {collection.description && <p className="text-gray-500 text-sm">{collection.description}</p>}
+                          </div>
                         </div>
-                      </div>
-                      {collection.hubs && collection.hubs.length > 0 && (
-                        <Link
-                          href={`/dashboard/hub/new?collection=${collection.id}`}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-auto"
-                        >
-                          + Add Hub
-                        </Link>
-                      )}
-                    </div>
-                    <div className="mt-4 space-y-2">
-                      {collection.hubs && collection.hubs.length > 0 ? (
-                        collection.hubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)
-                      ) : (
-                        <div className="flex flex-col gap-2 items-start">
-                          <div className="text-gray-400 text-sm">No hubs in this collection.</div>
-                          <Link
-                            href={`/dashboard/hub/new?collection=${collection.id}`}
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                        <div className="flex items-center gap-2 ml-auto">
+                          <button
+                            className="text-xs text-blue-600 border border-blue-100 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
+                            onClick={() => setExpanded(e => ({ ...e, [collection.id]: !isOpen }))}
                           >
-                            + Add Hub
-                          </Link>
+                            {isOpen ? 'Hide Hubs' : 'Show Hubs'}
+                          </button>
+                          <button
+                            className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 hover:bg-gray-100 transition-colors"
+                            onClick={() => alert('Edit coming soon!')}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50 transition-colors"
+                            onClick={() => { setConfirmCollection(collection); setConfirmOpen(true); }}
+                          >
+                            Delete
+                          </button>
+                          {collection.hubs && collection.hubs.length > 0 && (
+                            <Link
+                              href={`/dashboard/hub/new?collection=${collection.id}`}
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-2"
+                            >
+                              + Add Hub
+                            </Link>
+                          )}
+                        </div>
+                              {/* Confirm Delete Modal */}
+                              <ConfirmModal
+                                open={confirmOpen}
+                                collectionTitle={confirmCollection?.title}
+                                onClose={() => setConfirmOpen(false)}
+                                onDelete={async () => {
+                                  // Delete all hubs in collection, then delete collection
+                                  if (!confirmCollection) return;
+                                  setConfirmOpen(false);
+                                  setLoading(true);
+                                  const supabase = createClient();
+                                  // Delete hubs
+                                  await supabase.from('hubs').delete().eq('collection_id', confirmCollection.id);
+                                  // Delete collection
+                                  await supabase.from('collections').delete().eq('id', confirmCollection.id);
+                                  // Refresh
+                                  setCollections(collections.filter((c: any) => c.id !== confirmCollection.id));
+                                  setConfirmCollection(null);
+                                  setLoading(false);
+                                }}
+                                onMove={async () => {
+                                  // Move hubs to uncategorized, then delete collection
+                                  if (!confirmCollection) return;
+                                  setConfirmOpen(false);
+                                  setLoading(true);
+                                  const supabase = createClient();
+                                  // Update hubs
+                                  await supabase.from('hubs').update({ collection_id: null }).eq('collection_id', confirmCollection.id);
+                                  // Delete collection
+                                  await supabase.from('collections').delete().eq('id', confirmCollection.id);
+                                  // Refresh
+                                  setCollections(collections.filter((c: any) => c.id !== confirmCollection.id));
+                                  // Also update uncategorizedHubs
+                                  const { data: movedHubs } = await supabase.from('hubs').select('*').eq('collection_id', null);
+                                  setUncategorizedHubs(movedHubs || []);
+                                  setConfirmCollection(null);
+                                  setLoading(false);
+                                }}
+                              />
+                      </div>
+                      {isOpen && (
+                        <div className="mt-4 space-y-2">
+                          {collection.hubs && collection.hubs.length > 0 ? (
+                            collection.hubs.map((hub: any) => <HubCard key={hub.id} hub={hub} />)
+                          ) : (
+                            <div className="flex flex-col gap-2 items-start">
+                              <div className="text-gray-400 text-sm">No hubs in this collection.</div>
+                              <Link
+                                href={`/dashboard/hub/new?collection=${collection.id}`}
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                              >
+                                + Add Hub
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
