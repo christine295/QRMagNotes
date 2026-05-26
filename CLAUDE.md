@@ -38,6 +38,7 @@ app/
   page.tsx                           — redirects to /dashboard or /login
   login/page.tsx                     — email + Google auth (email login works; email signup grayed out pending SMTP)
   signup/page.tsx                    — Google auth only; email form disabled pending SMTP setup
+  setup/page.tsx                     — username picker; shown once after first login (when username_confirmed=false); redirects to /dashboard on confirm
   auth/callback/route.ts             — OAuth callback handler
   help/page.tsx                      — in-app help & reference page (no auth required)
   dashboard/collections/page.tsx     — main dashboard (flat hub list primary; Folders section collapsible above list; auto-creates "My Hubs" folder on first load)
@@ -266,4 +267,9 @@ CREATE POLICY "Anyone can read profiles"
 -- Change hub slug uniqueness: global → per-user
 ALTER TABLE public.hubs DROP CONSTRAINT IF EXISTS hubs_slug_key;
 ALTER TABLE public.hubs ADD CONSTRAINT hubs_slug_user_unique UNIQUE (user_id, slug);
+
+-- Username confirmation flag (used by /setup page)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS username_confirmed boolean NOT NULL DEFAULT false;
+-- Mark existing users as already confirmed (they went through the migration)
+UPDATE public.profiles SET username_confirmed = true WHERE username IS NOT NULL;
 ```

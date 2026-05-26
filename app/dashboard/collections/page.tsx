@@ -139,8 +139,13 @@ export default function DashboardPage() {
       const [{ data: hubsData }, { data: foldersData }, { data: profile }] = await Promise.all([
         supabase.from('hubs').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
         supabase.from('collections').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-        supabase.from('profiles').select('username').eq('id', user.id).single(),
+        supabase.from('profiles').select('username, username_confirmed').eq('id', user.id).single(),
       ])
+
+      if (!(profile as any)?.username_confirmed) {
+        router.replace('/setup')
+        return
+      }
 
       setAllHubs(hubsData || [])
       setUsername((profile as any)?.username ?? '')
