@@ -75,7 +75,7 @@ export default function HubCard({
             {currentCollection && (
               <p className="text-xs text-gray-400">📁 {currentCollection.title}</p>
             )}
-            <p className="text-[10px] text-gray-300 font-mono leading-tight opacity-75">
+            <p className="text-[11px] text-gray-300 font-mono leading-tight">
               /h/{username}/{hub.slug}
             </p>
           </div>
@@ -165,7 +165,7 @@ export default function HubCard({
                 : 'bg-green-100 text-green-700'
             }`}
           >
-            {hub.mode === 'redirect' ? 'Redirect' : 'Landing Page'}
+            {hub.mode === 'redirect' ? 'Redirect Link' : 'Interactive Page'}
           </span>
           {hub.privacy_mode === 'private' && (
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
