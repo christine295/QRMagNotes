@@ -481,7 +481,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
         <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
           <p className="text-sm font-medium text-green-800">Hub created! Add content blocks below.</p>
         </div>
-        <ContentBlocksEditor hubId={createdHubId} hubTitle={title} />
+        <ContentBlocksEditor hubId={createdHubId} hubTitle={title} templateId={selectedTemplateId ?? undefined} />
         <div className="flex gap-3 pt-2">
           <button
             type="button"

@@ -46,7 +46,7 @@ function blockSummary(block: ContentBlock): string {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function ContentBlocksEditor({ hubId, hubTitle }: { hubId: string; hubTitle?: string }) {
+export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { hubId: string; hubTitle?: string; templateId?: string }) {
   const [blocks, setBlocks] = useState<ContentBlock[]>([])
   const [loading, setLoading] = useState(true)
   const [pickingType, setPickingType] = useState(false)
@@ -138,10 +138,10 @@ export default function ContentBlocksEditor({ hubId, hubTitle }: { hubId: string
           return (
             <div key={block.id}>
               {block.type === 'text'      && <TextForm      initialData={d} onSave={save} onCancel={cancel} />}
-              {block.type === 'checklist' && <ChecklistForm initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'checklist' && <ChecklistForm initialData={d} templateId={templateId} onSave={save} onCancel={cancel} />}
               {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
               {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onCancel={cancel} />}
-              {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} onSave={save} onCancel={cancel} />}
+              {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} templateId={templateId} onSave={save} onCancel={cancel} />}
               {block.type === 'link'      && <LinkForm      initialData={d} onSave={save} onCancel={cancel} />}
               {block.type === 'phone'     && <PhoneForm     initialData={d} onSave={save} onCancel={cancel} />}
               {block.type === 'file'      && <FileForm      initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
@@ -232,10 +232,10 @@ export default function ContentBlocksEditor({ hubId, hubTitle }: { hubId: string
       )}
 
       {addingType === 'text'      && <TextForm      onSave={d => saveBlock('text', d)}      onCancel={() => setAddingType(null)} />}
-      {addingType === 'checklist' && <ChecklistForm onSave={d => saveBlock('checklist', d)} onCancel={() => setAddingType(null)} />}
+      {addingType === 'checklist' && <ChecklistForm templateId={templateId} onSave={d => saveBlock('checklist', d)} onCancel={() => setAddingType(null)} />}
       {addingType === 'image'     && <ImageForm     hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('image', d)} onCancel={() => setAddingType(null)} />}
       {addingType === 'timeline'  && <TimelineForm  onSave={d => saveBlock('timeline', d)}  onCancel={() => setAddingType(null)} />}
-      {addingType === 'audio'     && <AudioForm     hubId={hubId} onSave={d => saveBlock('audio', d)} onCancel={() => setAddingType(null)} />}
+      {addingType === 'audio'     && <AudioForm     hubId={hubId} templateId={templateId} onSave={d => saveBlock('audio', d)} onCancel={() => setAddingType(null)} />}
       {addingType === 'link'      && <LinkForm      onSave={d => saveBlock('link', d)}      onCancel={() => setAddingType(null)} />}
       {addingType === 'phone'     && <PhoneForm     onSave={d => saveBlock('phone', d)}     onCancel={() => setAddingType(null)} />}
       {addingType === 'file'      && <FileForm      hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('file', d)} onCancel={() => setAddingType(null)} />}
@@ -291,7 +291,7 @@ function TextForm({ onSave, onCancel, initialData }: { onSave: (d: TextData) => 
         type="text"
         value={label}
         onChange={e => setLabel(e.target.value)}
-        placeholder="Label (optional) — e.g. Artist Statement"
+        placeholder="Label (optional) — e.g. Overview, Notes, Details"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <textarea
@@ -319,7 +319,7 @@ function TextForm({ onSave, onCancel, initialData }: { onSave: (d: TextData) => 
 
 // ── Checklist form ────────────────────────────────────────────────────────────
 
-function ChecklistForm({ onSave, onCancel, initialData }: { onSave: (d: ChecklistData) => Promise<any>; onCancel: () => void; initialData?: ChecklistData }) {
+function ChecklistForm({ onSave, onCancel, initialData, templateId }: { onSave: (d: ChecklistData) => Promise<any>; onCancel: () => void; initialData?: ChecklistData; templateId?: string }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [items, setItems] = useState(initialData?.items?.length ? initialData.items : [{ id: uid(), text: '' }])
   const [saving, setSaving] = useState(false)
@@ -343,7 +343,7 @@ function ChecklistForm({ onSave, onCancel, initialData }: { onSave: (d: Checklis
         type="text"
         value={label}
         onChange={e => setLabel(e.target.value)}
-        placeholder="Label — e.g. Winterize Checklist"
+        placeholder={CHECKLIST_LABEL_PLACEHOLDER[templateId ?? 'default'] ?? CHECKLIST_LABEL_PLACEHOLDER.default}
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <div className="space-y-2">
@@ -497,11 +497,23 @@ function TimelineForm({ onSave, onCancel, initialData }: { onSave: (d: TimelineD
 
 // ── Audio form ────────────────────────────────────────────────────────────────
 
-const AUDIO_SUGGESTIONS = ['Intention', 'Sacred Space', 'In the Moment', 'Signs & Synchronicities', 'Ritual Reflection', 'Messages Received', 'Things to Revisit', 'Shadow Work']
+const AUDIO_SUGGESTIONS: Record<string, string[]> = {
+  ritual:  ['Intention', 'Sacred Space', 'In the Moment', 'Signs & Synchronicities', 'Ritual Reflection', 'Messages Received', 'Things to Revisit', 'Shadow Work'],
+  recipe:  ['Cooking Notes', 'Technique Tips', 'Family Story', 'Recipe Memory', 'Tasting Notes', 'How I Make It'],
+  artwork: ['Artist Statement', 'Process Notes', 'Inspiration', 'What This Means to Me', 'Studio Notes', 'Behind the Work'],
+  default: ['Introduction', 'Overview', 'Notes', 'Story', 'Reflection', 'Tips & Ideas'],
+}
+
+const CHECKLIST_LABEL_PLACEHOLDER: Record<string, string> = {
+  ritual:  'Label — e.g. Ritual Setup',
+  recipe:  'Label — e.g. Prep Checklist',
+  artwork: 'Label — e.g. Materials List',
+  default: 'Label — e.g. Steps to Complete',
+}
 
 function formatTime(s: number) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
 
-function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; onSave: (d: AudioData) => Promise<any>; onCancel: () => void; initialData?: AudioData }) {
+function AudioForm({ hubId, templateId, onSave, onCancel, initialData }: { hubId: string; templateId?: string; onSave: (d: AudioData) => Promise<any>; onCancel: () => void; initialData?: AudioData }) {
   const [mode, setMode] = useState<'record' | 'upload'>('record')
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [date, setDate] = useState(initialData?.date ?? '')
@@ -575,7 +587,7 @@ function AudioForm({ hubId, onSave, onCancel, initialData }: { hubId: string; on
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex flex-wrap gap-1 mt-1.5">
-          {AUDIO_SUGGESTIONS.map(s => (
+          {(AUDIO_SUGGESTIONS[templateId ?? 'default'] ?? AUDIO_SUGGESTIONS.default).map(s => (
             <button key={s} type="button" onClick={() => setLabel(s)} className="text-xs text-blue-600 border border-blue-100 rounded-full px-2 py-0.5 hover:bg-blue-50 transition-colors">
               {s}
             </button>
