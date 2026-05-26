@@ -75,7 +75,6 @@ export default function HubCard({
             {currentCollection && (
               <p className="text-xs text-gray-400">📁 {currentCollection.title}</p>
             )}
-            <p className="text-xs text-gray-300">Updated {formatDate(hub.updated_at)}</p>
             <p className="text-[10px] text-gray-300 font-mono leading-tight opacity-75">
               /h/{username}/{hub.slug}
             </p>
@@ -181,10 +180,10 @@ export default function HubCard({
         </div>
       </div>
 
-      {/* Tags */}
-      {hasTags && (
-        <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-gray-100">
-          {hub.tags.map(tag => (
+      {/* Bottom row: tags left, date right */}
+      <div className="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-gray-100">
+        <div className="flex flex-wrap gap-1">
+          {hasTags && hub.tags.map(tag => (
             <button
               key={tag}
               type="button"
@@ -195,7 +194,10 @@ export default function HubCard({
             </button>
           ))}
         </div>
-      )}
+        <p className="text-[10px] text-gray-300 shrink-0 whitespace-nowrap">
+          {formatDate(hub.updated_at)}
+        </p>
+      </div>
     </div>
   )
 }
