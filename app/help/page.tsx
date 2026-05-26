@@ -52,12 +52,20 @@ const TEMPLATES = [
     themeColor: '#3B82F6',
   },
   {
-    name: 'Artwork Memory Hub',
+    name: 'Artwork Archive',
     emoji: '🎨',
-    description: 'Pre-fills a hub title, description, and violet theme. No pre-built content blocks — add whichever block types suit the artwork. Designed to attach to the back of a painting or piece of art.',
-    blocks: [],
+    description: 'Document and archive your artwork — photos, materials, story, and status. Violet theme. Attach to the back of a painting or piece of art, or use as a standalone record.',
     themeColor: '#8B5CF6',
-    note: 'Suggested blocks: Link (Spotify Playlist, Artist Notes), Text (Creative Process, Inspiration), Image (Process Photos), Audio (Artist Reflection)',
+    blocks: [
+      { label: '(Main Photo)', type: 'Image', note: 'Primary photo of the artwork — upload or paste a public URL' },
+      { label: 'Description', type: 'Text', note: 'A short description or context for the piece' },
+      { label: 'Details', type: 'Text', note: 'Pre-filled: Date Created, Medium, Dimensions, and Status (In Progress / Completed / Sold / Gifted)' },
+      { label: 'Color Palette', type: 'Text', note: 'Comma-separated colors used in the piece — e.g. burnt sienna, cobalt blue, ivory' },
+      { label: 'Inspiration / Meaning', type: 'Text', note: 'The story, symbols, or meaning behind the work — supports multiline text' },
+      { label: '(Additional Photos)', type: 'Image', note: 'Process shots, detail photos, or alternate views' },
+      { label: 'Music / Playlist', type: 'Link', note: 'Optional — Spotify, YouTube, or any playlist URL. Starts collapsed by default.' },
+      { label: 'Notes', type: 'Text', note: 'Any other notes — materials sourced, exhibition history, ideas for next time' },
+    ],
   },
   {
     name: 'Ritual Template',
@@ -210,9 +218,6 @@ export default function HelpPage() {
                   <span className="text-xs text-stone-400">{t.themeColor}</span>
                 </div>
                 <p className="text-sm text-stone-600 leading-[1.65] mb-4 max-w-prose">{t.description}</p>
-                {t.note && (
-                  <p className="text-xs text-stone-400 mb-4 italic">{t.note}</p>
-                )}
                 {t.blocks.length > 0 && (
                   <div className="border-t border-stone-100 divide-y divide-stone-100">
                     {t.blocks.map((b, i) => (

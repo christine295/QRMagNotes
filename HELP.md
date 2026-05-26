@@ -93,10 +93,20 @@ To control the collapse state of any block, include or avoid the relevant keywor
 ### Blank (`blank`)
 Empty hub. No pre-built blocks. Blue default theme.
 
-### Artwork Memory Hub (`artwork`)
-Pre-fills: title "Artwork Memory Hub", violet theme (`#8B5CF6`).  
-No pre-built content blocks — add manually.  
-Suggested blocks: Link (Spotify Playlist, Artist Notes), Text (Creative Process, Inspiration), Image (Process Photos), Audio (Artist Reflection).
+### Artwork Archive (`artwork`)
+Pre-fills: title "Untitled Artwork", violet theme (`#8B5CF6`).  
+Creates **8 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | *(no label)* | image | Main photo — upload or paste URL |
+| 2 | Description | text | Short description or context |
+| 3 | Details | text | Pre-filled: Date Created, Medium, Dimensions, Status (In Progress / Completed / Sold / Gifted) |
+| 4 | Color Palette | text | Comma-separated colors |
+| 5 | Inspiration / Meaning | text | Multiline — story, symbols, meaning |
+| 6 | *(no label)* | image | Additional photos (caption: "Additional photos") |
+| 7 | Music / Playlist | link | Starts closed (label matches `playlist`) |
+| 8 | Notes | text | Starts open (label matches `note`) |
 
 ### Ritual Template (`ritual`)
 Pre-fills: title "My Ritual", description, violet theme (`#8B5CF6`).  

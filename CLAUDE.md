@@ -155,8 +155,8 @@ Defined in `TEMPLATES` array in `components/HubForm.tsx`. Template picker shown 
 ### Blank
 Empty hub, blue theme. No pre-built blocks.
 
-### Artwork Memory Hub
-Pre-fills title + violet theme. No pre-built blocks — user adds manually.
+### Artwork Archive
+Pre-fills title "Untitled Artwork" + violet theme. Creates **8 content blocks**: Main Photo (image), Description (text), Details (text — Date Created / Medium / Dimensions / Status), Color Palette (text), Inspiration / Meaning (text), Additional Photos (image), Music / Playlist (link), Notes (text).
 
 ### Ritual Template
 Violet theme. Creates **14 content blocks** via `Promise.all` API calls on hub creation:
@@ -215,4 +215,4 @@ Both files must stay template-agnostic in general sections. Template-specific co
 - Paid feature: `hide_footer` flag to remove footer branding on public hubs
 - Multi-user URL path: `/h/[slug]` → `/h/[username]/[slug]` (deferred until before real users print QR codes)
 - Sort order normalization on load (gaps only heal on first move, not on page load)
-- More templates beyond Blank, Artwork Memory Hub, Ritual Template
+- More templates beyond Blank, Artwork Archive, Ritual Template, Recipe

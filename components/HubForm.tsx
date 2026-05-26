@@ -41,11 +41,11 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'artwork',
-    label: 'Artwork Memory Hub',
+    label: 'Artwork Archive',
     emoji: '🎨',
-    description: 'Attach to the back of a painting or piece of art',
-    title: 'Artwork Memory Hub',
-    hubDescription: 'The story, songs, symbols, and notes connected to this piece.',
+    description: 'Document and archive your artwork — photos, materials, story, and status',
+    title: 'Untitled Artwork',
+    hubDescription: '',
     themeColor: '#8B5CF6',
   },
   {
@@ -65,6 +65,44 @@ const TEMPLATES: Template[] = [
     title: 'My Recipe',
     hubDescription: '',
     themeColor: '#F97316',
+  },
+]
+
+const ARTWORK_BLOCKS = [
+  {
+    type: 'image' as const,
+    data: { url: '', caption: '' },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Description', text: '' },
+  },
+  {
+    type: 'text' as const,
+    data: {
+      label: 'Details',
+      text: 'Date Created:\n\nMedium:\n\nDimensions:\n\nStatus: In Progress  /  Completed  /  Sold  /  Gifted',
+    },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Color Palette', text: '' },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Inspiration / Meaning', text: '' },
+  },
+  {
+    type: 'image' as const,
+    data: { url: '', caption: 'Additional photos' },
+  },
+  {
+    type: 'link' as const,
+    data: { label: 'Music / Playlist', url: '' },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Notes', text: '' },
   },
 ]
 
@@ -413,6 +451,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
         const templateBlocks =
           selectedTemplateId === 'ritual' ? RITUAL_BLOCKS :
           selectedTemplateId === 'recipe' ? RECIPE_BLOCKS :
+          selectedTemplateId === 'artwork' ? ARTWORK_BLOCKS :
           null
         if (templateBlocks) {
           await Promise.all(
@@ -786,6 +825,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   const tagPlaceholder =
     selectedTemplateId === 'ritual' ? 'Type a tag and press Enter — e.g. sabbat, full moon' :
     selectedTemplateId === 'recipe' ? 'Type a tag and press Enter — e.g. dinner, vegetarian, quick' :
+    selectedTemplateId === 'artwork' ? 'Type a tag and press Enter — e.g. oil-painting, portrait, 2024' :
     'Type a tag and press Enter — e.g. seasonal, car, kitchen'
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
