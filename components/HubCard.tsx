@@ -163,26 +163,26 @@ export default function HubCard({
           </div>
 
           {hub.template_id && TEMPLATE_LABELS[hub.template_id] && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+            <span className="text-[11px] font-normal px-1.5 py-px rounded-full bg-stone-50 text-stone-400">
               {TEMPLATE_LABELS[hub.template_id].emoji} {TEMPLATE_LABELS[hub.template_id].label}
             </span>
           )}
           <span
-            className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
+            className={`shrink-0 text-[11px] font-normal px-1.5 py-px rounded-full ${
               hub.mode === 'redirect'
-                ? 'bg-amber-100 text-amber-700'
-                : 'bg-green-100 text-green-700'
+                ? 'bg-amber-50 text-amber-600'
+                : 'bg-emerald-50 text-emerald-600'
             }`}
           >
             {hub.mode === 'redirect' ? 'Redirect Link' : 'Interactive Page'}
           </span>
           {hub.privacy_mode === 'private' && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+            <span className="text-[11px] font-normal px-1.5 py-px rounded-full bg-stone-100 text-stone-500">
               Private
             </span>
           )}
           {hub.privacy_mode === 'unlisted' && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+            <span className="text-[11px] font-normal px-1.5 py-px rounded-full bg-stone-50 text-stone-400">
               Unlisted
             </span>
           )}
@@ -191,13 +191,13 @@ export default function HubCard({
 
       {/* Bottom row: tags left, date right */}
       <div className="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-gray-100">
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-0.5">
           {hasTags && hub.tags.map(tag => (
             <button
               key={tag}
               type="button"
               onClick={e => { e.stopPropagation(); onTagClick?.(tag) }}
-              className="text-xs bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-500 px-2 py-0.5 rounded-full transition-colors"
+              className="text-[11px] bg-stone-50 hover:bg-stone-100 hover:text-stone-600 text-stone-400 px-1.5 py-px rounded-full transition-colors"
             >
               #{tag}
             </button>
