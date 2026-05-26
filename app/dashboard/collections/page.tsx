@@ -218,22 +218,8 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Folder filter banner */}
-        {activeFolder && (
-          <div className="flex items-center justify-between mb-4 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-            <span className="text-sm text-blue-700 font-medium">📁 {activeFolder.title}</span>
-            <button
-              type="button"
-              onClick={() => setFolderFilter(null)}
-              className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
-            >
-              Show all ×
-            </button>
-          </div>
-        )}
-
         {/* Search & filter */}
-        <div className="mb-6 space-y-2">
+        <div className="mb-4 space-y-2">
           <input
             type="text"
             value={searchQuery}
@@ -275,46 +261,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Hub list */}
-        {loading ? (
-          <div className="text-center text-gray-400 py-12">Loading…</div>
-        ) : allHubs.length === 0 ? (
-          <div className="text-center py-20 px-4">
-            <div className="text-5xl mb-4">✨</div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Create your first hub</h3>
-            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
-              Choose a template to get started — or start blank and build as you go.
-            </p>
-            <Link
-              href="/dashboard/hub/new"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
-            >
-              + New Hub
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3 mb-8">
-            {filteredHubs.length > 0 ? (
-              filteredHubs.map((hub: any) => (
-                <HubCard
-                  key={hub.id}
-                  hub={hub}
-                  onTagClick={setTagFilter}
-                  folders={folders}
-                  onFolderChange={handleFolderChange}
-                />
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-400 text-sm">
-                No hubs match your search.
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Folders section — compact rows, click to filter */}
         {!loading && (
-          <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
+          <div className="border border-gray-200 rounded-xl bg-white overflow-hidden mb-4">
             <button
               type="button"
               onClick={() => setFoldersOpen(v => !v)}
@@ -409,6 +358,58 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+
+        {/* Folder filter banner */}
+        {activeFolder && (
+          <div className="flex items-center justify-between mb-4 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+            <span className="text-sm text-blue-700 font-medium">📁 {activeFolder.title}</span>
+            <button
+              type="button"
+              onClick={() => setFolderFilter(null)}
+              className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
+            >
+              Show all ×
+            </button>
+          </div>
+        )}
+
+        {/* Hub list */}
+        {loading ? (
+          <div className="text-center text-gray-400 py-12">Loading…</div>
+        ) : allHubs.length === 0 ? (
+          <div className="text-center py-20 px-4">
+            <div className="text-5xl mb-4">✨</div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Create your first hub</h3>
+            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
+              Choose a template to get started — or start blank and build as you go.
+            </p>
+            <Link
+              href="/dashboard/hub/new"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            >
+              + New Hub
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3 mb-8">
+            {filteredHubs.length > 0 ? (
+              filteredHubs.map((hub: any) => (
+                <HubCard
+                  key={hub.id}
+                  hub={hub}
+                  onTagClick={setTagFilter}
+                  folders={folders}
+                  onFolderChange={handleFolderChange}
+                />
+              ))
+            ) : (
+              <div className="text-center py-12 text-gray-400 text-sm">
+                No hubs match your search.
+              </div>
+            )}
+          </div>
+        )}
+
       </main>
 
       <EditFolderModal

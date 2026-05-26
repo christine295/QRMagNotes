@@ -29,6 +29,21 @@ type FileData      = { label: string; url: string }
 
 function uid() { return Math.random().toString(36).slice(2) }
 
+function blockHasContent(block: ContentBlock): boolean {
+  const d = block.data as any
+  switch (block.type) {
+    case 'text':      return !!(d.text?.trim())
+    case 'image':     return !!(d.url?.trim())
+    case 'audio':     return !!(d.url?.trim())
+    case 'link':      return !!(d.url?.trim())
+    case 'phone':     return !!(d.url?.trim())
+    case 'file':      return !!(d.url?.trim())
+    case 'checklist': return Array.isArray(d.items) && d.items.length > 0
+    case 'timeline':  return Array.isArray(d.events) && d.events.length > 0
+    default:          return false
+  }
+}
+
 function blockSummary(block: ContentBlock): string {
   const d = block.data as any
   switch (block.type) {
@@ -148,8 +163,9 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
             </div>
           )
         }
+        const hasContent = blockHasContent(block)
         return (
-          <div key={block.id} className="flex items-center border border-gray-200 rounded-xl px-3 py-3 bg-white gap-2">
+          <div key={block.id} className={`flex items-center border rounded-xl px-3 py-3 gap-2 ${hasContent ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200'}`}>
             <div className="flex flex-col gap-0.5 flex-shrink-0">
               <button
                 type="button"
@@ -168,11 +184,15 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
                 ▼
               </button>
             </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide mr-2">
+            <div className="min-w-0 flex-1 flex items-center gap-2">
+              <span
+                title={hasContent ? 'Has content' : 'Empty'}
+                className={`flex-shrink-0 w-2 h-2 rounded-full ${hasContent ? 'bg-emerald-400' : 'border border-gray-300'}`}
+              />
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                 {BLOCK_TYPE_META[block.type as BlockType]?.label ?? block.type}
               </span>
-              <span className="text-sm text-gray-700">{blockSummary(block)}</span>
+              <span className="text-sm text-gray-700 truncate">{blockSummary(block)}</span>
             </div>
             {savedBlockId === block.id ? (
               <span className="text-xs text-green-600 font-medium flex-shrink-0 border border-green-200 bg-green-50 rounded px-2 py-1">
