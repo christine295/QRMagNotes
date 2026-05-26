@@ -66,6 +66,194 @@ const TEMPLATES: Template[] = [
     hubDescription: '',
     themeColor: '#F97316',
   },
+  {
+    id: 'box',
+    label: "What's in the Box?",
+    emoji: '📦',
+    description: 'Label a storage box with contents, location, and notes',
+    title: 'My Box',
+    hubDescription: '',
+    themeColor: '#64748B',
+  },
+  {
+    id: 'plant',
+    label: 'Plant Profile',
+    emoji: '🪴',
+    description: 'Track a plant with care instructions, growth log, and photos',
+    title: 'My Plant',
+    hubDescription: '',
+    themeColor: '#22C55E',
+  },
+  {
+    id: 'maintenance',
+    label: 'Home Maintenance Log',
+    emoji: '🔧',
+    description: 'Log appliances, repairs, warranties, and service contacts',
+    title: 'My Maintenance Log',
+    hubDescription: '',
+    themeColor: '#14B8A6',
+  },
+  {
+    id: 'travel',
+    label: 'Travel Journal',
+    emoji: '✈️',
+    description: 'Capture a trip with photos, timeline, packing list, and reflections',
+    title: 'My Trip',
+    hubDescription: '',
+    themeColor: '#3B82F6',
+  },
+  {
+    id: 'pet',
+    label: 'Pet Profile',
+    emoji: '🐾',
+    description: 'Track your pet with care tasks, health history, and vet info',
+    title: 'My Pet',
+    hubDescription: '',
+    themeColor: '#F59E0B',
+  },
+  {
+    id: 'book',
+    label: 'Book / Reading Notes',
+    emoji: '📖',
+    description: 'Save notes, quotes, and reflections about a book',
+    title: 'My Reading Notes',
+    hubDescription: '',
+    themeColor: '#8B5CF6',
+  },
+  {
+    id: 'goal',
+    label: 'Goal / Habit Tracker',
+    emoji: '🎯',
+    description: 'Define a goal, track daily habits, and log progress',
+    title: 'My Goal',
+    hubDescription: '',
+    themeColor: '#F43F5E',
+  },
+  {
+    id: 'journal',
+    label: 'Daily Reflection / Journal',
+    emoji: '📓',
+    description: 'A daily space for reflection, voice notes, and intentions',
+    title: 'My Journal',
+    hubDescription: '',
+    themeColor: '#14B8A6',
+  },
+]
+
+const BOX_BLOCKS = [
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'text' as const, data: { label: 'Quick Description', text: '' } },
+  { type: 'checklist' as const, data: { label: 'Contents', items: [] } },
+  { type: 'text' as const, data: { label: 'Storage Location', text: '' } },
+  { type: 'audio' as const, data: { label: 'Box Overview', url: '' } },
+  { type: 'timeline' as const, data: { label: 'Added / Removed Items', events: [] } },
+  { type: 'file' as const, data: { label: 'Manuals or Documents', url: '' } },
+  { type: 'text' as const, data: { label: 'Additional Notes', text: '' } },
+]
+
+const PLANT_BLOCKS = [
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'text' as const, data: { label: 'Plant Information', text: 'Plant Name:\n\nType / Species:\n\nDate Acquired:\n\nWhere From:\n\nPot Size:' } },
+  { type: 'text' as const, data: { label: 'Care Instructions', text: 'Watering:\n\nLight:\n\nSoil:\n\nTemperature:\n\nHumidity:\n\nFertilizing:\n\nRepotting:' } },
+  { type: 'checklist' as const, data: { label: 'Care Checklist', items: [
+    { id: 'pl-c1', text: 'Water plant' },
+    { id: 'pl-c2', text: 'Check soil moisture' },
+    { id: 'pl-c3', text: 'Check for pests or disease' },
+    { id: 'pl-c4', text: 'Wipe or mist leaves' },
+    { id: 'pl-c5', text: 'Rotate toward light' },
+  ] } },
+  { type: 'timeline' as const, data: { label: 'Growth & Care Log', events: [] } },
+  { type: 'audio' as const, data: { label: 'Plant Update', url: '' } },
+  { type: 'link' as const, data: { label: 'Care Guide', url: '' } },
+  { type: 'text' as const, data: { label: 'Seasonal Notes', text: '' } },
+]
+
+const MAINTENANCE_BLOCKS = [
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'text' as const, data: { label: 'Maintenance Information', text: 'Item / Area:\n\nBrand / Model:\n\nSerial Number:\n\nInstalled:\n\nWarranty Expiration:' } },
+  { type: 'checklist' as const, data: { label: 'Maintenance Tasks', items: [
+    { id: 'mt-c1', text: 'Inspect for damage or wear' },
+    { id: 'mt-c2', text: 'Clean filters or vents' },
+    { id: 'mt-c3', text: 'Test and run system' },
+    { id: 'mt-c4', text: 'Check for leaks or blockages' },
+    { id: 'mt-c5', text: 'Schedule next service' },
+  ] } },
+  { type: 'timeline' as const, data: { label: 'Repair History', events: [] } },
+  { type: 'file' as const, data: { label: 'Manuals & Warranty', url: '' } },
+  { type: 'phone' as const, data: { label: 'Service Contact', url: '' } },
+  { type: 'link' as const, data: { label: 'Product Page', url: '' } },
+  { type: 'text' as const, data: { label: 'Additional Notes', text: '' } },
+]
+
+const TRAVEL_BLOCKS = [
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'text' as const, data: { label: 'Trip Overview', text: 'Destination:\n\nDates:\n\nTraveling With:\n\nAccommodation:\n\nPurpose of Trip:' } },
+  { type: 'timeline' as const, data: { label: 'Travel Timeline', events: [] } },
+  { type: 'link' as const, data: { label: 'Maps / Reservations', url: '' } },
+  { type: 'checklist' as const, data: { label: 'Packing List', items: [
+    { id: 'tv-c1', text: 'Passport / ID' },
+    { id: 'tv-c2', text: 'Phone + charger + adapter' },
+    { id: 'tv-c3', text: 'Medications' },
+    { id: 'tv-c4', text: 'Travel insurance info' },
+    { id: 'tv-c5', text: 'Cash / cards' },
+    { id: 'tv-c6', text: 'Comfortable shoes' },
+  ] } },
+  { type: 'audio' as const, data: { label: 'Travel Reflection', url: '' } },
+  { type: 'text' as const, data: { label: 'Recommendations', text: '' } },
+]
+
+const PET_BLOCKS = [
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'text' as const, data: { label: 'Pet Information', text: 'Name:\n\nSpecies / Breed:\n\nDate of Birth:\n\nColor / Markings:\n\nMicrochip / ID #:' } },
+  { type: 'checklist' as const, data: { label: 'Care Tasks', items: [
+    { id: 'pt-c1', text: 'Morning feeding' },
+    { id: 'pt-c2', text: 'Evening feeding' },
+    { id: 'pt-c3', text: 'Fresh water' },
+    { id: 'pt-c4', text: 'Exercise / walk or playtime' },
+    { id: 'pt-c5', text: 'Grooming as needed' },
+  ] } },
+  { type: 'timeline' as const, data: { label: 'Vet & Health History', events: [] } },
+  { type: 'phone' as const, data: { label: 'Veterinarian', url: '' } },
+  { type: 'file' as const, data: { label: 'Vaccination Records', url: '' } },
+  { type: 'audio' as const, data: { label: 'Pet Update', url: '' } },
+  { type: 'text' as const, data: { label: 'Behavior / Preferences', text: '' } },
+]
+
+const BOOK_BLOCKS = [
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'text' as const, data: { label: 'Book Summary', text: 'Title:\n\nAuthor:\n\nGenre:\n\nYear Published:\n\nDate Read:\n\nRating:\n\nSummary:' } },
+  { type: 'text' as const, data: { label: 'Favorite Quotes', text: '' } },
+  { type: 'audio' as const, data: { label: 'Reading Reflection', url: '' } },
+  { type: 'link' as const, data: { label: 'Author / Purchase Link', url: '' } },
+  { type: 'timeline' as const, data: { label: 'Reading Progress', events: [] } },
+  { type: 'text' as const, data: { label: 'Thoughts & Insights', text: '' } },
+]
+
+const GOAL_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Goal Overview', text: 'Goal:\n\nWhy This Matters:\n\nTarget Date:\n\nSuccess Looks Like:' } },
+  { type: 'checklist' as const, data: { label: 'Habit Checklist', items: [
+    { id: 'gl-c1', text: 'Morning routine' },
+    { id: 'gl-c2', text: 'Exercise or movement' },
+    { id: 'gl-c3', text: 'Read or learn something new' },
+    { id: 'gl-c4', text: 'Evening reflection' },
+  ] } },
+  { type: 'timeline' as const, data: { label: 'Progress Log', events: [] } },
+  { type: 'audio' as const, data: { label: 'Progress Update', url: '' } },
+  { type: 'link' as const, data: { label: 'Related Resource', url: '' } },
+  { type: 'text' as const, data: { label: 'Wins & Challenges', text: '' } },
+]
+
+const JOURNAL_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Daily Reflection', text: '' } },
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'audio' as const, data: { label: 'Voice Journal', url: '' } },
+  { type: 'timeline' as const, data: { label: 'Important Moments', events: [] } },
+  { type: 'checklist' as const, data: { label: 'Daily Intentions', items: [
+    { id: 'jn-c1', text: 'Set my intention for today' },
+    { id: 'jn-c2', text: 'Prioritize my top 3 tasks' },
+    { id: 'jn-c3', text: 'End-of-day reflection' },
+  ] } },
+  { type: 'text' as const, data: { label: 'Additional Thoughts', text: '' } },
 ]
 
 const ARTWORK_BLOCKS = [
@@ -274,6 +462,34 @@ const RITUAL_BLOCKS = [
   },
 ]
 
+const BLOCKS_BY_TEMPLATE: Record<string, { type: string; data: object }[]> = {
+  artwork:     ARTWORK_BLOCKS,
+  ritual:      RITUAL_BLOCKS,
+  recipe:      RECIPE_BLOCKS,
+  box:         BOX_BLOCKS,
+  plant:       PLANT_BLOCKS,
+  maintenance: MAINTENANCE_BLOCKS,
+  travel:      TRAVEL_BLOCKS,
+  pet:         PET_BLOCKS,
+  book:        BOOK_BLOCKS,
+  goal:        GOAL_BLOCKS,
+  journal:     JOURNAL_BLOCKS,
+}
+
+const TAG_PLACEHOLDERS: Record<string, string> = {
+  ritual:      'Type a tag and press Enter — e.g. sabbat, full moon',
+  recipe:      'Type a tag and press Enter — e.g. dinner, vegetarian, quick',
+  artwork:     'Type a tag and press Enter — e.g. oil-painting, portrait, 2024',
+  box:         'Type a tag and press Enter — e.g. garage, tools, holiday-decor',
+  plant:       'Type a tag and press Enter — e.g. succulent, indoor, kitchen',
+  maintenance: 'Type a tag and press Enter — e.g. hvac, kitchen, annual',
+  travel:      'Type a tag and press Enter — e.g. europe, family-trip, 2024',
+  pet:         'Type a tag and press Enter — e.g. dog, rescue, senior',
+  book:        'Type a tag and press Enter — e.g. fiction, recommended, 2024',
+  goal:        'Type a tag and press Enter — e.g. fitness, learning, 2024',
+  journal:     'Type a tag and press Enter — e.g. daily, gratitude, 2024',
+}
+
 type Props = {
   hub?: Hub
   userId: string
@@ -448,11 +664,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
           return
         }
 
-        const templateBlocks =
-          selectedTemplateId === 'ritual' ? RITUAL_BLOCKS :
-          selectedTemplateId === 'recipe' ? RECIPE_BLOCKS :
-          selectedTemplateId === 'artwork' ? ARTWORK_BLOCKS :
-          null
+        const templateBlocks = selectedTemplateId ? (BLOCKS_BY_TEMPLATE[selectedTemplateId] ?? null) : null
         if (templateBlocks) {
           await Promise.all(
             templateBlocks.map((b, i) =>
@@ -822,11 +1034,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   }
 
   // ── Create mode ─────────────────────────────────────────────────────────
-  const tagPlaceholder =
-    selectedTemplateId === 'ritual' ? 'Type a tag and press Enter — e.g. sabbat, full moon' :
-    selectedTemplateId === 'recipe' ? 'Type a tag and press Enter — e.g. dinner, vegetarian, quick' :
-    selectedTemplateId === 'artwork' ? 'Type a tag and press Enter — e.g. oil-painting, portrait, 2024' :
-    'Type a tag and press Enter — e.g. seasonal, car, kitchen'
+  const tagPlaceholder = TAG_PLACEHOLDERS[selectedTemplateId ?? ''] ?? 'Type a tag and press Enter — e.g. seasonal, car, kitchen'
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Collection */}

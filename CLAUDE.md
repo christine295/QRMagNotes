@@ -215,4 +215,4 @@ Both files must stay template-agnostic in general sections. Template-specific co
 - Paid feature: `hide_footer` flag to remove footer branding on public hubs
 - Multi-user URL path: `/h/[slug]` → `/h/[username]/[slug]` (deferred until before real users print QR codes)
 - Sort order normalization on load (gaps only heal on first move, not on page load)
-- More templates beyond Blank, Artwork Archive, Ritual Template, Recipe
+- More templates (current: Blank, Artwork Archive, Ritual, Recipe, What's in the Box?, Plant Profile, Home Maintenance Log, Travel Journal, Pet Profile, Book / Reading Notes, Goal / Habit Tracker, Daily Reflection / Journal)

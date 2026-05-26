@@ -498,17 +498,33 @@ function TimelineForm({ onSave, onCancel, initialData }: { onSave: (d: TimelineD
 // ── Audio form ────────────────────────────────────────────────────────────────
 
 const AUDIO_SUGGESTIONS: Record<string, string[]> = {
-  ritual:  ['Intention', 'Sacred Space', 'In the Moment', 'Signs & Synchronicities', 'Ritual Reflection', 'Messages Received', 'Things to Revisit', 'Shadow Work'],
-  recipe:  ['Cooking Notes', 'Technique Tips', 'Family Story', 'Recipe Memory', 'Tasting Notes', 'How I Make It'],
-  artwork: ['Artist Statement', 'Process Notes', 'Inspiration', 'What This Means to Me', 'Studio Notes', 'Behind the Work'],
-  default: ['Introduction', 'Overview', 'Notes', 'Story', 'Reflection', 'Tips & Ideas'],
+  ritual:      ['Intention', 'Sacred Space', 'In the Moment', 'Signs & Synchronicities', 'Ritual Reflection', 'Messages Received', 'Things to Revisit', 'Shadow Work'],
+  recipe:      ['Cooking Notes', 'Technique Tips', 'Family Story', 'Recipe Memory', 'Tasting Notes', 'How I Make It'],
+  artwork:     ['Artist Statement', 'Process Notes', 'Inspiration', 'What This Means to Me', 'Studio Notes', 'Behind the Work'],
+  box:         ['Box Overview', 'What I Found', 'Storage Notes', 'Condition Notes', 'When I Packed This'],
+  plant:       ['Plant Update', 'Growth Notes', 'Care Reminder', 'Seasonal Update', 'What I Noticed'],
+  maintenance: ['Repair Notes', 'Inspection Update', 'Issue Report', 'What Was Fixed', 'Next Steps'],
+  travel:      ['Travel Reflection', 'Day Highlights', 'Place Review', 'Trip Memory', 'What I Would Do Differently'],
+  pet:         ['Pet Update', 'Vet Visit Notes', 'Behavior Notes', 'Training Progress', 'Funny Moment'],
+  book:        ['Reading Reflection', 'Book Review', 'Favorite Passage', 'Character Notes', 'What Stayed With Me'],
+  goal:        ['Progress Update', 'Weekly Review', 'Wins & Lessons', 'Motivation Check-in', 'What I Learned'],
+  journal:     ['Morning Reflection', 'Evening Wind-Down', 'Gratitude', 'Daily Highlight', 'What I Want to Remember'],
+  default:     ['Introduction', 'Overview', 'Notes', 'Story', 'Reflection', 'Tips & Ideas'],
 }
 
 const CHECKLIST_LABEL_PLACEHOLDER: Record<string, string> = {
-  ritual:  'Label — e.g. Ritual Setup',
-  recipe:  'Label — e.g. Prep Checklist',
-  artwork: 'Label — e.g. Materials List',
-  default: 'Label — e.g. Steps to Complete',
+  ritual:      'Label — e.g. Ritual Setup',
+  recipe:      'Label — e.g. Prep Checklist',
+  artwork:     'Label — e.g. Materials List',
+  box:         'Label — e.g. Contents',
+  plant:       'Label — e.g. Care Checklist',
+  maintenance: 'Label — e.g. Maintenance Tasks',
+  travel:      'Label — e.g. Packing List',
+  pet:         'Label — e.g. Care Tasks',
+  book:        'Label — e.g. Reading Goals',
+  goal:        'Label — e.g. Habit Checklist',
+  journal:     'Label — e.g. Daily Intentions',
+  default:     'Label — e.g. Steps to Complete',
 }
 
 function formatTime(s: number) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
