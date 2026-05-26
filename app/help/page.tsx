@@ -1,45 +1,60 @@
 import Link from 'next/link'
 
+const POPULAR_USES = [
+  { emoji: '🍳', label: 'QR recipe cards' },
+  { emoji: '🎨', label: 'Artwork archives' },
+  { emoji: '📸', label: 'Family memory collections' },
+  { emoji: '🐾', label: 'Pet emergency info' },
+  { emoji: '🕯️', label: 'Ritual journals' },
+  { emoji: '🔧', label: 'Home maintenance logs' },
+  { emoji: '📦', label: 'Storage box labels' },
+  { emoji: '✈️', label: 'Travel journals' },
+  { emoji: '🪴', label: 'Plant care tags' },
+  { emoji: '📋', label: 'Equipment manuals' },
+  { emoji: '📖', label: 'Book notes & reading logs' },
+  { emoji: '🎯', label: 'Goal & habit trackers' },
+]
+
 const BLOCK_TYPES = [
   {
     name: 'Text / Note',
-    description: 'Written content — overviews, instructions, descriptions, FAQs, notes. Supports multi-line whitespace-preserved text. Accepts an optional label and date.',
-    examples: 'product overviews, care instructions, artist statements, property notes, service descriptions, how-to guides',
+    emoji: '📝',
+    description: 'Written content — overviews, instructions, descriptions, reflections. Supports optional label and date. Whitespace preserved.',
   },
   {
     name: 'Checklist',
-    description: 'Step-by-step list with tap-to-complete items. Checked state is stored locally per device — each visitor tracks their own progress independently. "Begin again" resets all items.',
-    examples: 'setup steps, maintenance checklists, packing lists, onboarding flows, inspection notes, house rules',
+    emoji: '✅',
+    description: 'Tap-to-complete list. Checked state is stored per device — every visitor tracks their own progress. "Begin again" resets all items.',
   },
   {
     name: 'Audio / Voice Note',
-    description: 'Embedded audio player for any hosted audio URL. Supports an optional label and recording date. Record directly in the editor or upload a file.',
-    examples: 'welcome messages, voice instructions, property tours, product demonstrations, narrated context',
+    emoji: '🎙️',
+    description: 'Embedded audio player for any hosted URL. Add a label and recording date. Record directly or upload a file.',
   },
   {
     name: 'Link',
-    description: 'A tappable external URL row — opens in a new tab. The label is shown instead of the raw URL.',
-    examples: 'websites, booking pages, product listings, maps, playlists, reference guides, support portals, documentation',
+    emoji: '🔗',
+    description: 'A tappable URL row that opens in a new tab. The label is shown instead of the raw address.',
   },
   {
     name: 'Phone',
-    description: 'A tap-to-call phone number. Tapping opens the device dialer.',
-    examples: 'support lines, contact numbers, service providers, emergency contacts, reservation lines',
+    emoji: '📞',
+    description: 'A tap-to-call number. Tapping opens the device dialer directly.',
   },
   {
-    name: 'File',
-    description: 'A downloadable file from any publicly hosted URL (PDF, doc, etc.). Shown as a tappable row with a label.',
-    examples: 'care guides, user manuals, warranties, floor plans, menus, spec sheets, printable forms',
+    name: 'File / PDF',
+    emoji: '📄',
+    description: 'A downloadable file from any public URL. Shown as a labeled tappable row.',
   },
   {
     name: 'Image',
-    description: 'An inline photo uploaded directly or linked from a public URL. Displayed within the content column with an optional caption.',
-    examples: 'product photos, before/after shots, diagrams, artwork, property exteriors, team photos, instructional images',
+    emoji: '🖼️',
+    description: 'A full-width photo uploaded directly or linked from a public URL. Displayed with an optional caption.',
   },
   {
     name: 'Timeline',
-    description: 'A vertical sequence of dated entries with accent-color dot markers. Each entry has an optional date and a text description.',
-    examples: 'service history, project milestones, renovation log, ownership history, product lineage, event sequence',
+    emoji: '📅',
+    description: 'A vertical sequence of dated entries with accent-color markers. Each entry has an optional date and text description.',
   },
 ]
 
@@ -47,197 +62,201 @@ const TEMPLATES = [
   {
     name: 'Blank',
     emoji: '➕',
-    description: 'Empty hub. No pre-built blocks. Use this when starting something that doesn\'t fit an existing template, or when building a custom structure from scratch.',
+    tagline: 'Start from scratch with your own structure.',
+    description: 'Empty hub — no pre-built blocks. Use this when building something custom or when no existing template fits.',
+    borderClass: 'border-l-blue-500',
     blocks: [],
-    themeColor: '#3B82F6',
   },
   {
     name: 'Artwork Archive',
     emoji: '🎨',
-    description: 'Document and archive your artwork — photos, materials, story, and status. Violet theme. Attach to the back of a painting or piece of art, or use as a standalone record.',
-    themeColor: '#8B5CF6',
+    tagline: 'Document and archive a piece of artwork.',
+    description: 'Photos, materials, story, and status. Attach to the back of a painting or use as a standalone record.',
+    borderClass: 'border-l-violet-500',
     blocks: [
-      { label: '(Main Photo)', type: 'Image', note: 'Primary photo of the artwork — upload or paste a public URL' },
-      { label: 'Description', type: 'Text', note: 'A short description or context for the piece' },
-      { label: 'Details', type: 'Text', note: 'Pre-filled: Date Created, Medium, Dimensions, and Status (In Progress / Completed / Sold / Gifted)' },
-      { label: 'Color Palette', type: 'Text', note: 'Comma-separated colors used in the piece — e.g. burnt sienna, cobalt blue, ivory' },
-      { label: 'Inspiration / Meaning', type: 'Text', note: 'The story, symbols, or meaning behind the work — supports multiline text' },
-      { label: '(Additional Photos)', type: 'Image', note: 'Process shots, detail photos, or alternate views' },
-      { label: 'Music / Playlist', type: 'Link', note: 'Optional — Spotify, YouTube, or any playlist URL. Starts collapsed by default.' },
-      { label: 'Notes', type: 'Text', note: 'Any other notes — materials sourced, exhibition history, ideas for next time' },
+      { label: 'Main photo', type: 'Image', note: 'Primary photo of the artwork' },
+      { label: 'Description', type: 'Text', note: 'A short description or context' },
+      { label: 'Details', type: 'Text', note: 'Date created, medium, dimensions, status' },
+      { label: 'Color Palette', type: 'Text', note: 'Colors used — e.g. burnt sienna, cobalt blue' },
+      { label: 'Inspiration / Meaning', type: 'Text', note: 'Story, symbols, or meaning behind the work' },
+      { label: 'Additional photos', type: 'Image', note: 'Process shots or alternate views' },
+      { label: 'Music / Playlist', type: 'Link', note: 'Optional playlist URL — starts collapsed' },
+      { label: 'Notes', type: 'Text', note: 'Materials, exhibition history, ideas for next time' },
     ],
   },
   {
     name: 'Book / Reading Notes',
     emoji: '📖',
-    description: 'Save notes, quotes, and reflections about a book. Violet theme.',
-    themeColor: '#8B5CF6',
+    tagline: 'Capture quotes, reflections, and reading progress.',
+    description: 'Notes, quotes, and reflections about a book.',
+    borderClass: 'border-l-violet-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Photo of the book cover' },
-      { label: 'Book Summary', type: 'Text', note: 'Pre-filled: Title, Author, Genre, Year Published, Date Read, Rating, Summary' },
-      { label: 'Favorite Quotes', type: 'Text', note: 'Passages or quotes worth keeping' },
-      { label: 'Reading Reflection', type: 'Voice Note', note: 'Record your thoughts while reading or after finishing' },
-      { label: 'Author / Purchase Link', type: 'Link', note: 'Link to the author\'s site, Goodreads, or a purchase page' },
-      { label: 'Reading Progress', type: 'Timeline', note: 'Log when you started, paused, resumed, and finished' },
-      { label: 'Thoughts & Insights', type: 'Text', note: 'Deeper reflections, connections to other books, things to act on' },
+      { label: 'Book cover photo', type: 'Image', note: '' },
+      { label: 'Book Summary', type: 'Text', note: 'Title, author, genre, year, date read, rating, summary' },
+      { label: 'Favorite Quotes', type: 'Text', note: 'Passages worth keeping' },
+      { label: 'Reading Reflection', type: 'Audio', note: 'Voice thoughts while reading or after finishing' },
+      { label: 'Author / Purchase Link', type: 'Link', note: "Author's site, Goodreads, or purchase page" },
+      { label: 'Reading Progress', type: 'Timeline', note: 'Log when you started, paused, resumed, finished' },
+      { label: 'Thoughts & Insights', type: 'Text', note: 'Deeper reflections, connections, things to act on' },
     ],
   },
   {
     name: 'Daily Reflection / Journal',
     emoji: '📓',
-    description: 'A daily space for reflection, voice notes, and intentions. Teal theme.',
-    themeColor: '#14B8A6',
+    tagline: 'A daily space for reflection, voice notes, and intentions.',
+    description: 'Freeform daily journaling with voice notes, timeline, and intentions.',
+    borderClass: 'border-l-teal-500',
     blocks: [
-      { label: 'Daily Reflection', type: 'Text', note: 'Freeform space for the day\'s thoughts, feelings, or observations' },
-      { label: '(Photo)', type: 'Image', note: 'Photo of the day — optional' },
-      { label: 'Voice Journal', type: 'Voice Note', note: 'Record a spoken entry — what happened, how you felt, what you noticed' },
-      { label: 'Important Moments', type: 'Timeline', note: 'Log significant moments or events as they happen' },
-      { label: 'Daily Intentions', type: 'Checklist', note: '3 starter intentions: Set intention, Prioritize top 3 tasks, End-of-day reflection' },
-      { label: 'Additional Thoughts', type: 'Text', note: 'Anything else worth capturing before the day ends' },
+      { label: 'Daily Reflection', type: 'Text', note: "Thoughts, feelings, or observations from the day" },
+      { label: 'Photo of the day', type: 'Image', note: 'Optional' },
+      { label: 'Voice Journal', type: 'Audio', note: 'A spoken entry — what happened, how you felt' },
+      { label: 'Important Moments', type: 'Timeline', note: 'Log significant moments as they happen' },
+      { label: 'Daily Intentions', type: 'Checklist', note: 'Set intention, prioritize top 3, evening reflection' },
+      { label: 'Additional Thoughts', type: 'Text', note: 'Anything else before the day ends' },
     ],
   },
   {
     name: 'Goal / Habit Tracker',
     emoji: '🎯',
-    description: 'Define a goal, track daily habits, and log progress. Rose theme.',
-    themeColor: '#F43F5E',
+    tagline: 'Define a goal, track habits, and log milestones.',
+    description: 'Goal overview, daily habit checklist, progress log, and voice check-ins.',
+    borderClass: 'border-l-rose-500',
     blocks: [
-      { label: 'Goal Overview', type: 'Text', note: 'Pre-filled: Goal, Why This Matters, Target Date, Success Looks Like' },
-      { label: 'Habit Checklist', type: 'Checklist', note: '4 starter habits: Morning routine, Exercise, Read/learn, Evening reflection' },
-      { label: 'Progress Log', type: 'Timeline', note: 'Log milestones, breakthroughs, and setbacks over time' },
-      { label: 'Progress Update', type: 'Voice Note', note: 'Record a quick check-in on how the goal is going' },
-      { label: 'Related Resource', type: 'Link', note: 'Optional — a book, course, article, or tool related to this goal' },
-      { label: 'Wins & Challenges', type: 'Text', note: 'Freeform space for what\'s working and what isn\'t' },
+      { label: 'Goal Overview', type: 'Text', note: 'Goal, why it matters, target date, success definition' },
+      { label: 'Habit Checklist', type: 'Checklist', note: 'Morning routine, exercise, read/learn, evening reflection' },
+      { label: 'Progress Log', type: 'Timeline', note: 'Milestones, breakthroughs, and setbacks' },
+      { label: 'Progress Update', type: 'Audio', note: 'Quick voice check-in on how the goal is going' },
+      { label: 'Related Resource', type: 'Link', note: 'A book, course, article, or tool' },
+      { label: 'Wins & Challenges', type: 'Text', note: "What's working and what isn't" },
     ],
   },
   {
     name: 'Home Maintenance Log',
     emoji: '🔧',
-    description: 'Log appliances, repairs, warranties, and service contacts. Teal theme. Attach to an appliance, breaker box, HVAC unit, or any area of the home.',
-    themeColor: '#14B8A6',
+    tagline: 'Log repairs, warranties, and service contacts.',
+    description: 'Attach to an appliance, breaker box, HVAC unit, or any area of the home.',
+    borderClass: 'border-l-teal-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Photo of the appliance or area' },
-      { label: 'Maintenance Information', type: 'Text', note: 'Pre-filled: Item/Area, Brand/Model, Serial Number, Installed, Warranty Expiration' },
-      { label: 'Maintenance Tasks', type: 'Checklist', note: '5 starter tasks: Inspect, Clean filters, Test system, Check for leaks, Schedule service' },
-      { label: 'Repair History', type: 'Timeline', note: 'Log all repairs and service visits over time' },
-      { label: 'Manuals & Warranty', type: 'File/PDF', note: 'Upload or link the user manual and warranty document' },
-      { label: 'Service Contact', type: 'Phone Number', note: 'Tap-to-call number for the repair company or service line' },
-      { label: 'Product Page', type: 'Link', note: 'Optional — link to the product page or parts store' },
-      { label: 'Additional Notes', type: 'Text', note: 'Any other notes about the item or area' },
+      { label: 'Photo', type: 'Image', note: 'Photo of the appliance or area' },
+      { label: 'Maintenance Information', type: 'Text', note: 'Brand/model, serial number, installed, warranty' },
+      { label: 'Maintenance Tasks', type: 'Checklist', note: 'Inspect, clean filters, test, check leaks, schedule service' },
+      { label: 'Repair History', type: 'Timeline', note: 'All repairs and service visits' },
+      { label: 'Manuals & Warranty', type: 'File', note: 'Upload or link manual and warranty documents' },
+      { label: 'Service Contact', type: 'Phone', note: 'Tap-to-call repair line' },
+      { label: 'Product Page', type: 'Link', note: 'Optional product or parts page' },
+      { label: 'Additional Notes', type: 'Text', note: 'Other notes about the item or area' },
     ],
   },
   {
     name: 'Pet Profile',
     emoji: '🐾',
-    description: 'Track your pet with care tasks, health history, and vet info. Amber theme. Attach to a pet carrier, food station, or pet folder.',
-    themeColor: '#F59E0B',
+    tagline: 'Care tasks, health history, vet info, and photos.',
+    description: 'Attach to a pet carrier, food station, or pet folder.',
+    borderClass: 'border-l-amber-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Photos of your pet' },
-      { label: 'Pet Information', type: 'Text', note: 'Pre-filled: Name, Species/Breed, Date of Birth, Color/Markings, Microchip/ID #' },
-      { label: 'Care Tasks', type: 'Checklist', note: '5 starter tasks: Morning feeding, Evening feeding, Fresh water, Exercise/walk, Grooming' },
-      { label: 'Vet & Health History', type: 'Timeline', note: 'Log vet visits, medications, illnesses, and health events' },
-      { label: 'Veterinarian', type: 'Phone Number', note: 'Tap-to-call number for your vet' },
-      { label: 'Vaccination Records', type: 'File/PDF', note: 'Upload vaccination and health certificates' },
-      { label: 'Pet Update', type: 'Voice Note', note: 'Record a quick audio update about how your pet is doing' },
-      { label: 'Behavior / Preferences', type: 'Text', note: 'Favorite things, quirks, training notes, dietary restrictions' },
+      { label: 'Photos', type: 'Image', note: '' },
+      { label: 'Pet Information', type: 'Text', note: 'Name, breed, DOB, markings, microchip/ID' },
+      { label: 'Care Tasks', type: 'Checklist', note: 'Morning/evening feeding, water, exercise, grooming' },
+      { label: 'Vet & Health History', type: 'Timeline', note: 'Vet visits, medications, illnesses, health events' },
+      { label: 'Veterinarian', type: 'Phone', note: 'Tap-to-call vet number' },
+      { label: 'Vaccination Records', type: 'File', note: 'Upload vaccination and health certificates' },
+      { label: 'Pet Update', type: 'Audio', note: 'Quick voice update on how your pet is doing' },
+      { label: 'Behavior / Preferences', type: 'Text', note: 'Favorites, quirks, training notes, dietary restrictions' },
     ],
   },
   {
     name: 'Plant Profile',
     emoji: '🪴',
-    description: 'Track a plant with care instructions, growth log, and photos. Green theme. Attach to a pot or shelf tag.',
-    themeColor: '#22C55E',
+    tagline: 'Care instructions, growth log, and watering reminders.',
+    description: 'Attach to a pot or shelf tag.',
+    borderClass: 'border-l-green-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Photo of the plant' },
-      { label: 'Plant Information', type: 'Text', note: 'Pre-filled: Plant Name, Type/Species, Date Acquired, Where From, Pot Size' },
-      { label: 'Care Instructions', type: 'Text', note: 'Pre-filled: Watering, Light, Soil, Temperature, Humidity, Fertilizing, Repotting' },
-      { label: 'Care Checklist', type: 'Checklist', note: '5 starter tasks: Water, Check soil, Check for pests, Wipe leaves, Rotate' },
-      { label: 'Growth & Care Log', type: 'Timeline', note: 'Log growth milestones, repotting, and care events over time' },
-      { label: 'Plant Update', type: 'Voice Note', note: 'Record a quick audio update about how the plant is doing' },
-      { label: 'Care Guide', type: 'Link', note: 'Optional — link to a care guide or species reference' },
-      { label: 'Seasonal Notes', type: 'Text', note: 'Notes for spring/summer/fall/winter care adjustments' },
+      { label: 'Photo', type: 'Image', note: '' },
+      { label: 'Plant Information', type: 'Text', note: 'Name, species, date acquired, pot size' },
+      { label: 'Care Instructions', type: 'Text', note: 'Watering, light, soil, temperature, humidity, fertilizing' },
+      { label: 'Care Checklist', type: 'Checklist', note: 'Water, check soil, check pests, wipe leaves, rotate' },
+      { label: 'Growth & Care Log', type: 'Timeline', note: 'Repotting, milestones, and care events' },
+      { label: 'Plant Update', type: 'Audio', note: 'Quick voice update on how the plant is doing' },
+      { label: 'Care Guide', type: 'Link', note: 'Optional species reference' },
+      { label: 'Seasonal Notes', type: 'Text', note: 'Spring/summer/fall/winter adjustments' },
     ],
   },
   {
     name: 'Recipe',
     emoji: '🍳',
-    description: 'A recipe hub with 8 pre-built blocks covering photo, description, timing, ingredients, instructions, notes, video, and source. Orange theme. Attach to a cookbook, a kitchen item, or share a family recipe via QR code.',
-    themeColor: '#F97316',
+    tagline: 'Photos, ingredients, instructions, and cooking notes.',
+    description: 'Attach to a cookbook, a kitchen item, or share a family recipe via QR.',
+    borderClass: 'border-l-orange-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Recipe photo — upload directly or paste a public URL' },
+      { label: 'Recipe photo', type: 'Image', note: '' },
       { label: 'Description', type: 'Text', note: 'A short intro or context for the recipe' },
-      { label: 'At a Glance', type: 'Text', note: 'Pre-filled with Prep Time, Cook Time, and Servings fields' },
-      { label: 'Ingredients', type: 'Text', note: 'Full ingredients list — one per line or freeform' },
-      { label: 'Instructions', type: 'Text', note: 'Step-by-step method — freeform multiline text' },
-      { label: 'Notes', type: 'Text', note: 'Tips, substitutions, variations, or storage notes' },
-      { label: 'Video', type: 'Link', note: 'Optional — YouTube, TikTok, or any video URL' },
-      { label: 'Source', type: 'Link', note: 'Optional — original recipe URL or credit' },
+      { label: 'At a Glance', type: 'Text', note: 'Prep time, cook time, servings' },
+      { label: 'Ingredients', type: 'Text', note: 'Full list — one per line or freeform' },
+      { label: 'Instructions', type: 'Text', note: 'Step-by-step method' },
+      { label: 'Notes', type: 'Text', note: 'Tips, substitutions, variations, storage' },
+      { label: 'Video', type: 'Link', note: 'Optional — YouTube, TikTok, etc.' },
+      { label: 'Source', type: 'Link', note: 'Optional — original recipe or credit' },
     ],
   },
   {
-    name: 'Ritual Template',
+    name: 'Ritual',
     emoji: '🕯️',
-    description: 'A complete ritual documentation hub with 14 pre-built blocks in ceremonial order. Violet theme. Drop into any ritual practice — adapt labels and content as needed.',
-    themeColor: '#8B5CF6',
+    tagline: 'A complete space for ritual practice and reflection.',
+    description: '14 blocks in ceremonial order. Adapt labels and content to any practice.',
+    borderClass: 'border-l-violet-500',
     blocks: [
-      { label: 'Ritual Overview', type: 'Text', note: 'Name, date/season/moon phase, intention, location, participants' },
-      { label: 'Ritual Setup', type: 'Checklist', note: '8 setup steps — cleanse space, prepare altar, gather tools, ground and center' },
-      { label: 'Correspondences', type: 'Text', note: 'Colors, herbs, crystals, elements, deities, symbols, offerings, tarot cards' },
-      { label: 'Ritual Steps', type: 'Checklist', note: '11 steps from opening through closing and final grounding' },
-      { label: 'Invocation / Words to Speak', type: 'Text', note: 'Renders in italic with accent border — ceremonial text styling' },
-      { label: 'Quote / Passage', type: 'Text', note: 'Renders in italic with accent border — for sacred text, poetry, or seasonal passages' },
-      { label: 'Reference: Moon & Seasons', type: 'Link', note: 'Blank — fill in your preferred moon calendar or seasonal guide' },
-      { label: 'Reference: Herb & Correspondences', type: 'Link', note: 'Blank — fill in your preferred herb, crystal, or element reference' },
-      { label: 'Reference: Sacred Text / Source', type: 'Link', note: 'Blank — fill in a source text, tradition resource, or citation' },
+      { label: 'Ritual Overview', type: 'Text', note: 'Date, intention, location, participants, moon phase' },
+      { label: 'Ritual Setup', type: 'Checklist', note: '8 setup steps — cleanse, altar, candles, ground and center' },
+      { label: 'Correspondences', type: 'Text', note: 'Colors, herbs, crystals, elements, symbols' },
+      { label: 'Ritual Steps', type: 'Checklist', note: '11 steps from opening through closing and grounding' },
+      { label: 'Invocation / Words to Speak', type: 'Text', note: 'Italic with accent border — ceremonial styling' },
+      { label: 'Quote / Passage', type: 'Text', note: 'Italic with accent border — sacred text, poetry, seasonal' },
+      { label: 'Reference: Moon & Seasons', type: 'Link', note: 'Your preferred moon calendar or seasonal guide' },
+      { label: 'Reference: Herb & Correspondences', type: 'Link', note: 'Preferred herb, crystal, or element reference' },
+      { label: 'Reference: Sacred Text / Source', type: 'Link', note: 'Source text, tradition resource, or citation' },
       { label: 'Ritual Playlist', type: 'Link', note: 'Spotify or any music URL' },
       { label: 'Voice Reflections', type: 'Audio', note: 'Voice note recorded during or after ritual' },
-      { label: 'Ritual Notes', type: 'Text', note: 'Guided reflection prompts — energy, shifts, signs, emotions, lessons' },
-      { label: 'Photos', type: 'Image', note: 'Photos from this ritual' },
-      { label: 'Follow-Up', type: 'Checklist', note: '7 follow-up actions — journaling, cleanup, recording divination, watching for signs' },
+      { label: 'Ritual Notes', type: 'Text', note: 'Energy, shifts, signs, emotions, lessons' },
+      { label: 'Photos', type: 'Image', note: 'Altar or ritual photos' },
+      { label: 'Follow-Up', type: 'Checklist', note: 'Journaling, cleanup, divination record, watching for signs' },
     ],
   },
   {
     name: 'Travel Journal',
     emoji: '✈️',
-    description: 'Capture a trip with photos, timeline, packing list, and reflections. Blue theme.',
-    themeColor: '#3B82F6',
+    tagline: 'Trip overview, timeline, packing list, and reflections.',
+    description: 'Capture a trip with photos, timeline, packing list, and reflections.',
+    borderClass: 'border-l-blue-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Photos from the trip' },
-      { label: 'Trip Overview', type: 'Text', note: 'Pre-filled: Destination, Dates, Traveling With, Accommodation, Purpose of Trip' },
-      { label: 'Travel Timeline', type: 'Timeline', note: 'Log destinations, events, and moments day by day' },
-      { label: 'Maps / Reservations', type: 'Link', note: 'Link to maps, booking confirmations, or itineraries' },
-      { label: 'Packing List', type: 'Checklist', note: '6 starter items: Passport/ID, Phone+charger, Medications, Travel insurance, Cash/cards, Shoes' },
-      { label: 'Travel Reflection', type: 'Voice Note', note: 'Record a reflection from the road or after returning' },
-      { label: 'Recommendations', type: 'Text', note: 'Restaurants, places, tips you want to remember or share' },
+      { label: 'Photos', type: 'Image', note: '' },
+      { label: 'Trip Overview', type: 'Text', note: 'Destination, dates, traveling with, accommodation, purpose' },
+      { label: 'Travel Timeline', type: 'Timeline', note: 'Day-by-day destinations, events, and moments' },
+      { label: 'Maps / Reservations', type: 'Link', note: 'Maps, bookings, or itineraries' },
+      { label: 'Packing List', type: 'Checklist', note: 'Passport/ID, phone+charger, medications, insurance, cash' },
+      { label: 'Travel Reflection', type: 'Audio', note: 'Record a reflection from the road or after returning' },
+      { label: 'Recommendations', type: 'Text', note: 'Restaurants, places, tips you want to remember' },
     ],
   },
   {
     name: "What's in the Box?",
     emoji: '📦',
-    description: "Label a storage box with a photo, contents checklist, location, and notes. Slate theme. Print and attach a QR code to any box so you always know what's inside.",
-    themeColor: '#64748B',
+    tagline: 'Label any storage box with a contents list and photo.',
+    description: 'Attach a QR code to any box so you always know what\'s inside.',
+    borderClass: 'border-l-slate-500',
     blocks: [
-      { label: '(Photo)', type: 'Image', note: 'Photo of the box or its contents' },
+      { label: 'Photo', type: 'Image', note: 'Photo of the box or its contents' },
       { label: 'Quick Description', type: 'Text', note: 'One-line summary of what this box holds' },
       { label: 'Contents', type: 'Checklist', note: 'Add each item as a checklist entry' },
       { label: 'Storage Location', type: 'Text', note: 'Where the box lives — e.g. attic shelf 3, garage left wall' },
-      { label: 'Box Overview', type: 'Voice Note', note: 'Optional audio walkthrough of the contents' },
-      { label: 'Added / Removed Items', type: 'Timeline', note: 'Log changes to the box over time' },
-      { label: 'Manuals or Documents', type: 'File/PDF', note: 'Any related documents stored with the box' },
-      { label: 'Additional Notes', type: 'Text', note: 'Condition notes, fragile warnings, last opened date, etc.' },
+      { label: 'Box Overview', type: 'Audio', note: 'Optional audio walkthrough of the contents' },
+      { label: 'Added / Removed Items', type: 'Timeline', note: 'Log changes over time' },
+      { label: 'Manuals or Documents', type: 'File', note: 'Related documents stored with the box' },
+      { label: 'Additional Notes', type: 'Text', note: 'Condition, fragile warnings, last opened date' },
     ],
   },
 ]
 
-const COLLAPSE_BEHAVIOR = [
-  { rule: 'Open by default', examples: 'overview, step, note, invocation, words' },
-  { rule: 'Closed by default', examples: 'setup, correspond, photo, memor, follow, playlist, voice' },
-  { rule: 'Open by default (fallback)', examples: 'everything else' },
-]
-
-const CEREMONIAL_LABELS = [
-  'invocation', 'words to speak', 'quote', 'passage', 'poem', 'prayer', 'sacred',
-]
+const CEREMONIAL_LABELS = ['invocation', 'words to speak', 'quote', 'passage', 'poem', 'prayer', 'sacred']
 
 export default function HelpPage() {
   return (
@@ -253,141 +272,243 @@ export default function HelpPage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-5 py-10 space-y-16">
+      <main className="max-w-2xl mx-auto px-5 py-10 space-y-14">
 
-        {/* How it works */}
+        {/* What is QRMagNotes? */}
         <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-4">How QRMagNotes works</h2>
-          <div className="prose-sm text-stone-600 leading-[1.7] space-y-3 max-w-prose">
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">What is QRMagNotes?</h2>
+          <div className="text-stone-600 leading-[1.75] space-y-3 max-w-prose text-sm">
             <p>
-              Each hub has a permanent URL at <code className="text-stone-700 bg-stone-100 px-1 py-0.5 rounded text-xs">/h/your-username/your-slug</code>.
-              You print a QR code pointing to that URL and attach it to something physical — a product, an artwork, a piece of equipment, a property, a vehicle, or any physical space.
-              The content behind the QR can be updated at any time without reprinting the code.
+              QRMagNotes lets you create living digital pages connected to QR codes.
+              Organize recipes, rituals, pet profiles, artwork, journals, manuals, memories, and more
+              into collections you can update anytime — without reprinting the code.
             </p>
             <p>
-              Hubs can operate in two modes: <strong>landing</strong> (shows a content page with blocks) or <strong>redirect</strong> (instantly sends visitors to another URL).
-              Privacy can be set to public, unlisted (link-only), or private (owner-only).
+              Attach a QR code to anything physical: a storage box, a plant pot, a piece of art,
+              a recipe card, an appliance, a pet carrier. Scan it and see the full story behind the object.
+            </p>
+          </div>
+          <div className="mt-5 rounded-xl bg-stone-50 border border-stone-200 px-5 py-4">
+            <p className="text-sm text-stone-700 leading-[1.7]">
+              <span className="text-stone-400 mr-2 select-none">✦</span>
+              The content behind the QR can be updated at any time — without reprinting the code.
             </p>
           </div>
         </section>
 
-        {/* Dashboard & Folders */}
+        {/* Popular uses */}
         <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-4">Dashboard &amp; folders</h2>
-          <div className="prose-sm text-stone-600 leading-[1.7] space-y-3 max-w-prose">
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">What people use it for</h2>
+          <div className="flex flex-wrap gap-2">
+            {POPULAR_USES.map(u => (
+              <span
+                key={u.label}
+                className="flex items-center gap-1.5 text-sm text-stone-600 bg-white border border-stone-100 rounded-full px-3 py-1.5 leading-none"
+              >
+                <span>{u.emoji}</span>
+                <span>{u.label}</span>
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Templates */}
+        <section>
+          <h2 className="text-lg font-semibold text-stone-800 mb-2">Templates</h2>
+          <p className="text-sm text-stone-500 leading-[1.65] mb-5">
+            Start with a template and everything is already laid out — just fill in what matters to you.
+          </p>
+
+          {/* Template cards */}
+          <div className="grid grid-cols-2 gap-2.5 mb-10">
+            {TEMPLATES.map(t => (
+              <div
+                key={t.name}
+                className={`bg-white rounded-xl border border-stone-100 border-l-[3px] ${t.borderClass} p-4`}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-xl leading-none">{t.emoji}</span>
+                  <span className="text-sm font-semibold text-stone-800 leading-snug">{t.name}</span>
+                </div>
+                <p className="text-xs text-stone-500 leading-[1.55]">{t.tagline}</p>
+                {t.blocks.length > 0 && (
+                  <p className="text-[10px] text-stone-400 mt-2">{t.blocks.length} blocks included</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Template details */}
+          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-4">Template details</h3>
+          <div className="space-y-8">
+            {TEMPLATES.filter(t => t.blocks.length > 0).map(t => (
+              <div key={t.name}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base leading-none">{t.emoji}</span>
+                  <span className="text-sm font-semibold text-stone-700">{t.name}</span>
+                  <span className="text-xs text-stone-400">— {t.description}</span>
+                </div>
+                <div className="divide-y divide-stone-100">
+                  {t.blocks.map(b => (
+                    <div key={b.label} className="py-2 flex gap-3 items-baseline">
+                      <span className="text-xs font-medium text-stone-600 w-44 flex-shrink-0">{b.label}</span>
+                      <span className="text-[10px] text-stone-400 w-16 flex-shrink-0">{b.type}</span>
+                      {b.note && <span className="text-[10px] text-stone-400 leading-[1.5]">{b.note}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* How hubs work */}
+        <section>
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">How hubs work</h2>
+          <div className="text-stone-600 leading-[1.75] space-y-3 max-w-prose text-sm">
             <p>
-              Your dashboard shows all hubs in a single flat list, sorted by most recently updated. A collapsible <strong>Folders</strong> section sits above the list — click a folder name to filter the list to just that folder's hubs, then <strong>Show all ×</strong> to clear the filter.
+              Each hub is a page with a permanent, printable URL. You create the hub, print the QR code,
+              and attach it to something — a box, a wall, a jar, a frame.
+              The QR always points to the same address, so you can keep editing the content forever.
+            </p>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="bg-white rounded-xl border border-stone-100 p-4">
+              <div className="text-sm font-semibold text-stone-800 mb-1">Interactive Page</div>
+              <p className="text-xs text-stone-500 leading-[1.6]">
+                Shows a full content page with text, images, audio, links, checklists, timelines, and more.
+                Visitors can interact directly — checking off items, playing audio, following links.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-stone-100 p-4">
+              <div className="text-sm font-semibold text-stone-800 mb-1">Redirect Link</div>
+              <p className="text-xs text-stone-500 leading-[1.6]">
+                Instantly sends visitors to another URL — no page shown.
+                Useful when the QR code should act as a permanent shortcut to an external site.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {[
+              { label: 'Public', desc: 'Anyone can find and view' },
+              { label: 'Unlisted', desc: 'Only people with the link can view' },
+              { label: 'Private', desc: 'Only you, when signed in' },
+            ].map(p => (
+              <div key={p.label} className="bg-white rounded-xl border border-stone-100 px-4 py-3">
+                <div className="text-xs font-semibold text-stone-700 mb-0.5">{p.label}</div>
+                <p className="text-[11px] text-stone-400 leading-[1.55]">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-stone-400 mt-2">New hubs default to Private.</p>
+        </section>
+
+        {/* Collections & Organization */}
+        <section>
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">Collections &amp; Organization</h2>
+          <div className="text-stone-600 leading-[1.75] space-y-3 max-w-prose text-sm">
+            <p>
+              Collections are curated groups of hubs — a way to organise your archive into meaningful spaces.
+              Think of them less like folders and more like shelves: a shelf for home, a shelf for creative work, a shelf for rituals.
             </p>
             <p>
-              <strong>Assigning a hub to a folder:</strong> At creation time the Folder selector appears just below the slug field. After creation, each hub card has a small <code className="text-stone-700 bg-stone-100 px-1 py-0.5 rounded text-xs">📁 folder name</code> dropdown — tap it to move the hub without going into Settings.
+              <strong>Browsing by collection:</strong> Click a collection card on the dashboard to filter the hub list to just that collection. Click again to return to all hubs. The collection&apos;s description appears when it&apos;s selected — add one via the collection&apos;s ⋮ menu.
             </p>
             <p>
-              <strong>Hub type badge:</strong> When you create a hub from a template, a badge like <code className="text-stone-700 bg-stone-100 px-1 py-0.5 rounded text-xs">🐾 Pet Profile</code> appears on the dashboard card. For hubs started from Blank, you can add this label later via the hub's <strong>Settings tab → Hub type</strong>. Changing the type only updates the badge — it does not add or remove content blocks.
+              <strong>Assigning a hub:</strong> Open the hub card&apos;s ⋮ menu and choose <em>Move to collection</em>.
+              You can also set the collection during hub creation, or from the hub&apos;s Settings tab.
+            </p>
+            <p>
+              <strong>Uncollected hubs</strong> appear in their own filter at the bottom of the collections list — so nothing gets lost.
             </p>
           </div>
         </section>
 
         {/* Block types */}
         <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-6">Block types</h2>
-          <div className="space-y-5">
+          <h2 className="text-lg font-semibold text-stone-800 mb-2">Block types</h2>
+          <p className="text-sm text-stone-500 leading-[1.65] mb-5 max-w-prose">
+            Every hub is built from blocks. Mix and match as many as you need — add, reorder, and remove at any time.
+          </p>
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {BLOCK_TYPES.map(b => (
-              <div key={b.name} className="border-l-2 border-stone-100 pl-4">
-                <div className="flex items-baseline gap-2 mb-1">
+              <div key={b.name} className="bg-white rounded-xl border border-stone-100 p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-lg leading-none">{b.emoji}</span>
                   <span className="text-sm font-semibold text-stone-800">{b.name}</span>
                 </div>
-                <p className="text-sm text-stone-600 leading-[1.65] mb-1">{b.description}</p>
-                <p className="text-xs text-stone-400">
-                  <span className="font-medium">Examples:</span> {b.examples}
-                </p>
+                <p className="text-xs text-stone-500 leading-[1.6]">{b.description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Accent text */}
+        {/* Advanced styling */}
         <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-3">Styled quote / passage text</h2>
-          <p className="text-sm text-stone-600 leading-[1.65] mb-4 max-w-prose">
-            Any <strong>Text</strong> block whose label contains one of the following words automatically renders in italic with a thin accent-color left border — useful for quotes, poetry, featured passages, spoken text, or any content that should feel set apart from body copy:
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">Advanced styling</h2>
+
+          <h3 className="text-sm font-semibold text-stone-700 mb-2">Styled quote &amp; passage text</h3>
+          <p className="text-sm text-stone-500 leading-[1.65] mb-3 max-w-prose">
+            Any <strong>Text</strong> block whose label contains one of these words automatically renders in italic
+            with a thin accent-color left border — useful for quotes, poetry, spoken text, or ceremonial content:
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mb-6">
             {CEREMONIAL_LABELS.map(w => (
               <span key={w} className="text-xs text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full">{w}</span>
             ))}
           </div>
-          <p className="text-xs text-stone-400 mt-3">
-            This is automatic — no configuration needed. Rename any block label to include one of these words to activate the styling.
-          </p>
-        </section>
 
-        {/* Collapse behavior */}
-        <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-3">Default collapse state</h2>
-          <p className="text-sm text-stone-600 leading-[1.65] mb-4 max-w-prose">
-            On the public hub view, every block is collapsible — visitors tap the section header to expand or collapse it.
-            The initial open or closed state when the page first loads is controlled automatically by keywords in the block's label.
-            You can change how any block opens by default simply by including or avoiding these words in its label.
+          <h3 className="text-sm font-semibold text-stone-700 mb-2">Default collapse state</h3>
+          <p className="text-sm text-stone-500 leading-[1.65] mb-3 max-w-prose">
+            On the public hub view, blocks are collapsible. The initial open or closed state is controlled automatically
+            by keywords in the block&apos;s label — you can change it simply by renaming the label.
           </p>
-          <div className="border-t border-stone-100 divide-y divide-stone-100">
-            {COLLAPSE_BEHAVIOR.map(row => (
-              <div key={row.rule} className="py-3 flex gap-4">
-                <span className="text-xs font-semibold text-stone-700 w-36 flex-shrink-0 pt-0.5">{row.rule}</span>
-                <span className="text-xs text-stone-500">Label contains: <em>{row.examples}</em></span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-stone-400 mt-3">
-            Matching is case-insensitive and partial — "Correspondences" matches "correspond," "Setup Steps" matches "setup," and so on.
-            If a label doesn't match any keyword, the block starts open.
-            To make a block start collapsed, rename its label to include one of the closed keywords (e.g. rename "Extra Notes" to "Setup Notes" — the word "setup" triggers closed).
-          </p>
-        </section>
-
-        {/* Templates */}
-        <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-6">Templates</h2>
-          <div className="space-y-10">
-            {TEMPLATES.map(t => (
-              <div key={t.name}>
-                <div className="flex items-baseline gap-2.5 mb-2">
-                  <span className="text-xl leading-none">{t.emoji}</span>
-                  <h3 className="text-base font-semibold text-stone-800">{t.name}</h3>
-                  <span className="text-xs text-stone-400">{t.themeColor}</span>
-                </div>
-                <p className="text-sm text-stone-600 leading-[1.65] mb-4 max-w-prose">{t.description}</p>
-                {t.blocks.length > 0 && (
-                  <div className="border-t border-stone-100 divide-y divide-stone-100">
-                    {t.blocks.map((b, i) => (
-                      <div key={b.label} className="py-2.5 flex gap-4">
-                        <span className="text-[0.6875rem] text-stone-300 w-5 flex-shrink-0 pt-0.5 text-right">{i + 1}</span>
-                        <div className="flex-1">
-                          <span className="text-xs font-semibold text-stone-700">{b.label}</span>
-                          <span className="text-xs text-stone-400 ml-2">({b.type})</span>
-                          {b.note && <p className="text-xs text-stone-400 mt-0.5">{b.note}</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="border-t border-stone-100 divide-y divide-stone-100 text-xs">
+            <div className="py-2.5 flex gap-4">
+              <span className="font-semibold text-stone-600 w-32 flex-shrink-0">Open by default</span>
+              <span className="text-stone-400">Label contains: <em>overview, step, note, invocation, words</em></span>
+            </div>
+            <div className="py-2.5 flex gap-4">
+              <span className="font-semibold text-stone-600 w-32 flex-shrink-0">Closed by default</span>
+              <span className="text-stone-400">Label contains: <em>setup, correspond, photo, memor, follow, playlist, voice</em></span>
+            </div>
+            <div className="py-2.5 flex gap-4">
+              <span className="font-semibold text-stone-600 w-32 flex-shrink-0">Open (fallback)</span>
+              <span className="text-stone-400">Everything else</span>
+            </div>
           </div>
         </section>
 
-        {/* Tips */}
+        {/* Good to know */}
         <section>
-          <h2 className="text-lg font-semibold text-stone-800 mb-4">Tips</h2>
-          <ul className="space-y-3 text-sm text-stone-600 leading-[1.65] max-w-prose">
-            <li><strong>Slugs are permanent.</strong> The URL slug is the identifier encoded in the QR code. Changing it breaks printed codes. Choose it carefully at creation time.</li>
-            <li><strong>Block order matters.</strong> Blocks appear in sort order. Use ▲▼ arrows in the editor to reorder. High-priority content should come first since visitors read top-to-bottom.</li>
-            <li><strong>Checklists are per-device.</strong> The checked state is stored in each visitor's browser localStorage — not the database. Every new device starts fresh.</li>
-            <li><strong>Label your voice notes.</strong> Audio blocks with a date and label are much more meaningful when revisited weeks or months later.</li>
-            <li><strong>Image blocks support upload or URL.</strong> You can upload a photo directly from the image block editor, or paste a public URL. Uploaded images are stored in Supabase Storage.</li>
-            <li><strong>Redirect mode is instant.</strong> A hub in redirect mode sends visitors directly to the destination URL with no loading screen shown.</li>
-            <li><strong>Hub privacy options:</strong> Public (anyone can find and view), Unlisted (only people with the link can view), Private (only you can view when signed in).</li>
-            <li><strong>Block content indicators.</strong> In the block editor, a small green dot means the block has content; a hollow gray ring means it's empty. Use this to scan quickly for blocks that still need filling in after applying a template.</li>
-            <li><strong>Hub type can be set anytime.</strong> Even hubs created from Blank can get a template badge — open Settings and choose a hub type. This just labels the card and has no effect on the content blocks.</li>
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">Good to know</h2>
+          <ul className="space-y-3 text-sm text-stone-600 leading-[1.7] max-w-prose">
+            <li>
+              <strong>The URL slug is permanent.</strong> It&apos;s encoded in the QR code — changing it breaks printed codes.
+              Choose it carefully at creation time and leave it alone after printing.
+            </li>
+            <li>
+              <strong>Block order matters.</strong> Blocks appear in sort order. Use the ▲▼ arrows in the editor to reorder.
+              High-priority content should come first.
+            </li>
+            <li>
+              <strong>Checklists are per-device.</strong> Checked state is stored in each visitor&apos;s browser — not the database.
+              Every new device starts fresh. Great for shared checklists where each person tracks their own progress.
+            </li>
+            <li>
+              <strong>Images can be uploaded or linked.</strong> Upload a photo directly from the image block editor,
+              or paste any public URL. Uploaded images are stored securely in Supabase Storage.
+            </li>
+            <li>
+              <strong>Hub type can be set anytime.</strong> Even hubs created from Blank can get a template badge —
+              open Settings and choose a hub type. This only updates the label; it doesn&apos;t add or remove blocks.
+            </li>
+            <li>
+              <strong>Content indicator dots.</strong> In the block editor, a green dot means the block has content;
+              a hollow ring means it&apos;s empty. Useful for scanning after applying a template to see what still needs filling in.
+            </li>
           </ul>
         </section>
 
