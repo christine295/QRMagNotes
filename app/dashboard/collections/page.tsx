@@ -127,7 +127,8 @@ export default function DashboardPage() {
     const matchesMode = modeFilter === 'all' || hub.mode === modeFilter
     const matchesPrivacy = privacyFilter === 'all' || hub.privacy_mode === privacyFilter
     const matchesTag = !tagFilter || (hub.tags ?? []).includes(tagFilter)
-    const matchesFolder = folderFilter === null || hub.collection_id === folderFilter
+    const matchesFolder = folderFilter === null ||
+      (folderFilter === '__none__' ? hub.collection_id === null : hub.collection_id === folderFilter)
     return matchesSearch && matchesMode && matchesPrivacy && matchesTag && matchesFolder
   }
 
@@ -186,8 +187,11 @@ export default function DashboardPage() {
 
   const totalHubs = allHubs.length
   const totalFolders = folders.length
+  const uncollectedCount = allHubs.filter(h => h.collection_id === null).length
   const filteredHubs = allHubs.filter(hubMatches)
-  const activeCollection = folderFilter ? folders.find((f: any) => f.id === folderFilter) : null
+  const activeCollection = (folderFilter && folderFilter !== '__none__')
+    ? folders.find((f: any) => f.id === folderFilter)
+    : null
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -278,9 +282,9 @@ export default function DashboardPage() {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Collections
+                Collections <span className="font-normal">({totalFolders})</span>
               </h2>
-              {activeCollection && (
+              {(activeCollection || folderFilter === '__none__') && (
                 <button
                   type="button"
                   onClick={() => setFolderFilter(null)}
@@ -370,6 +374,30 @@ export default function DashboardPage() {
                 )
               })}
 
+              {/* Uncollected hubs */}
+              {uncollectedCount > 0 && (() => {
+                const isActive = folderFilter === '__none__'
+                return (
+                  <div
+                    onClick={() => { setFolderFilter(isActive ? null : '__none__'); setOpenCollectionMenu(null) }}
+                    className={`rounded-xl border px-4 py-3 cursor-pointer transition-all ${
+                      isActive
+                        ? 'border-blue-200 bg-blue-50/60 shadow-sm'
+                        : 'border-dashed border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-medium ${isActive ? 'text-blue-800' : 'text-gray-500'}`}>
+                        Uncollected
+                      </span>
+                      <span className={`text-xs ${isActive ? 'text-blue-400' : 'text-gray-400'}`}>
+                        {uncollectedCount} {uncollectedCount === 1 ? 'hub' : 'hubs'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })()}
+
               {/* New collection */}
               {showCreateFolder ? (
                 <form
@@ -434,13 +462,13 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Hubs section label */}
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2">
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                {activeCollection ? activeCollection.title : 'All hubs'}
+                {activeCollection ? activeCollection.title : folderFilter === '__none__' ? 'Uncollected' : 'All hubs'}
+                {filteredHubs.length > 0 && (
+                  <span className="font-normal ml-1.5">({filteredHubs.length})</span>
+                )}
               </h2>
-              {filteredHubs.length > 0 && (
-                <span className="text-xs text-gray-400">{filteredHubs.length}</span>
-              )}
             </div>
 
             <div className="space-y-2 mb-8">
@@ -465,6 +493,14 @@ export default function DashboardPage() {
         )}
 
       </main>
+
+      <footer className="text-center py-8 text-[0.6875rem] text-gray-400">
+        © 2026 QRMagNotes | Developed by{' '}
+        <a href="https://websketching.com" target="_blank" rel="noopener noreferrer"
+          className="hover:text-gray-600 transition-colors underline underline-offset-2">
+          Websketching
+        </a>
+      </footer>
 
       <EditCollectionModal
         open={editFolderOpen}
