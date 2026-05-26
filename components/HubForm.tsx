@@ -57,6 +57,53 @@ const TEMPLATES: Template[] = [
     hubDescription: 'A space to capture the intention, steps, and reflections of this ritual.',
     themeColor: '#8B5CF6',
   },
+  {
+    id: 'recipe',
+    label: 'Recipe',
+    emoji: '🍳',
+    description: 'Save and share a recipe with photo, ingredients, and instructions',
+    title: 'My Recipe',
+    hubDescription: '',
+    themeColor: '#F97316',
+  },
+]
+
+const RECIPE_BLOCKS = [
+  {
+    type: 'image' as const,
+    data: { url: '', caption: '' },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Description', text: '' },
+  },
+  {
+    type: 'text' as const,
+    data: {
+      label: 'At a Glance',
+      text: 'Prep Time:\n\nCook Time:\n\nServings:',
+    },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Ingredients', text: '' },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Instructions', text: '' },
+  },
+  {
+    type: 'text' as const,
+    data: { label: 'Notes', text: '' },
+  },
+  {
+    type: 'link' as const,
+    data: { label: 'Video', url: '' },
+  },
+  {
+    type: 'link' as const,
+    data: { label: 'Source', url: '' },
+  },
 ]
 
 const RITUAL_BLOCKS = [
@@ -363,9 +410,13 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
           return
         }
 
-        if (selectedTemplateId === 'ritual') {
+        const templateBlocks =
+          selectedTemplateId === 'ritual' ? RITUAL_BLOCKS :
+          selectedTemplateId === 'recipe' ? RECIPE_BLOCKS :
+          null
+        if (templateBlocks) {
           await Promise.all(
-            RITUAL_BLOCKS.map((b, i) =>
+            templateBlocks.map((b, i) =>
               fetch(`/api/hub/${newHub.id}/content_blocks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -732,9 +783,10 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   }
 
   // ── Create mode ─────────────────────────────────────────────────────────
-  const tagPlaceholder = selectedTemplateId === 'ritual'
-    ? 'Type a tag and press Enter — e.g. sabbat, full moon'
-    : 'Type a tag and press Enter — e.g. seasonal, car, kitchen'
+  const tagPlaceholder =
+    selectedTemplateId === 'ritual' ? 'Type a tag and press Enter — e.g. sabbat, full moon' :
+    selectedTemplateId === 'recipe' ? 'Type a tag and press Enter — e.g. dinner, vegetarian, quick' :
+    'Type a tag and press Enter — e.g. seasonal, car, kitchen'
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Collection */}
