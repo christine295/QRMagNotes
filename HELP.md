@@ -2,11 +2,11 @@
 
 ## How it works
 
-Each hub has a permanent URL at `/h/[slug]`. You print a QR code pointing to that URL and attach it to something physical — a product, an artwork, a piece of equipment, a property, a vehicle, or any physical space. The content behind the QR can be updated at any time without reprinting.
+Each hub has a permanent URL at `/h/[username]/[slug]`. You print a QR code pointing to that URL and attach it to something physical — a product, an artwork, a piece of equipment, a property, a vehicle, or any physical space. The content behind the QR can be updated at any time without reprinting.
 
 **Hub modes:**
-- `landing` — Shows a content page with blocks
-- `redirect` — Instantly sends visitors to another URL (no page shown)
+- **Interactive Page** (`landing`) — A full content page with text, images, audio, links, checklists, timelines, and more. Visitors can interact directly — tapping links, playing audio, checking off items.
+- **Redirect Link** (`redirect`) — Instantly sends visitors to another URL. No page is shown; the QR code acts as a permanent shortcut to any external link.
 
 **Privacy levels:**
 - `public` — Anyone can find and view
@@ -60,20 +60,28 @@ All blocks are stored in `content_blocks` as `type` + `data` (JSONB) + `sort_ord
 
 ---
 
-## Dashboard & folders
+## Dashboard & collections
 
-The dashboard (`/dashboard`) shows all your hubs as a flat list sorted by most recently updated. Above the list is a collapsible **Folders** section.
+The dashboard (`/dashboard`) shows your collections at the top and your hubs below, sorted by most recently updated.
 
-**Folders:**
-- Click **▼ Show** to expand the Folders section; each folder row shows a name and hub count.
-- Click a folder name to filter the flat list to only that folder's hubs. A blue banner appears showing the active folder; click **Show all ×** to clear.
-- Use **+ Hub** on any folder row to create a new hub pre-assigned to that folder.
-- A default "My Hubs" folder is created automatically on first login if you have none.
+**Collections:**
+- Collections appear as expandable cards above the hub list — always visible, no accordion toggle.
+- Click a collection card to select it; the hub list below filters to show only that collection's hubs. Click again to deselect (or use **Show all hubs ×** in the Collections header).
+- When a collection is selected, its description appears on the card. Add or edit a description via the collection's ⋮ menu → Edit.
+- The ⋮ button on each collection card: **+ Add hub** (creates a hub pre-assigned to that collection), **Edit** (rename + set description), **Delete**.
+- A default "My Hubs" collection is created automatically on first login if you have none.
+- Create a new collection with the **+ New collection** dashed button at the bottom of the collection list.
 
-**Assigning a hub to a folder:**
-- At creation time: a Folder selector appears right after the slug field.
-- After creation: each hub card has a small `📁 folder name` dropdown — tap it to move the hub without going into Settings.
-- In hub Settings tab: full Folder dropdown with a **+ New** button to create a folder inline.
+**Hub cards:**
+- Click anywhere on a hub card to open the edit page.
+- The ⋮ button opens a menu: **Edit**, **View** (opens public page), **Copy link**, **Download QR**, **Print card**, **Move to collection**.
+- Tags appear at the bottom-left of the card and are clickable to filter the hub list by that tag.
+- The updated date appears bottom-right on each card.
+
+**Assigning a hub to a collection:**
+- At creation time: a Collection selector appears in the hub creation form.
+- After creation: open the hub card's ⋮ menu → **Move to collection**.
+- In hub Settings tab: full Collection dropdown.
 
 **Hub type badge:**
 - When creating a hub from a template, the template name (e.g. "🐾 Pet Profile") appears as a badge on the dashboard card.
@@ -327,6 +335,6 @@ This makes it easy to scan the editor and see what still needs to be filled in a
 ## Known issues / deferred
 
 - **Sort order gaps**: If a block insert fails (e.g., during bulk template creation), sort_order numbering can have gaps. When two blocks share the same sort_order, `moveBlock()` swaps equal values and does nothing. Fix: normalize sort_orders after every move (reassign 0,1,2,… from array position). Deferred — only manifests after a failed partial template insert.
-- **Multi-user slugs**: Current URL is `/h/[slug]`. Future plan: `/h/[username]/[slug]` for multi-tenant. Deferred until before real users print QR codes.
-- **Free tier limits**: Hub and folder limits not yet enforced.
+- **Free tier limits**: Hub and collection limits not yet enforced.
 - **Image uploads**: Supported directly from the image block editor. Uploaded files are stored in Supabase Storage. A public URL can also be pasted instead.
+- **Email login / signup**: Both are grayed out pending SMTP configuration. Only Google OAuth is active.

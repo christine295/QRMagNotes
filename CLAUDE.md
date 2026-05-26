@@ -36,19 +36,19 @@ Supabase project ref: `hiotzlktznkznjxjakup`
 ```
 app/
   page.tsx                           — redirects to /dashboard or /login
-  login/page.tsx                     — email + Google auth (email login works; email signup grayed out pending SMTP)
-  signup/page.tsx                    — Google auth only; email form disabled pending SMTP setup
+  login/page.tsx                     — Google OAuth only; both email login and email signup grayed out pending SMTP
+  signup/page.tsx                    — Google OAuth only; email form grayed out pending SMTP setup
   setup/page.tsx                     — username picker; shown once after first login (when username_confirmed=false); redirects to /dashboard on confirm
   auth/callback/route.ts             — OAuth callback handler
   help/page.tsx                      — in-app help & reference page (no auth required)
-  dashboard/collections/page.tsx     — main dashboard (flat hub list primary; Folders section collapsible above list; auto-creates "My Hubs" folder on first load)
+  dashboard/collections/page.tsx     — main dashboard; collection cards (expandable, click to select/filter hub list); hub list below; auto-creates "My Hubs" collection on first load
   dashboard/hub/new/page.tsx         — create hub (template picker → form → ContentBlocksEditor)
   dashboard/hub/[id]/edit/page.tsx   — edit hub (Content tab + Settings tab)
   dashboard/hub/[id]/print/page.tsx  — print QR card
   h/[username]/[slug]/page.tsx       — public hub page (server component, passes to HubView)
 
 components/
-  HubCard.tsx              — dashboard card; template badge, inline folder <select>, Edit/View/Copy/QR/Print buttons
+  HubCard.tsx              — dashboard card; clickable (navigates to edit); ⋮ kebab (Edit/View/Copy link/Download QR/Print card/Move to collection); template + mode + privacy pills; tags bottom-left, updated date bottom-right
   HubForm.tsx              — create/edit form; TEMPLATES array; BLOCKS_BY_TEMPLATE map; RITUAL_BLOCKS + 10 other *_BLOCKS consts; tabs on edit (Content / Settings)
   HubView.tsx              — PUBLIC hub renderer (client component); all interactive logic
   ContentBlocksEditor.tsx  — block editor (add/edit/delete/reorder); green dot = has content, hollow ring = empty
@@ -62,6 +62,7 @@ app/api/hub/[hubId]/
 
 lib/
   types.ts                    — Hub, ContentBlock, Profile types
+  version.ts                  — VERSION constant (e.g. 'v0.1'); displayed in dashboard header
   supabase/client.ts          — browser Supabase client
   supabase/server.ts          — server Supabase client
   supabase/uploadPhoto.ts     — upload image to hub-photos Storage bucket
@@ -102,8 +103,10 @@ Block inserts/updates **must go through the API routes** (`/api/hub/[hubId]/cont
 ## Core concepts
 
 **Hub modes:**
-- `landing` — shows the public content page (HubView)
-- `redirect` — instantly redirects to `redirect_url`
+- `landing` — shows the public content page (HubView); labelled **"Interactive Page"** in the UI
+- `redirect` — instantly redirects to `redirect_url`; labelled **"Redirect Link"** in the UI
+
+New hubs default to `private` visibility.
 
 **Privacy:**
 - `public` — anyone can find and view
@@ -113,12 +116,14 @@ Block inserts/updates **must go through the API routes** (`/api/hub/[hubId]/cont
 **Hub type (`template_id`):**
 Stored as a text column on hubs. Set automatically when a hub is created from a template. Can also be set retroactively in the hub's Settings tab → "Hub type" dropdown — this only adds the badge label on the dashboard card; it does not add or remove content blocks.
 
-**Folders (formerly "Collections"):**
-- All user-facing text says "Folder". The DB table is still named `collections` and the FK is still `collection_id`.
-- Dashboard shows a flat hub list as primary view; Folders section is collapsible and appears above the list.
-- Clicking a folder name filters the flat list to that folder's hubs.
-- Each HubCard has an inline folder `<select>` for quick assignment without going to Settings.
-- First login auto-creates a "My Hubs" folder if the user has none.
+**Collections:**
+- User-facing label is "Collection/Collections". DB table is still `collections`; FK is still `collection_id`.
+- Dashboard shows collection cards above the hub list (always visible, not in an accordion).
+- Clicking a card selects it and filters the hub list below to that collection; clicking again deselects.
+- Description (optional) appears on the card only when it is the active/selected collection.
+- Collection ⋮ kebab: + Add hub, Edit (name + description), Delete.
+- Hub assignment is done via the hub card's ⋮ kebab → "Move to collection" (no inline select on the card).
+- First login auto-creates a "My Hubs" collection if the user has none.
 
 The QR code always points to `/h/[username]/[slug]`. The slug is permanent — changing it breaks printed QR codes. The username is derived from the user's email prefix and stored on the `profiles` table.
 
@@ -139,7 +144,7 @@ Each block has `type`, `data` (JSONB), and `sort_order`. Supported types:
 
 ## Public view (HubView.tsx)
 
-`app/h/[slug]/page.tsx` is a server component that fetches data and passes props to `HubView`. All interactive rendering is in `components/HubView.tsx` (client component).
+`app/h/[username]/[slug]/page.tsx` is a server component that looks up the profile by username, then the hub by user_id + slug, and passes props to `HubView`. All interactive rendering is in `components/HubView.tsx` (client component).
 
 **Design system:**
 - Background: `#FAF9F7` (warm cream) via `bg-[#FAF9F7]`
@@ -185,7 +190,7 @@ New blocks are inserted with `sort_order: blocks.length`.
 
 ## HubForm edit mode
 
-Edit page uses Content / Settings tabs (`activeTab` state). Content tab renders `<ContentBlocksEditor hubId={hub.id} hubTitle={hub.title} />`. Settings tab has all hub fields including Folder, Hub type (template_id dropdown), title, slug, mode, visibility, tags, description, image, theme color.
+Edit page uses Content / Settings tabs (`activeTab` state). Content tab renders `<ContentBlocksEditor hubId={hub.id} hubTitle={hub.title} />`. Settings tab has all hub fields including Collection, Hub type (template_id dropdown), title, slug, mode, visibility, tags, description, image, theme color.
 
 The `✓ Saved` chip appears for 2.5s after a block is updated (`savedBlockId` state).
 
@@ -214,8 +219,8 @@ Both files must stay template-agnostic in general sections. Template-specific co
 
 ## Not yet built
 
-- SMTP configuration: email signup works but confirmation emails are not delivered — Supabase project needs a custom SMTP provider configured (Authentication → Settings → SMTP in the Supabase dashboard). Without this, only OAuth (Google) signup works reliably. Email signup is grayed out on the signup page until this is resolved.
-- Free tier enforcement (hub/folder limits)
+- SMTP configuration: both email login and email signup are grayed out in the UI pending SMTP setup. Only Google OAuth works. Configure via Supabase dashboard → Authentication → Settings → SMTP.
+- Free tier enforcement (hub/collection limits)
 - Paid feature: `hide_footer` flag to remove footer branding on public hubs
 - Sort order normalization on load (gaps only heal on first move, not on page load)
 
