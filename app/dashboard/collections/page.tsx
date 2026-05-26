@@ -101,6 +101,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [allHubs, setAllHubs] = useState<any[]>([])
   const [folders, setFolders] = useState<any[]>([])
+  const [username, setUsername] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [foldersOpen, setFoldersOpen] = useState(false)
   const [folderFilter, setFolderFilter] = useState<string | null>(null)
@@ -135,12 +136,14 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.replace('/login'); return }
 
-      const [{ data: hubsData }, { data: foldersData }] = await Promise.all([
+      const [{ data: hubsData }, { data: foldersData }, { data: profile }] = await Promise.all([
         supabase.from('hubs').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }),
         supabase.from('collections').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('profiles').select('username').eq('id', user.id).single(),
       ])
 
       setAllHubs(hubsData || [])
+      setUsername((profile as any)?.username ?? '')
 
       let currentFolders = foldersData || []
       if (currentFolders.length === 0) {
@@ -397,6 +400,7 @@ export default function DashboardPage() {
                 <HubCard
                   key={hub.id}
                   hub={hub}
+                  username={username}
                   onTagClick={setTagFilter}
                   folders={folders}
                   onFolderChange={handleFolderChange}

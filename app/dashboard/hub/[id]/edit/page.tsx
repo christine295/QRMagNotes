@@ -11,14 +11,14 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: hub } = await supabase
-    .from('hubs')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
+  const [{ data: hub }, { data: profile }] = await Promise.all([
+    supabase.from('hubs').select('*').eq('id', id).eq('user_id', user.id).single(),
+    supabase.from('profiles').select('username').eq('id', user.id).single(),
+  ])
 
   if (!hub) notFound()
+
+  const username: string = (profile as any)?.username ?? ''
 
   async function deleteHub() {
     'use server'
@@ -42,7 +42,7 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href={`/h/${hub.slug}`}
+              href={`/h/${username}/${hub.slug}`}
               className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 hover:text-gray-900 transition-colors"
             >
               View hub
@@ -58,7 +58,7 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
         </div>
       </header>
       <main className="max-w-xl mx-auto px-4 py-8">
-        <HubForm hub={hub} userId={user.id} />
+        <HubForm hub={hub} userId={user.id} username={username} />
       </main>
     </div>
   )

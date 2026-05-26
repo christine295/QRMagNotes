@@ -186,6 +186,43 @@ alter table public.hubs add column if not exists tags text[] not null default '{
 alter table public.hubs add column if not exists template_id text;
 
 -- ==================
+-- Username on Profiles
+-- ==================
+-- Add username column (auto-derived from email prefix on signup)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS username text;
+
+-- Populate existing rows from email
+UPDATE public.profiles
+SET username = REGEXP_REPLACE(TRIM(BOTH '-' FROM REGEXP_REPLACE(LOWER(SPLIT_PART(email, '@', 1)), '[^a-z0-9-]+', '-', 'g')), '-+', '-', 'g')
+WHERE username IS NULL;
+
+-- Unique constraint
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_username_unique UNIQUE (username);
+
+-- Update signup trigger to auto-set username
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, username)
+  VALUES (
+    new.id,
+    new.email,
+    REGEXP_REPLACE(TRIM(BOTH '-' FROM REGEXP_REPLACE(LOWER(SPLIT_PART(new.email, '@', 1)), '[^a-z0-9-]+', '-', 'g')), '-+', '-', 'g')
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Allow public read of profiles (username is in the public URL)
+CREATE POLICY "Anyone can read profiles"
+  ON public.profiles FOR SELECT
+  USING (true);
+
+-- Change hub slug uniqueness from global to per-user
+ALTER TABLE public.hubs DROP CONSTRAINT IF EXISTS hubs_slug_key;
+ALTER TABLE public.hubs ADD CONSTRAINT hubs_slug_user_unique UNIQUE (user_id, slug);
+
+-- ==================
 -- Privacy Mode RLS
 -- ==================
 -- Replace open hub read policy with privacy-aware one:

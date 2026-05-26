@@ -13,11 +13,11 @@ const TEMPLATES: { id: Template; label: string; description: string }[] = [
   { id: 'creator',  label: 'Creator Card',  description: 'Image-forward layout' },
 ]
 
-export default function PrintPreview({ hub }: { hub: Hub }) {
+export default function PrintPreview({ hub, username }: { hub: Hub; username: string }) {
   const [template, setTemplate] = useState<Template>('standard')
   const [qrDataUrl, setQrDataUrl] = useState('')
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-  const hubUrl = `${siteUrl}/h/${hub.slug}`
+  const hubUrl = `${siteUrl}/h/${username}/${hub.slug}`
   const color = hub.theme_color ?? '#3B82F6'
 
   useEffect(() => {

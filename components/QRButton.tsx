@@ -2,9 +2,9 @@
 
 import QRCode from 'qrcode'
 
-export default function QRButton({ slug }: { slug: string }) {
+export default function QRButton({ slug, username }: { slug: string; username: string }) {
   async function downloadQR() {
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL}/h/${slug}`
+    const url = `${process.env.NEXT_PUBLIC_SITE_URL}/h/${username}/${slug}`
     const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2 })
     const link = document.createElement('a')
     link.download = `qr-${slug}.png`

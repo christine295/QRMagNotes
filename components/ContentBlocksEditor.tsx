@@ -31,6 +31,7 @@ function uid() { return Math.random().toString(36).slice(2) }
 
 function blockHasContent(block: ContentBlock): boolean {
   const d = block.data as any
+  if (d._templateDefault) return false
   switch (block.type) {
     case 'text':      return !!(d.text?.trim())
     case 'image':     return !!(d.url?.trim())
@@ -487,11 +488,11 @@ function TimelineForm({ onSave, onCancel, initialData }: { onSave: (d: TimelineD
         {events.map((event, idx) => (
           <div key={event.id} className="flex gap-2">
             <input
-              type="text"
+              type="date"
               value={event.date}
+              title="Event date"
               onChange={e => updateEvent(event.id, 'date', e.target.value)}
-              placeholder="Date"
-              className="w-24 flex-shrink-0 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-36 flex-shrink-0 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="text"

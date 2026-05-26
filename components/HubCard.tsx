@@ -24,16 +24,18 @@ const TEMPLATE_LABELS: Record<string, { emoji: string; label: string }> = {
 
 export default function HubCard({
   hub,
+  username,
   onTagClick,
   folders,
   onFolderChange,
 }: {
   hub: Hub
+  username: string
   onTagClick?: (tag: string) => void
   folders?: { id: string; title: string }[]
   onFolderChange?: (hubId: string, folderId: string | null) => void
 }) {
-  const publicUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/h/${hub.slug}`
+  const publicUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/h/${username}/${hub.slug}`
 
   async function copyLink() {
     await navigator.clipboard.writeText(publicUrl)
@@ -45,7 +47,7 @@ export default function HubCard({
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h3 className="font-semibold text-gray-900">{hub.title}</h3>
-          <p className="text-xs text-gray-400 font-mono mt-0.5">/h/{hub.slug}</p>
+          <p className="text-xs text-gray-400 font-mono mt-0.5">/h/{username}/{hub.slug}</p>
           <p className="text-xs text-gray-300 mt-1">
             Updated {formatDate(hub.updated_at)}
           </p>
@@ -113,7 +115,7 @@ export default function HubCard({
           Edit
         </Link>
         <a
-          href={`/h/${hub.slug}`}
+          href={`/h/${username}/${hub.slug}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 hover:text-gray-900 transition-colors"
@@ -127,7 +129,7 @@ export default function HubCard({
         >
           Copy Link
         </button>
-        <QRButton slug={hub.slug} />
+        <QRButton slug={hub.slug} username={username} />
         <Link
           href={`/dashboard/hub/${hub.id}/print`}
           className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 hover:text-gray-900 transition-colors"

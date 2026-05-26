@@ -260,7 +260,7 @@ export default function HelpPage() {
           <h2 className="text-lg font-semibold text-stone-800 mb-4">How QRMagNotes works</h2>
           <div className="prose-sm text-stone-600 leading-[1.7] space-y-3 max-w-prose">
             <p>
-              Each hub has a permanent URL at <code className="text-stone-700 bg-stone-100 px-1 py-0.5 rounded text-xs">/h/your-slug</code>.
+              Each hub has a permanent URL at <code className="text-stone-700 bg-stone-100 px-1 py-0.5 rounded text-xs">/h/your-username/your-slug</code>.
               You print a QR code pointing to that URL and attach it to something physical — a product, an artwork, a piece of equipment, a property, a vehicle, or any physical space.
               The content behind the QR can be updated at any time without reprinting the code.
             </p>

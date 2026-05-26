@@ -493,6 +493,7 @@ const TAG_PLACEHOLDERS: Record<string, string> = {
 type Props = {
   hub?: Hub
   userId: string
+  username?: string
   initialCollectionId?: string
 }
 
@@ -504,7 +505,7 @@ function slugify(val: string) {
     .replace(/^-|-$/g, '')
 }
 
-export default function HubForm({ hub, userId, initialCollectionId }: Props) {
+export default function HubForm({ hub, userId, username, initialCollectionId }: Props) {
   const { collections, setCollections, loading: collectionsLoading } = useCollections(userId)
   const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? initialCollectionId ?? null)
   const [showNewCollection, setShowNewCollection] = useState(false)
@@ -673,7 +674,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
               fetch(`/api/hub/${newHub.id}/content_blocks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: b.type, data: b.data, sort_order: i }),
+                body: JSON.stringify({ type: b.type, data: { ...b.data, _templateDefault: true }, sort_order: i }),
               })
             )
           )
@@ -848,7 +849,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
               </label>
               <div className="flex items-center border border-gray-200 bg-gray-50 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
                 <span className="px-3 py-2.5 bg-gray-100 text-gray-400 text-sm border-r border-gray-200 select-none">
-                  /h/
+                  /h/{username ?? '…'}/
                 </span>
                 <input
                   type="text"
@@ -979,7 +980,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Hub Image <span className="text-gray-400 font-normal">(optional)</span>
                   </label>
-                  <div className="flex gap-2 items-center">
+                  <div className="space-y-2">
                     <input
                       type="file"
                       accept="image/*"
@@ -993,14 +994,14 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
                           else setError('Image upload failed. Check console for details.')
                         }
                       }}
-                      className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:text-gray-600 file:bg-white hover:file:bg-gray-50"
                     />
                     <input
                       type="url"
                       value={imageUrl}
                       onChange={e => setImageUrl(e.target.value)}
-                      placeholder="https://example.com/logo.png"
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Or paste an image URL"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   {imageUrl && (
@@ -1076,7 +1077,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
         <label className="block text-sm font-medium mb-1 text-gray-700">Slug</label>
         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
           <span className="px-3 py-2.5 bg-gray-100 text-gray-400 text-sm border-r border-gray-200 select-none">
-            /h/
+            /h/{username ?? '…'}/
           </span>
           <input
             type="text"
@@ -1266,7 +1267,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Hub Image <span className="text-gray-400 font-normal">(optional)</span>
             </label>
-            <div className="flex gap-2 items-center">
+            <div className="space-y-2">
               <input
                 type="file"
                 accept="image/*"
@@ -1280,14 +1281,14 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
                     else setError('Image upload failed. Check console for details.')
                   }
                 }}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:text-gray-600 file:bg-white hover:file:bg-gray-50"
               />
               <input
                 type="url"
                 value={imageUrl}
                 onChange={e => setImageUrl(e.target.value)}
-                placeholder="https://example.com/logo.png"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Or paste an image URL"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             {imageUrl && (

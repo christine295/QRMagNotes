@@ -13,6 +13,7 @@ function NewHubPageContent() {
   const searchParams = useSearchParams()
   const collectionId = searchParams.get('collection') || undefined
   const [userId, setUserId] = useState<string | null>(null)
+  const [username, setUsername] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -23,7 +24,9 @@ function NewHubPageContent() {
         router.replace('/login')
         return
       }
+      const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single()
       setUserId(user.id)
+      setUsername((profile as any)?.username ?? '')
       setLoading(false)
     }
     fetchUser()
@@ -44,7 +47,7 @@ function NewHubPageContent() {
         </div>
       </header>
       <main className="max-w-xl mx-auto px-4 py-8">
-        <HubForm userId={userId} initialCollectionId={collectionId} />
+        <HubForm userId={userId} username={username} initialCollectionId={collectionId} />
       </main>
     </div>
   )

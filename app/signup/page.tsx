@@ -82,39 +82,34 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <form onSubmit={handleEmailSignup} className="space-y-4">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 space-y-3 opacity-60 select-none">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
             <input
               type="email"
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              disabled
               placeholder="you@example.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
             <input
               type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              disabled
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
+            type="button"
+            disabled
+            className="w-full bg-gray-200 text-gray-400 rounded-lg px-4 py-2.5 text-sm font-medium cursor-not-allowed"
           >
-            {loading ? 'Creating account…' : 'Create account'}
+            Create account
           </button>
-        </form>
+          <p className="text-xs text-center text-gray-400">Email signup coming soon — use Google for now</p>
+        </div>
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{' '}

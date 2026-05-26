@@ -36,15 +36,15 @@ Supabase project ref: `hiotzlktznkznjxjakup`
 ```
 app/
   page.tsx                           — redirects to /dashboard or /login
-  login/page.tsx                     — email + Google auth
-  signup/page.tsx                    — email + Google auth
+  login/page.tsx                     — email + Google auth (email login works; email signup grayed out pending SMTP)
+  signup/page.tsx                    — Google auth only; email form disabled pending SMTP setup
   auth/callback/route.ts             — OAuth callback handler
   help/page.tsx                      — in-app help & reference page (no auth required)
   dashboard/collections/page.tsx     — main dashboard (flat hub list primary; Folders section collapsible above list; auto-creates "My Hubs" folder on first load)
   dashboard/hub/new/page.tsx         — create hub (template picker → form → ContentBlocksEditor)
   dashboard/hub/[id]/edit/page.tsx   — edit hub (Content tab + Settings tab)
   dashboard/hub/[id]/print/page.tsx  — print QR card
-  h/[slug]/page.tsx                  — public hub page (server component, passes to HubView)
+  h/[username]/[slug]/page.tsx       — public hub page (server component, passes to HubView)
 
 components/
   HubCard.tsx              — dashboard card; template badge, inline folder <select>, Edit/View/Copy/QR/Print buttons
@@ -119,7 +119,7 @@ Stored as a text column on hubs. Set automatically when a hub is created from a 
 - Each HubCard has an inline folder `<select>` for quick assignment without going to Settings.
 - First login auto-creates a "My Hubs" folder if the user has none.
 
-The QR code always points to `/h/[slug]`. The slug is permanent — changing it breaks printed QR codes.
+The QR code always points to `/h/[username]/[slug]`. The slug is permanent — changing it breaks printed QR codes. The username is derived from the user's email prefix and stored on the `profiles` table.
 
 ## Content blocks
 
@@ -213,9 +213,9 @@ Both files must stay template-agnostic in general sections. Template-specific co
 
 ## Not yet built
 
+- SMTP configuration: email signup works but confirmation emails are not delivered — Supabase project needs a custom SMTP provider configured (Authentication → Settings → SMTP in the Supabase dashboard). Without this, only OAuth (Google) signup works reliably. Email signup is grayed out on the signup page until this is resolved.
 - Free tier enforcement (hub/folder limits)
 - Paid feature: `hide_footer` flag to remove footer branding on public hubs
-- Multi-user URL path: `/h/[slug]` → `/h/[username]/[slug]` (deferred until before real users print QR codes)
 - Sort order normalization on load (gaps only heal on first move, not on page load)
 
 ## DB migrations applied (Supabase SQL editor)
@@ -230,4 +230,40 @@ alter table public.hubs add column if not exists template_id text;
 ALTER TABLE public.content_blocks DROP CONSTRAINT IF EXISTS content_blocks_type_check;
 ALTER TABLE public.content_blocks ADD CONSTRAINT content_blocks_type_check
   CHECK (type IN ('text', 'image', 'audio', 'file', 'link', 'phone', 'checklist', 'timeline', 'note'));
+```
+
+**Still needs to be run** (username + per-user slug uniqueness):
+
+```sql
+-- Add username to profiles
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS username text;
+
+UPDATE public.profiles
+SET username = REGEXP_REPLACE(TRIM(BOTH '-' FROM REGEXP_REPLACE(LOWER(SPLIT_PART(email, '@', 1)), '[^a-z0-9-]+', '-', 'g')), '-+', '-', 'g')
+WHERE username IS NULL;
+
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_username_unique UNIQUE (username);
+
+-- Update signup trigger to auto-set username
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, username)
+  VALUES (
+    new.id,
+    new.email,
+    REGEXP_REPLACE(TRIM(BOTH '-' FROM REGEXP_REPLACE(LOWER(SPLIT_PART(new.email, '@', 1)), '[^a-z0-9-]+', '-', 'g')), '-+', '-', 'g')
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Allow public read of profiles (username appears in public hub URLs)
+CREATE POLICY "Anyone can read profiles"
+  ON public.profiles FOR SELECT
+  USING (true);
+
+-- Change hub slug uniqueness: global → per-user
+ALTER TABLE public.hubs DROP CONSTRAINT IF EXISTS hubs_slug_key;
+ALTER TABLE public.hubs ADD CONSTRAINT hubs_slug_user_unique UNIQUE (user_id, slug);
 ```
