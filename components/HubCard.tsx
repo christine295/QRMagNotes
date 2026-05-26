@@ -65,27 +65,31 @@ export default function HubCard({
   return (
     <div
       onClick={() => router.push(`/dashboard/hub/${hub.id}/edit`)}
-      className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 cursor-pointer hover:border-gray-300 hover:shadow transition-all"
+      className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3.5 cursor-pointer hover:border-gray-300 hover:shadow transition-all"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         {/* Left: info */}
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-gray-900">{hub.title}</h3>
-          <p className="text-xs text-gray-400 font-mono mt-0.5">/h/{username}/{hub.slug}</p>
-          <p className="text-xs text-gray-300 mt-1">Updated {formatDate(hub.updated_at)}</p>
-          {currentCollection && (
-            <p className="text-xs text-gray-400 mt-1">📁 {currentCollection.title}</p>
-          )}
+          <h3 className="font-semibold text-gray-900 leading-snug">{hub.title}</h3>
+          <div className="mt-0.5 space-y-0.5">
+            {currentCollection && (
+              <p className="text-xs text-gray-400">📁 {currentCollection.title}</p>
+            )}
+            <p className="text-xs text-gray-300">Updated {formatDate(hub.updated_at)}</p>
+            <p className="text-[10px] text-gray-300 font-mono leading-tight opacity-75">
+              /h/{username}/{hub.slug}
+            </p>
+          </div>
         </div>
 
         {/* Right: badges + kebab */}
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <div ref={menuRef} className="relative mb-1">
+          <div ref={menuRef} className="relative mb-0.5">
             <button
               type="button"
               onClick={e => { e.stopPropagation(); setMenuOpen(v => !v) }}
               aria-label="Actions"
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md px-2 py-1 transition-colors text-lg leading-none"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md px-2 py-0.5 transition-colors text-lg leading-none"
             >
               ⋮
             </button>
@@ -151,12 +155,12 @@ export default function HubCard({
           </div>
 
           {hub.template_id && TEMPLATE_LABELS[hub.template_id] && (
-            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-stone-100 text-stone-500">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
               {TEMPLATE_LABELS[hub.template_id].emoji} {TEMPLATE_LABELS[hub.template_id].label}
             </span>
           )}
           <span
-            className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
+            className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
               hub.mode === 'redirect'
                 ? 'bg-amber-100 text-amber-700'
                 : 'bg-green-100 text-green-700'
@@ -165,12 +169,12 @@ export default function HubCard({
             {hub.mode === 'redirect' ? 'Redirect' : 'Landing Page'}
           </span>
           {hub.privacy_mode === 'private' && (
-            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
               Private
             </span>
           )}
           {hub.privacy_mode === 'unlisted' && (
-            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
               Unlisted
             </span>
           )}
@@ -179,7 +183,7 @@ export default function HubCard({
 
       {/* Tags */}
       {hasTags && (
-        <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-gray-100">
+        <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-gray-100">
           {hub.tags.map(tag => (
             <button
               key={tag}

@@ -6,13 +6,13 @@ import { VERSION } from '@/lib/version'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-function EditFolderModal({ open, onClose, onSave, folder }: any) {
-  const [title, setTitle] = useState(folder?.title || '')
-  const [description, setDescription] = useState(folder?.description || '')
+function EditCollectionModal({ open, onClose, onSave, collection }: any) {
+  const [title, setTitle] = useState(collection?.title || '')
+  const [description, setDescription] = useState(collection?.description || '')
   useEffect(() => {
-    setTitle(folder?.title || '')
-    setDescription(folder?.description || '')
-  }, [folder])
+    setTitle(collection?.title || '')
+    setDescription(collection?.description || '')
+  }, [collection])
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
@@ -34,8 +34,8 @@ function EditFolderModal({ open, onClose, onSave, folder }: any) {
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
-            title="Folder description"
-            placeholder="Optional description"
+            title="Collection description"
+            placeholder="e.g. Rituals, tarot, moon work, and seasonal reflections"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={2}
           />
@@ -61,14 +61,14 @@ function EditFolderModal({ open, onClose, onSave, folder }: any) {
   )
 }
 
-function ConfirmFolderDeleteModal({ open, onClose, onDelete, onMove, folderTitle }: any) {
+function ConfirmCollectionDeleteModal({ open, onClose, onDelete, onMove, collectionTitle }: any) {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-xs">
         <h3 className="font-semibold text-lg mb-2">Delete Collection</h3>
         <p className="text-gray-700 text-sm mb-4">
-          What should happen to the hubs in <span className="font-bold">{folderTitle}</span>?
+          What should happen to the hubs in <span className="font-bold">{collectionTitle}</span>?
         </p>
         <div className="flex flex-col gap-2">
           <button
@@ -104,8 +104,8 @@ export default function DashboardPage() {
   const [folders, setFolders] = useState<any[]>([])
   const [username, setUsername] = useState<string>('')
   const [loading, setLoading] = useState(true)
-  const [foldersOpen, setFoldersOpen] = useState(false)
   const [folderFilter, setFolderFilter] = useState<string | null>(null)
+  const [openCollectionMenu, setOpenCollectionMenu] = useState<string | null>(null)
   const [showCreateFolder, setShowCreateFolder] = useState(false)
   const [newFolderTitle, setNewFolderTitle] = useState('')
   const [folderError, setFolderError] = useState('')
@@ -187,7 +187,7 @@ export default function DashboardPage() {
   const totalHubs = allHubs.length
   const totalFolders = folders.length
   const filteredHubs = allHubs.filter(hubMatches)
-  const activeFolder = folderFilter ? folders.find((f: any) => f.id === folderFilter) : null
+  const activeCollection = folderFilter ? folders.find((f: any) => f.id === folderFilter) : null
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -216,9 +216,9 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 py-6">
         {/* Stats + primary CTA */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5">
           <p className="text-sm text-gray-400">
             {!loading && `${totalHubs} ${totalHubs === 1 ? 'hub' : 'hubs'} · ${totalFolders} ${totalFolders === 1 ? 'collection' : 'collections'}`}
           </p>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Search & filter */}
-        <div className="mb-4 space-y-2">
+        <div className="mb-5 space-y-2">
           <input
             type="text"
             value={searchQuery}
@@ -273,115 +273,144 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Folders section — compact rows, click to filter */}
+        {/* Collections */}
         {!loading && (
-          <div className="border border-gray-200 rounded-xl bg-white overflow-hidden mb-4">
-            <button
-              type="button"
-              onClick={() => setFoldersOpen(v => !v)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-medium text-gray-700 text-sm">Collections ({totalFolders})</span>
-              <span className="text-gray-400 text-xs">{foldersOpen ? '▲ Hide' : '▼ Show'}</span>
-            </button>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Collections
+              </h2>
+              {activeCollection && (
+                <button
+                  type="button"
+                  onClick={() => setFolderFilter(null)}
+                  className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
+                >
+                  Show all hubs ×
+                </button>
+              )}
+            </div>
 
-            {foldersOpen && (
-              <div className="border-t border-gray-100">
-                {folders.map((folder: any) => {
-                  const count = allHubs.filter(h => h.collection_id === folder.id).length
-                  const isActive = folderFilter === folder.id
-                  return (
-                    <div key={folder.id} className="flex items-center justify-between px-5 py-3 border-b border-gray-50 last:border-0">
-                      <button
-                        type="button"
-                        onClick={() => setFolderFilter(isActive ? null : folder.id)}
-                        className={`flex items-center gap-2 text-sm transition-colors ${isActive ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'}`}
-                      >
-                        📁 {folder.title}
-                        <span className="text-xs font-normal text-gray-400">
+            <div className="space-y-1.5">
+              {folders.map((folder: any) => {
+                const count = allHubs.filter(h => h.collection_id === folder.id).length
+                const isActive = folderFilter === folder.id
+                const menuOpen = openCollectionMenu === folder.id
+
+                return (
+                  <div
+                    key={folder.id}
+                    onClick={() => { setFolderFilter(isActive ? null : folder.id); setOpenCollectionMenu(null) }}
+                    className={`group rounded-xl border px-4 py-3 cursor-pointer transition-all ${
+                      isActive
+                        ? 'border-blue-200 bg-blue-50/60 shadow-sm'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/40'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`text-sm font-medium truncate ${isActive ? 'text-blue-800' : 'text-gray-800'}`}>
+                          {folder.title}
+                        </span>
+                        <span className={`text-xs shrink-0 ${isActive ? 'text-blue-400' : 'text-gray-400'}`}>
                           {count} {count === 1 ? 'hub' : 'hubs'}
                         </span>
-                      </button>
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/dashboard/hub/new?collection=${folder.id}`}
-                          className="text-xs text-blue-600 border border-blue-100 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-                        >
-                          + Hub
-                        </Link>
+                      </div>
+
+                      <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
                         <button
                           type="button"
-                          className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 hover:bg-gray-100 transition-colors"
-                          onClick={() => { setEditFolder(folder); setEditFolderOpen(true) }}
+                          onClick={() => setOpenCollectionMenu(menuOpen ? null : folder.id)}
+                          className={`text-base leading-none rounded-md px-1.5 py-0.5 transition-colors ${
+                            isActive
+                              ? 'text-blue-400 hover:text-blue-600 hover:bg-blue-100'
+                              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                          }`}
                         >
-                          Rename
+                          ⋮
                         </button>
-                        <button
-                          type="button"
-                          className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50 transition-colors"
-                          onClick={() => { setConfirmFolder(folder); setConfirmFolderOpen(true) }}
-                        >
-                          Delete
-                        </button>
+                        {menuOpen && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setOpenCollectionMenu(null)} />
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
+                              <Link
+                                href={`/dashboard/hub/new?collection=${folder.id}`}
+                                onClick={() => setOpenCollectionMenu(null)}
+                                className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              >
+                                + Add hub
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => { setEditFolder(folder); setEditFolderOpen(true); setOpenCollectionMenu(null) }}
+                                className="w-full text-left flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setConfirmFolder(folder); setConfirmFolderOpen(true); setOpenCollectionMenu(null) }}
+                                className="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
-                  )
-                })}
 
-                {showCreateFolder ? (
-                  <form onSubmit={handleCreateFolder} className="flex gap-2 px-5 py-4 border-t border-gray-100">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={newFolderTitle}
-                        onChange={e => setNewFolderTitle(e.target.value)}
-                        placeholder="Collection name"
-                        autoFocus
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {folderError && <p className="text-red-500 text-xs mt-1">{folderError}</p>}
-                    </div>
+                    {/* Description — only visible when collection is selected */}
+                    {isActive && folder.description && (
+                      <p className="text-xs text-blue-600/60 mt-1.5 leading-relaxed pr-6">
+                        {folder.description}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+
+              {/* New collection */}
+              {showCreateFolder ? (
+                <form
+                  onSubmit={handleCreateFolder}
+                  className="rounded-xl border border-dashed border-gray-300 bg-white px-4 py-3"
+                >
+                  <input
+                    type="text"
+                    value={newFolderTitle}
+                    onChange={e => setNewFolderTitle(e.target.value)}
+                    placeholder="Collection name"
+                    autoFocus
+                    className="w-full text-sm outline-none bg-transparent placeholder:text-gray-400"
+                  />
+                  {folderError && <p className="text-red-500 text-xs mt-1">{folderError}</p>}
+                  <div className="flex gap-2 mt-2.5">
                     <button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors"
                     >
                       Create
                     </button>
                     <button
                       type="button"
                       onClick={() => { setShowCreateFolder(false); setNewFolderTitle(''); setFolderError('') }}
-                      className="text-sm text-gray-400 hover:text-gray-600 px-2 py-2"
+                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      ✕
-                    </button>
-                  </form>
-                ) : (
-                  <div className="px-5 py-4 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateFolder(true)}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                    >
-                      + New Collection
+                      Cancel
                     </button>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Folder filter banner */}
-        {activeFolder && (
-          <div className="flex items-center justify-between mb-4 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-            <span className="text-sm text-blue-700 font-medium">📁 {activeFolder.title}</span>
-            <button
-              type="button"
-              onClick={() => setFolderFilter(null)}
-              className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
-            >
-              Show all ×
-            </button>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCreateFolder(true)}
+                  className="w-full rounded-xl border border-dashed border-gray-200 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-500 hover:border-gray-300 transition-colors text-left"
+                >
+                  + New collection
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -403,31 +432,43 @@ export default function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3 mb-8">
-            {filteredHubs.length > 0 ? (
-              filteredHubs.map((hub: any) => (
-                <HubCard
-                  key={hub.id}
-                  hub={hub}
-                  username={username}
-                  onTagClick={setTagFilter}
-                  folders={folders}
-                  onFolderChange={handleFolderChange}
-                />
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-400 text-sm">
-                No hubs match your search.
-              </div>
-            )}
-          </div>
+          <>
+            {/* Hubs section label */}
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                {activeCollection ? activeCollection.title : 'All hubs'}
+              </h2>
+              {filteredHubs.length > 0 && (
+                <span className="text-xs text-gray-400">{filteredHubs.length}</span>
+              )}
+            </div>
+
+            <div className="space-y-2 mb-8">
+              {filteredHubs.length > 0 ? (
+                filteredHubs.map((hub: any) => (
+                  <HubCard
+                    key={hub.id}
+                    hub={hub}
+                    username={username}
+                    onTagClick={setTagFilter}
+                    folders={folders}
+                    onFolderChange={handleFolderChange}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12 text-gray-400 text-sm">
+                  No hubs match your search.
+                </div>
+              )}
+            </div>
+          </>
         )}
 
       </main>
 
-      <EditFolderModal
+      <EditCollectionModal
         open={editFolderOpen}
-        folder={editFolder}
+        collection={editFolder}
         onClose={() => { setEditFolderOpen(false); setEditFolder(null) }}
         onSave={async (title: string, description: string) => {
           if (!editFolder) return
@@ -439,9 +480,9 @@ export default function DashboardPage() {
         }}
       />
 
-      <ConfirmFolderDeleteModal
+      <ConfirmCollectionDeleteModal
         open={confirmFolderOpen}
-        folderTitle={confirmFolder?.title}
+        collectionTitle={confirmFolder?.title}
         onClose={() => { setConfirmFolderOpen(false); setConfirmFolder(null) }}
         onDelete={async () => {
           if (!confirmFolder) return
