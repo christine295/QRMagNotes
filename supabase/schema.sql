@@ -182,6 +182,8 @@ create policy "Users can manage own content_blocks"
 -- ==================
 alter table public.hubs add column if not exists collection_id uuid references public.collections(id) on delete set null;
 alter table public.hubs add column if not exists privacy_mode text not null default 'public' check (privacy_mode in ('public', 'unlisted', 'private'));
+alter table public.hubs add column if not exists tags text[] not null default '{}';
+alter table public.hubs add column if not exists template_id text;
 
 -- ==================
 -- Privacy Mode RLS

@@ -15,6 +15,7 @@ export type Hub = {
   image_url: string | null
   theme_color: string | null
   collection_id?: string | null
+  template_id?: string | null
   privacy_mode: 'public' | 'unlisted' | 'private'
   tags: string[]
   created_at: string

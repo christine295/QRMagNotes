@@ -1,29 +1,30 @@
 "use client";
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-
 import { createClient } from '@/lib/supabase/client'
 import HubCard from '@/components/HubCard'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-function EditCollectionModal({ open, onClose, onSave, collection }: any) {
-  const [title, setTitle] = useState(collection?.title || "");
-  const [description, setDescription] = useState(collection?.description || "");
+
+function EditFolderModal({ open, onClose, onSave, folder }: any) {
+  const [title, setTitle] = useState(folder?.title || '')
+  const [description, setDescription] = useState(folder?.description || '')
   useEffect(() => {
-    setTitle(collection?.title || "");
-    setDescription(collection?.description || "");
-  }, [collection]);
-  if (!open) return null;
+    setTitle(folder?.title || '')
+    setDescription(folder?.description || '')
+  }, [folder])
+  if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-xs">
-        <h3 className="font-semibold text-lg mb-2">Edit Collection</h3>
+        <h3 className="font-semibold text-lg mb-4">Edit Folder</h3>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
+            title="Folder name"
+            placeholder="Folder name"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -32,18 +33,22 @@ function EditCollectionModal({ open, onClose, onSave, collection }: any) {
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
+            title="Folder description"
+            placeholder="Optional description"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={2}
           />
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
             onClick={() => onSave(title, description)}
           >
             Save
           </button>
           <button
+            type="button"
             className="text-gray-500 hover:text-gray-700 text-xs underline"
             onClick={onClose}
           >
@@ -55,27 +60,32 @@ function EditCollectionModal({ open, onClose, onSave, collection }: any) {
   )
 }
 
-function ConfirmModal({ open, onClose, onDelete, onMove, collectionTitle }: any) {
-  if (!open) return null;
+function ConfirmFolderDeleteModal({ open, onClose, onDelete, onMove, folderTitle }: any) {
+  if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-xs">
-        <h3 className="font-semibold text-lg mb-2">Delete Collection</h3>
-        <p className="text-gray-700 text-sm mb-4">What should happen to the hubs in <span className="font-bold">{collectionTitle}</span>?</p>
+        <h3 className="font-semibold text-lg mb-2">Delete Folder</h3>
+        <p className="text-gray-700 text-sm mb-4">
+          What should happen to the hubs in <span className="font-bold">{folderTitle}</span>?
+        </p>
         <div className="flex flex-col gap-2">
           <button
+            type="button"
             className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
             onClick={onDelete}
           >
-            Delete collection & all hubs
+            Delete folder &amp; all hubs inside
           </button>
           <button
+            type="button"
             className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium px-4 py-2 rounded-lg"
             onClick={onMove}
           >
-            Move hubs to Uncategorized
+            Keep hubs, remove from folder
           </button>
           <button
+            type="button"
             className="mt-2 text-gray-500 hover:text-gray-700 text-xs underline"
             onClick={onClose}
           >
@@ -87,21 +97,19 @@ function ConfirmModal({ open, onClose, onDelete, onMove, collectionTitle }: any)
   )
 }
 
-
-export default function CollectionsPage() {
+export default function DashboardPage() {
   const router = useRouter()
-  const [collections, setCollections] = useState<any[]>([])
-  const [uncategorizedHubs, setUncategorizedHubs] = useState<any[]>([])
+  const [allHubs, setAllHubs] = useState<any[]>([])
+  const [folders, setFolders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [error, setError] = useState('')
-  const [expanded, setExpanded] = useState<{ [id: string]: boolean }>({})
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [confirmCollection, setConfirmCollection] = useState<any>(null)
-  const [editOpen, setEditOpen] = useState(false)
-  const [editCollection, setEditCollection] = useState<any>(null)
+  const [foldersOpen, setFoldersOpen] = useState(false)
+  const [showCreateFolder, setShowCreateFolder] = useState(false)
+  const [newFolderTitle, setNewFolderTitle] = useState('')
+  const [folderError, setFolderError] = useState('')
+  const [editFolderOpen, setEditFolderOpen] = useState(false)
+  const [editFolder, setEditFolder] = useState<any>(null)
+  const [confirmFolderOpen, setConfirmFolderOpen] = useState(false)
+  const [confirmFolder, setConfirmFolder] = useState<any>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [modeFilter, setModeFilter] = useState<'all' | 'landing' | 'redirect'>('all')
   const [privacyFilter, setPrivacyFilter] = useState<'all' | 'public' | 'unlisted' | 'private'>('all')
@@ -121,67 +129,63 @@ export default function CollectionsPage() {
 
   const isFiltering = searchQuery || modeFilter !== 'all' || privacyFilter !== 'all' || tagFilter
 
-  // Fetch collections and uncategorized hubs on mount
   useEffect(() => {
     async function fetchData() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        redirect('/login')
-        return
+      if (!user) { router.replace('/login'); return }
+
+      const [{ data: hubsData }, { data: foldersData }] = await Promise.all([
+        supabase
+          .from('hubs')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('collections')
+          .select('*, hubs(*)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+      ])
+
+      setAllHubs(hubsData || [])
+
+      let currentFolders = foldersData || []
+      if (currentFolders.length === 0) {
+        const { data: newFolder } = await supabase
+          .from('collections')
+          .insert({ user_id: user.id, title: 'My Hubs' })
+          .select()
+          .single()
+        if (newFolder) currentFolders = [{ ...newFolder, hubs: [] }]
       }
-      // Fetch collections with hubs
-      const { data: collectionsData } = await supabase
-        .from('collections')
-        .select('*, hubs(*)')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-      setCollections(collectionsData || [])
-
-      // Fetch uncategorized hubs
-      const { data: hubsData } = await supabase
-        .from('hubs')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('collection_id', null)
-        .order('created_at', { ascending: false })
-      setUncategorizedHubs(hubsData || [])
-
+      setFolders(currentFolders)
       setLoading(false)
     }
     fetchData()
-  }, [])
+  }, [router])
 
-  async function handleCreateCollection(e: React.FormEvent) {
+  async function handleCreateFolder(e: React.FormEvent) {
     e.preventDefault()
-    setError('')
-    if (!title) {
-      setError('Title is required')
-      return
-    }
-    setLoading(true)
+    setFolderError('')
+    if (!newFolderTitle.trim()) { setFolderError('Name is required'); return }
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      redirect('/login')
-      return
-    }
+    if (!user) return
     const { data, error } = await supabase
       .from('collections')
-      .insert([{ user_id: user.id, title, description }])
+      .insert([{ user_id: user.id, title: newFolderTitle.trim() }])
       .select()
       .single()
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
-    setCollections([data, ...collections])
-    setTitle('')
-    setDescription('')
-    setShowForm(false)
-    setLoading(false)
+    if (error) { setFolderError(error.message); return }
+    setFolders(prev => [{ ...data, hubs: [] }, ...prev])
+    setNewFolderTitle('')
+    setShowCreateFolder(false)
   }
+
+  const totalHubs = allHubs.length
+  const totalFolders = folders.length
+  const filteredHubs = allHubs.filter(hubMatches)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -206,17 +210,19 @@ export default function CollectionsPage() {
           </div>
         </div>
       </header>
+
       <main className="max-w-2xl mx-auto px-4 py-8">
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center">
-            <div className="text-2xl font-bold text-blue-700">{collections.reduce((acc, c) => acc + (c.hubs?.length || 0), 0) + uncategorizedHubs.length}</div>
-            <div className="text-xs text-gray-500">Total Hubs</div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center">
-            <div className="text-2xl font-bold text-blue-700">{collections.length}</div>
-            <div className="text-xs text-gray-500">Collections</div>
-          </div>
+        {/* Stats + primary CTA */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm text-gray-400">
+            {!loading && `${totalHubs} ${totalHubs === 1 ? 'hub' : 'hubs'} · ${totalFolders} ${totalFolders === 1 ? 'folder' : 'folders'}`}
+          </p>
+          <Link
+            href="/dashboard/hub/new"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            + New Hub
+          </Link>
         </div>
 
         {/* Search & filter */}
@@ -225,7 +231,7 @@ export default function CollectionsPage() {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search hubs by title or slug…"
+            placeholder="Search hubs by title, slug, or tag…"
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {tagFilter && (
@@ -251,7 +257,7 @@ export default function CollectionsPage() {
             <select
               value={privacyFilter}
               onChange={e => setPrivacyFilter(e.target.value as any)}
-              title="Filter by privacy"
+              title="Filter by visibility"
               className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
             >
               <option value="all">All visibility</option>
@@ -262,236 +268,182 @@ export default function CollectionsPage() {
           </div>
         </div>
 
-        <div className="mb-8 flex justify-end">
-          <button
-            type="button"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            onClick={() => setShowForm(!showForm)}
-          >
-            {showForm ? 'Cancel' : '+ Create Collection'}
-          </button>
-        </div>
-        {showForm && (
-          <form onSubmit={handleCreateCollection} className="bg-white border border-gray-200 rounded-xl p-5 mb-8 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Collection title"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Optional description"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={2}
-              />
-            </div>
-            {error && <div className="text-red-500 text-sm">{error}</div>}
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-              disabled={loading}
-            >
-              Create Collection
-            </button>
-          </form>
-        )}
+        {/* Hub list */}
         {loading ? (
-          <div className="text-center text-gray-400">Loading...</div>
+          <div className="text-center text-gray-400 py-12">Loading…</div>
+        ) : allHubs.length === 0 ? (
+          <div className="text-center py-20 px-4">
+            <div className="text-5xl mb-4">✨</div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Create your first hub</h3>
+            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
+              Choose a template to get started — or start blank and build as you go.
+            </p>
+            <Link
+              href="/dashboard/hub/new"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            >
+              + New Hub
+            </Link>
+          </div>
         ) : (
-          <>
-            {/* Collections */}
-            {collections && collections.length > 0 && (
-              <div className="space-y-8 mb-12">
-                {collections.map((collection: any) => {
-                  const isOpen = expanded[collection.id] ?? true;
-                  const matchingHubs = (collection.hubs ?? []).filter(hubMatches)
-                  if (isFiltering && matchingHubs.length === 0) return null
-                  return (
-                    <div key={collection.id} className="bg-white rounded-xl border border-gray-200 shadow p-5">
-                      <div className="flex items-center gap-4 mb-2 justify-between">
-                        <div className="flex items-center gap-4">
-                          {collection.cover_image && (
-                            <img src={collection.cover_image} alt="cover" className="w-12 h-12 rounded object-cover" />
-                          )}
-                          <div>
-                            <h2 className="font-semibold text-lg text-gray-900">{collection.title}</h2>
-                            {collection.description && <p className="text-gray-500 text-sm">{collection.description}</p>}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 ml-auto">
-                          <button
-                            type="button"
-                            className="text-xs text-blue-600 border border-blue-100 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-                            onClick={() => setExpanded(e => ({ ...e, [collection.id]: !isOpen }))}
-                          >
-                            {isOpen ? 'Hide Hubs' : 'Show Hubs'}
-                          </button>
-                          <button
-                            type="button"
-                            className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 hover:bg-gray-100 transition-colors"
-                            onClick={() => { setEditCollection(collection); setEditOpen(true); }}
-                          >
-                            Edit
-                          </button>
-                                  {/* Edit Collection Modal */}
-                                  <EditCollectionModal
-                                    open={editOpen}
-                                    collection={editCollection}
-                                    onClose={() => setEditOpen(false)}
-                                    onSave={async (title: string, description: string) => {
-                                      if (!editCollection) return;
-                                      setEditOpen(false);
-                                      setLoading(true);
-                                      const supabase = createClient();
-                                      await supabase.from('collections').update({ title, description }).eq('id', editCollection.id);
-                                      // Update local state
-                                      setCollections(collections.map((c: any) => c.id === editCollection.id ? { ...c, title, description } : c));
-                                      setEditCollection(null);
-                                      setLoading(false);
-                                    }}
-                                  />
-                          <button
-                            type="button"
-                            className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50 transition-colors"
-                            onClick={() => { setConfirmCollection(collection); setConfirmOpen(true); }}
-                          >
-                            Delete
-                          </button>
-                          {collection.hubs && collection.hubs.length > 0 && (
-                            <Link
-                              href={`/dashboard/hub/new?collection=${collection.id}`}
-                              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-2"
-                            >
-                              + Add Hub
-                            </Link>
-                          )}
-                        </div>
-                              {/* Confirm Delete Modal */}
-                              <ConfirmModal
-                                open={confirmOpen}
-                                collectionTitle={confirmCollection?.title}
-                                onClose={() => setConfirmOpen(false)}
-                                onDelete={async () => {
-                                  // Delete all hubs in collection, then delete collection
-                                  if (!confirmCollection) return;
-                                  setConfirmOpen(false);
-                                  setLoading(true);
-                                  const supabase = createClient();
-                                  // Delete hubs
-                                  await supabase.from('hubs').delete().eq('collection_id', confirmCollection.id);
-                                  // Delete collection
-                                  await supabase.from('collections').delete().eq('id', confirmCollection.id);
-                                  // Refresh
-                                  setCollections(collections.filter((c: any) => c.id !== confirmCollection.id));
-                                  setConfirmCollection(null);
-                                  setLoading(false);
-                                }}
-                                onMove={async () => {
-                                  // Move hubs to uncategorized, then delete collection
-                                  if (!confirmCollection) return;
-                                  setConfirmOpen(false);
-                                  setLoading(true);
-                                  const supabase = createClient();
-                                  // Update hubs
-                                  await supabase.from('hubs').update({ collection_id: null }).eq('collection_id', confirmCollection.id);
-                                  // Delete collection
-                                  await supabase.from('collections').delete().eq('id', confirmCollection.id);
-                                  // Refresh
-                                  setCollections(collections.filter((c: any) => c.id !== confirmCollection.id));
-                                  // Also update uncategorizedHubs
-                                  const { data: movedHubs } = await supabase.from('hubs').select('*').eq('collection_id', null);
-                                  setUncategorizedHubs(movedHubs || []);
-                                  setConfirmCollection(null);
-                                  setLoading(false);
-                                }}
-                              />
-                      </div>
-                      {isOpen && (
-                        <div className="mt-4 space-y-2">
-                          {matchingHubs.length > 0 ? (
-                            matchingHubs.map((hub: any) => <HubCard key={hub.id} hub={hub} onTagClick={setTagFilter} />)
-                          ) : (
-                            <div className="flex flex-col gap-2 items-start">
-                              <div className="text-gray-400 text-sm">No hubs in this collection.</div>
-                              <Link
-                                href={`/dashboard/hub/new?collection=${collection.id}`}
-                                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                              >
-                                + Add Hub
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Uncategorized Hubs */}
-            {(() => {
-              const matchingUncategorized = uncategorizedHubs.filter(hubMatches)
-              if (uncategorizedHubs.length === 0) return null
-              if (isFiltering && matchingUncategorized.length === 0) return null
-              return (
-                <div className="bg-white rounded-xl border border-gray-200 shadow p-5 mb-12">
-                  <div className="flex items-center gap-4 mb-2 justify-between">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <h2 className="font-semibold text-lg text-gray-900">Uncategorized</h2>
-                        <p className="text-gray-500 text-sm">Hubs not assigned to any collection</p>
-                      </div>
-                    </div>
-                    <Link
-                      href="/dashboard/hub/new"
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-auto"
-                    >
-                      + Add Hub
-                    </Link>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    {matchingUncategorized.map((hub: any) => <HubCard key={hub.id} hub={hub} onTagClick={setTagFilter} />)}
-                  </div>
-                </div>
-              )
-            })()}
-
-            {/* No search results */}
-            {isFiltering && collections.every(c => (c.hubs ?? []).filter(hubMatches).length === 0) && uncategorizedHubs.filter(hubMatches).length === 0 && (collections.length > 0 || uncategorizedHubs.length > 0) && (
+          <div className="space-y-3 mb-8">
+            {filteredHubs.length > 0 ? (
+              filteredHubs.map((hub: any) => (
+                <HubCard key={hub.id} hub={hub} onTagClick={setTagFilter} />
+              ))
+            ) : (
               <div className="text-center py-12 text-gray-400 text-sm">
                 No hubs match your search.
               </div>
             )}
+          </div>
+        )}
 
-            {/* Empty State */}
-            {(!collections || collections.length === 0) && (!uncategorizedHubs || uncategorizedHubs.length === 0) && (
-              <div className="text-center py-20 px-4">
-                <div className="text-5xl mb-4">📁</div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">No collections or hubs yet</h3>
-                <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
-                  Organize your hubs into collections for easier management.
-                </p>
-                <Link
-                  href="/dashboard"
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                >
-                  Back to Dashboard
-                </Link>
+        {/* Folders section */}
+        {!loading && (
+          <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setFoldersOpen(v => !v)}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+            >
+              <span className="font-medium text-gray-700 text-sm">
+                Folders ({totalFolders})
+              </span>
+              <span className="text-gray-400 text-xs">{foldersOpen ? '▲ Hide' : '▼ Show'}</span>
+            </button>
+
+            {foldersOpen && (
+              <div className="border-t border-gray-100 px-5 pb-5 pt-4 space-y-6">
+                {folders.map((folder: any) => (
+                  <div key={folder.id}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h2 className="font-semibold text-gray-900 text-sm">{folder.title}</h2>
+                        {folder.description && (
+                          <p className="text-xs text-gray-400 mt-0.5">{folder.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 hover:bg-gray-100 transition-colors"
+                          onClick={() => { setEditFolder(folder); setEditFolderOpen(true) }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50 transition-colors"
+                          onClick={() => { setConfirmFolder(folder); setConfirmFolderOpen(true) }}
+                        >
+                          Delete
+                        </button>
+                        <Link
+                          href={`/dashboard/hub/new?collection=${folder.id}`}
+                          className="text-xs text-blue-600 border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
+                        >
+                          + Add Hub
+                        </Link>
+                      </div>
+                    </div>
+                    {folder.hubs && folder.hubs.length > 0 ? (
+                      <div className="space-y-2">
+                        {folder.hubs.map((hub: any) => (
+                          <HubCard key={hub.id} hub={hub} onTagClick={setTagFilter} />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400 py-2">No hubs in this folder.</p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Create folder */}
+                {showCreateFolder ? (
+                  <form onSubmit={handleCreateFolder} className="flex gap-2 items-start pt-2">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={newFolderTitle}
+                        onChange={e => setNewFolderTitle(e.target.value)}
+                        placeholder="Folder name"
+                        autoFocus
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {folderError && <p className="text-red-500 text-xs mt-1">{folderError}</p>}
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                    >
+                      Create
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowCreateFolder(false); setNewFolderTitle(''); setFolderError('') }}
+                      className="text-sm text-gray-400 hover:text-gray-600 px-2 py-2"
+                    >
+                      ✕
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateFolder(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  >
+                    + New Folder
+                  </button>
+                )}
               </div>
             )}
-          </>
+          </div>
         )}
       </main>
+
+      <EditFolderModal
+        open={editFolderOpen}
+        folder={editFolder}
+        onClose={() => { setEditFolderOpen(false); setEditFolder(null) }}
+        onSave={async (title: string, description: string) => {
+          if (!editFolder) return
+          setEditFolderOpen(false)
+          const supabase = createClient()
+          await supabase.from('collections').update({ title, description }).eq('id', editFolder.id)
+          setFolders(prev => prev.map((f: any) => f.id === editFolder.id ? { ...f, title, description } : f))
+          setEditFolder(null)
+        }}
+      />
+
+      <ConfirmFolderDeleteModal
+        open={confirmFolderOpen}
+        folderTitle={confirmFolder?.title}
+        onClose={() => { setConfirmFolderOpen(false); setConfirmFolder(null) }}
+        onDelete={async () => {
+          if (!confirmFolder) return
+          setConfirmFolderOpen(false)
+          const supabase = createClient()
+          const hubIds = (confirmFolder.hubs ?? []).map((h: any) => h.id)
+          if (hubIds.length > 0) await supabase.from('hubs').delete().in('id', hubIds)
+          await supabase.from('collections').delete().eq('id', confirmFolder.id)
+          setFolders(prev => prev.filter((f: any) => f.id !== confirmFolder.id))
+          setAllHubs(prev => prev.filter((h: any) => !hubIds.includes(h.id)))
+          setConfirmFolder(null)
+        }}
+        onMove={async () => {
+          if (!confirmFolder) return
+          setConfirmFolderOpen(false)
+          const supabase = createClient()
+          await supabase.from('hubs').update({ collection_id: null }).eq('collection_id', confirmFolder.id)
+          await supabase.from('collections').delete().eq('id', confirmFolder.id)
+          setFolders(prev => prev.filter((f: any) => f.id !== confirmFolder.id))
+          setAllHubs(prev => prev.map((h: any) =>
+            h.collection_id === confirmFolder.id ? { ...h, collection_id: null } : h
+          ))
+          setConfirmFolder(null)
+        }}
+      />
     </div>
   )
 }

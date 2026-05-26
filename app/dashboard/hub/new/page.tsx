@@ -40,7 +40,7 @@ function NewHubPageContent() {
           <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">
             ← Back
           </Link>
-          <h1 className="text-lg font-semibold text-gray-900">Create Hub</h1>
+          <h1 className="text-lg font-semibold text-gray-900">New Hub</h1>
         </div>
       </header>
       <main className="max-w-xl mx-auto px-4 py-8">

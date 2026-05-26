@@ -652,6 +652,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
             image_url: mode === 'landing' ? imageUrl || null : null,
             theme_color: themeColor,
             collection_id: collectionId || null,
+            template_id: selectedTemplateId || null,
             privacy_mode: privacyMode,
             tags,
           })
@@ -753,18 +754,18 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
 
         {activeTab === 'settings' && (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Collection */}
+            {/* Folder */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Collection</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Folder</label>
               <div className="flex gap-2">
                 <select
                   value={collectionId ?? ''}
                   onChange={e => setCollectionId(e.target.value || null)}
-                  title="Collection"
+                  title="Folder"
                   className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={collectionsLoading}
                 >
-                  <option value="">No Collection</option>
+                  <option value="">No folder</option>
                   {collections.map((c: Collection) => (
                     <option key={c.id} value={c.id}>{c.title}</option>
                   ))}
@@ -784,7 +785,7 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
                     value={newCollectionTitle}
                     onChange={e => setNewCollectionTitle(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); createCollection() } }}
-                    placeholder="Collection name"
+                    placeholder="Folder name"
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     autoFocus
                   />
@@ -1037,60 +1038,6 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
   const tagPlaceholder = TAG_PLACEHOLDERS[selectedTemplateId ?? ''] ?? 'Type a tag and press Enter — e.g. seasonal, car, kitchen'
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Collection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Collection</label>
-        <div className="flex gap-2">
-          <select
-            value={collectionId ?? ''}
-            onChange={e => setCollectionId(e.target.value || null)}
-            title="Collection"
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={collectionsLoading}
-          >
-            <option value="">No Collection</option>
-            {collections.map((c: Collection) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={() => setShowNewCollection(v => !v)}
-            className="text-sm text-blue-600 border border-blue-200 rounded-lg px-3 py-2 hover:bg-blue-50 transition-colors whitespace-nowrap"
-          >
-            + New
-          </button>
-        </div>
-        {showNewCollection && (
-          <div className="mt-2 flex gap-2">
-            <input
-              type="text"
-              value={newCollectionTitle}
-              onChange={e => setNewCollectionTitle(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); createCollection() } }}
-              placeholder="Collection name"
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-            <button
-              type="button"
-              onClick={createCollection}
-              disabled={creatingCollection || !newCollectionTitle.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
-            >
-              {creatingCollection ? '…' : 'Create'}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setShowNewCollection(false); setNewCollectionTitle('') }}
-              className="text-sm text-gray-400 hover:text-gray-600 px-2"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-      </div>
-
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Hub title</label>
@@ -1293,6 +1240,62 @@ export default function HubForm({ hub, userId, initialCollectionId }: Props) {
           </div>
         </>
       )}
+
+      {/* Folder */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Folder <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <div className="flex gap-2">
+          <select
+            value={collectionId ?? ''}
+            onChange={e => setCollectionId(e.target.value || null)}
+            title="Folder"
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={collectionsLoading}
+          >
+            <option value="">No folder</option>
+            {collections.map((c: Collection) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setShowNewCollection(v => !v)}
+            className="text-sm text-blue-600 border border-blue-200 rounded-lg px-3 py-2 hover:bg-blue-50 transition-colors whitespace-nowrap"
+          >
+            + New
+          </button>
+        </div>
+        {showNewCollection && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={newCollectionTitle}
+              onChange={e => setNewCollectionTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); createCollection() } }}
+              placeholder="Folder name"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={createCollection}
+              disabled={creatingCollection || !newCollectionTitle.trim()}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+            >
+              {creatingCollection ? '…' : 'Create'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowNewCollection(false); setNewCollectionTitle('') }}
+              className="text-sm text-gray-400 hover:text-gray-600 px-2"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+      </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 

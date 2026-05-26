@@ -8,6 +8,20 @@ function formatDate(iso: string) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso))
 }
 
+const TEMPLATE_LABELS: Record<string, { emoji: string; label: string }> = {
+  artwork:     { emoji: '🎨', label: 'Artwork Archive' },
+  ritual:      { emoji: '🕯️', label: 'Ritual' },
+  recipe:      { emoji: '🍳', label: 'Recipe' },
+  box:         { emoji: '📦', label: "What's in the Box?" },
+  plant:       { emoji: '🪴', label: 'Plant Profile' },
+  maintenance: { emoji: '🔧', label: 'Home Maintenance' },
+  travel:      { emoji: '✈️', label: 'Travel Journal' },
+  pet:         { emoji: '🐾', label: 'Pet Profile' },
+  book:        { emoji: '📖', label: 'Book Notes' },
+  goal:        { emoji: '🎯', label: 'Goal Tracker' },
+  journal:     { emoji: '📓', label: 'Journal' },
+}
+
 export default function HubCard({ hub, onTagClick }: { hub: Hub; onTagClick?: (tag: string) => void }) {
   const publicUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/h/${hub.slug}`
 
@@ -41,6 +55,11 @@ export default function HubCard({ hub, onTagClick }: { hub: Hub; onTagClick?: (t
           )}
         </div>
         <div className="flex flex-col items-end gap-1">
+          {hub.template_id && TEMPLATE_LABELS[hub.template_id] && (
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-stone-100 text-stone-500">
+              {TEMPLATE_LABELS[hub.template_id].emoji} {TEMPLATE_LABELS[hub.template_id].label}
+            </span>
+          )}
           <span
             className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
               hub.mode === 'redirect'
