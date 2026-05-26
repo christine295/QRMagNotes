@@ -129,6 +129,108 @@ Creates **8 content blocks** via `Promise.all` to the API route.
 | 7 | Music / Playlist | link | Starts closed (label matches `playlist`) |
 | 8 | Notes | text | Starts open (label matches `note`) |
 
+### Book / Reading Notes (`book`)
+Pre-fills: title "My Reading Notes", violet theme (`#8B5CF6`).  
+Creates **7 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | *(no label)* | image | Book cover photo |
+| 2 | Book Summary | text | Pre-filled: Title, Author, Genre, Year Published, Date Read, Rating, Summary |
+| 3 | Favorite Quotes | text | Passages worth keeping |
+| 4 | Reading Reflection | audio | Voice thoughts while reading or after finishing |
+| 5 | Author / Purchase Link | link | Author site, Goodreads, or purchase page |
+| 6 | Reading Progress | timeline | Start/pause/resume/finish log |
+| 7 | Thoughts & Insights | text | Deeper reflections, connections, things to act on |
+
+### Daily Reflection / Journal (`journal`)
+Pre-fills: title "My Journal", teal theme (`#14B8A6`).  
+Creates **6 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Daily Reflection | text | Freeform thoughts, feelings, observations |
+| 2 | *(no label)* | image | Photo of the day |
+| 3 | Voice Journal | audio | Spoken entry — what happened, how you felt |
+| 4 | Important Moments | timeline | Significant moments as they happen |
+| 5 | Daily Intentions | checklist | 3 items: Set intention, Prioritize top 3, End-of-day reflection |
+| 6 | Additional Thoughts | text | Anything else worth capturing |
+
+### Goal / Habit Tracker (`goal`)
+Pre-fills: title "My Goal", rose theme (`#F43F5E`).  
+Creates **6 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Goal Overview | text | Pre-filled: Goal, Why This Matters, Target Date, Success Looks Like |
+| 2 | Habit Checklist | checklist | 4 items: Morning routine, Exercise, Read/learn, Evening reflection |
+| 3 | Progress Log | timeline | Milestones, breakthroughs, and setbacks |
+| 4 | Progress Update | audio | Quick check-in voice note |
+| 5 | Related Resource | link | Optional book, course, or article |
+| 6 | Wins & Challenges | text | What's working and what isn't |
+
+### Home Maintenance Log (`maintenance`)
+Pre-fills: title "My Maintenance Log", teal theme (`#14B8A6`).  
+Creates **8 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | *(no label)* | image | Appliance or area photo |
+| 2 | Maintenance Information | text | Pre-filled: Item/Area, Brand/Model, Serial Number, Installed, Warranty Expiration |
+| 3 | Maintenance Tasks | checklist | 5 items: Inspect, Clean filters, Test, Check leaks, Schedule service |
+| 4 | Repair History | timeline | All repairs and service visits |
+| 5 | Manuals & Warranty | file | Manual and warranty document |
+| 6 | Service Contact | phone | Tap-to-call repair line |
+| 7 | Product Page | link | Optional product or parts page |
+| 8 | Additional Notes | text | Other notes |
+
+### Pet Profile (`pet`)
+Pre-fills: title "My Pet", amber theme (`#F59E0B`).  
+Creates **8 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | *(no label)* | image | Pet photos |
+| 2 | Pet Information | text | Pre-filled: Name, Species/Breed, Date of Birth, Markings, Microchip/ID # |
+| 3 | Care Tasks | checklist | 5 items: Morning feed, Evening feed, Water, Exercise/walk, Grooming |
+| 4 | Vet & Health History | timeline | Vet visits, medications, illnesses |
+| 5 | Veterinarian | phone | Tap-to-call vet number |
+| 6 | Vaccination Records | file | Vaccination and health certificates |
+| 7 | Pet Update | audio | Quick voice update on how the pet is doing |
+| 8 | Behavior / Preferences | text | Quirks, favorites, training notes, dietary restrictions |
+
+### Plant Profile (`plant`)
+Pre-fills: title "My Plant", green theme (`#22C55E`).  
+Creates **8 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | *(no label)* | image | Plant photo |
+| 2 | Plant Information | text | Pre-filled: Name, Species, Date Acquired, Where From, Pot Size |
+| 3 | Care Instructions | text | Pre-filled: Watering, Light, Soil, Temperature, Humidity, Fertilizing, Repotting |
+| 4 | Care Checklist | checklist | 5 items: Water, Check soil, Check pests, Wipe leaves, Rotate |
+| 5 | Growth & Care Log | timeline | Log milestones and care events |
+| 6 | Plant Update | audio | Voice update about the plant |
+| 7 | Care Guide | link | Optional care guide or species reference |
+| 8 | Seasonal Notes | text | Seasonal care adjustments |
+
+### Recipe (`recipe`)
+Pre-fills: title "My Recipe", orange theme (`#F97316`).  
+Creates **8 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | *(no label)* | image | Recipe photo — upload or paste URL |
+| 2 | Description | text | Short intro or context |
+| 3 | At a Glance | text | Pre-filled: Prep Time, Cook Time, Servings |
+| 4 | Ingredients | text | Freeform multiline — one ingredient per line or freeform |
+| 5 | Instructions | text | Freeform multiline — step-by-step method |
+| 6 | Notes | text | Tips, substitutions, variations, storage |
+| 7 | Video | link | Optional — YouTube, TikTok, etc. |
+| 8 | Source | link | Optional — original recipe URL |
+
+All 8 blocks start **open by default** (none of their labels match a closed keyword).
+
 ### Ritual Template (`ritual`)
 Pre-fills: title "My Ritual", description, violet theme (`#8B5CF6`).  
 Creates **14 content blocks** via `Promise.all` to the API route (RLS requires server-side auth context; direct client inserts fail silently).
@@ -150,22 +252,19 @@ Creates **14 content blocks** via `Promise.all` to the API route (RLS requires s
 | 13 | Photos | image | Altar or ritual photos |
 | 14 | Follow-Up | checklist | 7 actions: journal, offerings, cleanup, photos, tarot record, watch for signs, revisit |
 
-### Recipe (`recipe`)
-Pre-fills: title "My Recipe", orange theme (`#F97316`).  
-Creates **8 content blocks** via `Promise.all` to the API route.
+### Travel Journal (`travel`)
+Pre-fills: title "My Trip", blue theme (`#3B82F6`).  
+Creates **7 content blocks** via `Promise.all` to the API route.
 
 | # | Label | Type | Notes |
 |---|-------|------|-------|
-| 1 | *(no label)* | image | Recipe photo — upload or paste URL |
-| 2 | Description | text | Short intro or context |
-| 3 | At a Glance | text | Pre-filled: Prep Time, Cook Time, Servings |
-| 4 | Ingredients | text | Freeform multiline — one ingredient per line or freeform |
-| 5 | Instructions | text | Freeform multiline — step-by-step method |
-| 6 | Notes | text | Tips, substitutions, variations, storage |
-| 7 | Video | link | Optional — YouTube, TikTok, etc. |
-| 8 | Source | link | Optional — original recipe URL |
-
-All 8 blocks start **open by default** (none of their labels match a closed keyword).
+| 1 | *(no label)* | image | Trip photos |
+| 2 | Trip Overview | text | Pre-filled: Destination, Dates, Traveling With, Accommodation, Purpose |
+| 3 | Travel Timeline | timeline | Day-by-day events and destinations |
+| 4 | Maps / Reservations | link | Maps, bookings, or itineraries |
+| 5 | Packing List | checklist | 6 items: Passport/ID, Phone+charger, Medications, Insurance, Cash/cards, Shoes |
+| 6 | Travel Reflection | audio | Voice reflection from the road or after returning |
+| 7 | Recommendations | text | Restaurants, places, tips to remember |
 
 ### What's in the Box? (`box`)
 Pre-fills: title "My Box", slate theme (`#64748B`).  
@@ -181,105 +280,6 @@ Creates **8 content blocks** via `Promise.all` to the API route.
 | 6 | Added / Removed Items | timeline | Log changes over time |
 | 7 | Manuals or Documents | file | Related documents |
 | 8 | Additional Notes | text | Condition, fragile warnings, etc. |
-
-### Plant Profile (`plant`)
-Pre-fills: title "My Plant", green theme (`#22C55E`).  
-Creates **8 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | *(no label)* | image | Plant photo |
-| 2 | Plant Information | text | Pre-filled: Name, Species, Date Acquired, Where From, Pot Size |
-| 3 | Care Instructions | text | Pre-filled: Watering, Light, Soil, Temperature, Humidity, Fertilizing, Repotting |
-| 4 | Care Checklist | checklist | 5 items: Water, Check soil, Check pests, Wipe leaves, Rotate |
-| 5 | Growth & Care Log | timeline | Log milestones and care events |
-| 6 | Plant Update | audio | Voice update about the plant |
-| 7 | Care Guide | link | Optional care guide or species reference |
-| 8 | Seasonal Notes | text | Seasonal care adjustments |
-
-### Home Maintenance Log (`maintenance`)
-Pre-fills: title "My Maintenance Log", teal theme (`#14B8A6`).  
-Creates **8 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | *(no label)* | image | Appliance or area photo |
-| 2 | Maintenance Information | text | Pre-filled: Item/Area, Brand/Model, Serial Number, Installed, Warranty Expiration |
-| 3 | Maintenance Tasks | checklist | 5 items: Inspect, Clean filters, Test, Check leaks, Schedule service |
-| 4 | Repair History | timeline | All repairs and service visits |
-| 5 | Manuals & Warranty | file | Manual and warranty document |
-| 6 | Service Contact | phone | Tap-to-call repair line |
-| 7 | Product Page | link | Optional product or parts page |
-| 8 | Additional Notes | text | Other notes |
-
-### Travel Journal (`travel`)
-Pre-fills: title "My Trip", blue theme (`#3B82F6`).  
-Creates **7 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | *(no label)* | image | Trip photos |
-| 2 | Trip Overview | text | Pre-filled: Destination, Dates, Traveling With, Accommodation, Purpose |
-| 3 | Travel Timeline | timeline | Day-by-day events and destinations |
-| 4 | Maps / Reservations | link | Maps, bookings, or itineraries |
-| 5 | Packing List | checklist | 6 items: Passport/ID, Phone+charger, Medications, Insurance, Cash/cards, Shoes |
-| 6 | Travel Reflection | audio | Voice reflection from the road or after returning |
-| 7 | Recommendations | text | Restaurants, places, tips to remember |
-
-### Pet Profile (`pet`)
-Pre-fills: title "My Pet", amber theme (`#F59E0B`).  
-Creates **8 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | *(no label)* | image | Pet photos |
-| 2 | Pet Information | text | Pre-filled: Name, Species/Breed, Date of Birth, Markings, Microchip/ID # |
-| 3 | Care Tasks | checklist | 5 items: Morning feed, Evening feed, Water, Exercise/walk, Grooming |
-| 4 | Vet & Health History | timeline | Vet visits, medications, illnesses |
-| 5 | Veterinarian | phone | Tap-to-call vet number |
-| 6 | Vaccination Records | file | Vaccination and health certificates |
-| 7 | Pet Update | audio | Quick voice update on how the pet is doing |
-| 8 | Behavior / Preferences | text | Quirks, favorites, training notes, dietary restrictions |
-
-### Book / Reading Notes (`book`)
-Pre-fills: title "My Reading Notes", violet theme (`#8B5CF6`).  
-Creates **7 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | *(no label)* | image | Book cover photo |
-| 2 | Book Summary | text | Pre-filled: Title, Author, Genre, Year Published, Date Read, Rating, Summary |
-| 3 | Favorite Quotes | text | Passages worth keeping |
-| 4 | Reading Reflection | audio | Voice thoughts while reading or after finishing |
-| 5 | Author / Purchase Link | link | Author site, Goodreads, or purchase page |
-| 6 | Reading Progress | timeline | Start/pause/resume/finish log |
-| 7 | Thoughts & Insights | text | Deeper reflections, connections, things to act on |
-
-### Goal / Habit Tracker (`goal`)
-Pre-fills: title "My Goal", rose theme (`#F43F5E`).  
-Creates **6 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | Goal Overview | text | Pre-filled: Goal, Why This Matters, Target Date, Success Looks Like |
-| 2 | Habit Checklist | checklist | 4 items: Morning routine, Exercise, Read/learn, Evening reflection |
-| 3 | Progress Log | timeline | Milestones, breakthroughs, and setbacks |
-| 4 | Progress Update | audio | Quick check-in voice note |
-| 5 | Related Resource | link | Optional book, course, or article |
-| 6 | Wins & Challenges | text | What's working and what isn't |
-
-### Daily Reflection / Journal (`journal`)
-Pre-fills: title "My Journal", teal theme (`#14B8A6`).  
-Creates **6 content blocks** via `Promise.all` to the API route.
-
-| # | Label | Type | Notes |
-|---|-------|------|-------|
-| 1 | Daily Reflection | text | Freeform thoughts, feelings, observations |
-| 2 | *(no label)* | image | Photo of the day |
-| 3 | Voice Journal | audio | Spoken entry — what happened, how you felt |
-| 4 | Important Moments | timeline | Significant moments as they happen |
-| 5 | Daily Intentions | checklist | 3 items: Set intention, Prioritize top 3, End-of-day reflection |
-| 6 | Additional Thoughts | text | Anything else worth capturing |
 
 ---
 
