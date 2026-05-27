@@ -103,6 +103,15 @@ const TEMPLATES: Template[] = [
     themeColor: '#14B8A6',
   },
   {
+    id: 'hub_collector',
+    label: 'Hub Collector',
+    emoji: '🔗',
+    description: 'A public button menu linking to hubs from your collections — like Linktree for your QR content',
+    title: 'My Hub Collection',
+    hubDescription: '',
+    themeColor: '#3B82F6',
+  },
+  {
     id: 'pet',
     label: 'Pet Profile',
     emoji: '🐾',
@@ -507,6 +516,11 @@ const RITUAL_BLOCKS = [
   },
 ]
 
+const HUB_COLLECTOR_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Introduction', text: '' } },
+  { type: 'collection_menu' as const, data: { collection_id: '', excluded_hub_ids: [] } },
+]
+
 const GARDEN_BLOCKS = [
   { type: 'text' as const, data: { label: 'Garden Overview', text: 'Location, sunlight, soil notes, garden goals, seasonal plans.' } },
   { type: 'checklist' as const, data: { label: 'Planting List', items: [
@@ -687,7 +701,8 @@ const BLOCKS_BY_TEMPLATE: Record<string, { type: string; data: object }[]> = {
   book:        BOOK_BLOCKS,
   goal:        GOAL_BLOCKS,
   journal:     JOURNAL_BLOCKS,
-  garden:      GARDEN_BLOCKS,
+  hub_collector: HUB_COLLECTOR_BLOCKS,
+  garden:        GARDEN_BLOCKS,
   grocery:     GROCERY_BLOCKS,
   packing:     PACKING_BLOCKS,
   vehicle:     VEHICLE_BLOCKS,
@@ -706,7 +721,8 @@ const TAG_PLACEHOLDERS: Record<string, string> = {
   book:        'Type a tag and press Enter — e.g. fiction, recommended, 2024',
   goal:        'Type a tag and press Enter — e.g. fitness, learning, 2024',
   journal:     'Type a tag and press Enter — e.g. daily, gratitude, 2024',
-  garden:      'Type a tag and press Enter — e.g. vegetable, herb, spring',
+  hub_collector: 'Type a tag and press Enter — e.g. recipes, portfolio, family',
+  garden:        'Type a tag and press Enter — e.g. vegetable, herb, spring',
   grocery:     'Type a tag and press Enter — e.g. weekly, family, meal-prep',
   packing:     'Type a tag and press Enter — e.g. vacation, weekend, family-trip',
   vehicle:     'Type a tag and press Enter — e.g. honda, 2020, sedan',

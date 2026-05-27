@@ -5,20 +5,22 @@ import { ContentBlock } from '@/lib/types'
 
 // ── Types & metadata ─────────────────────────────────────────────────────────
 
-type BlockType = 'text' | 'checklist' | 'image' | 'timeline' | 'audio' | 'link' | 'phone' | 'file'
+type BlockType = 'text' | 'checklist' | 'image' | 'timeline' | 'audio' | 'link' | 'phone' | 'file' | 'collection_menu'
 
 const BLOCK_TYPE_META: Record<BlockType, { label: string; summary: string }> = {
-  text:      { label: 'Text / Note',  summary: 'Paragraphs, stories, instructions' },
-  checklist: { label: 'Checklist',    summary: 'Tappable to-do items' },
-  image:     { label: 'Image',        summary: 'Photo with optional caption' },
-  timeline:  { label: 'Timeline',     summary: 'Dated events or history log' },
-  audio:     { label: 'Voice Note',   summary: 'Record or upload audio' },
-  link:      { label: 'Link Button',  summary: 'Clickable link or URL button' },
-  phone:     { label: 'Phone Number', summary: 'Tap-to-call button' },
-  file:      { label: 'File / PDF',   summary: 'Upload a PDF or file' },
+  text:            { label: 'Text / Note',    summary: 'Paragraphs, stories, instructions' },
+  checklist:       { label: 'Checklist',      summary: 'Tappable to-do items' },
+  image:           { label: 'Image',          summary: 'Photo with optional caption' },
+  timeline:        { label: 'Timeline',       summary: 'Dated events or history log' },
+  audio:           { label: 'Voice Note',     summary: 'Record or upload audio' },
+  link:            { label: 'Link Button',    summary: 'Clickable link or URL button' },
+  phone:           { label: 'Phone Number',   summary: 'Tap-to-call button' },
+  file:            { label: 'File / PDF',     summary: 'Upload a PDF or file' },
+  collection_menu: { label: 'Hub Collector',  summary: 'Button menu from a collection of hubs' },
 }
 
-type TextData      = { label: string; text: string; date?: string }
+type TextData           = { label: string; text: string; date?: string }
+type CollectionMenuData = { collection_id: string; excluded_hub_ids: string[] }
 type ChecklistData = { label: string; items: { id: string; text: string }[] }
 type ImageData     = { caption: string; url: string }
 type TimelineData  = { label: string; events: { id: string; date: string; text: string }[] }
@@ -39,9 +41,10 @@ function blockHasContent(block: ContentBlock): boolean {
     case 'link':      return !!(d.url?.trim())
     case 'phone':     return !!(d.url?.trim())
     case 'file':      return !!(d.url?.trim())
-    case 'checklist': return Array.isArray(d.items) && d.items.length > 0
-    case 'timeline':  return Array.isArray(d.events) && d.events.length > 0
-    default:          return false
+    case 'checklist':       return Array.isArray(d.items) && d.items.length > 0
+    case 'timeline':        return Array.isArray(d.events) && d.events.length > 0
+    case 'collection_menu': return !!(d.collection_id?.trim())
+    default:                return false
   }
 }
 
@@ -55,8 +58,9 @@ function blockSummary(block: ContentBlock): string {
     case 'audio':     return d.label || 'Voice note'
     case 'link':      return d.label || d.url || 'Link'
     case 'phone':     return d.label || d.url || 'Phone'
-    case 'file':      return d.label || 'File'
-    default:          return block.type
+    case 'file':            return d.label || 'File'
+    case 'collection_menu': return d.collection_id ? 'Collection linked' : 'No collection selected'
+    default:                return block.type
   }
 }
 
@@ -158,9 +162,10 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
               {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
               {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onCancel={cancel} />}
               {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} templateId={templateId} onSave={save} onCancel={cancel} />}
-              {block.type === 'link'      && <LinkForm      initialData={d} onSave={save} onCancel={cancel} />}
-              {block.type === 'phone'     && <PhoneForm     initialData={d} onSave={save} onCancel={cancel} />}
-              {block.type === 'file'      && <FileForm      initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
+              {block.type === 'link'            && <LinkForm            initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'phone'           && <PhoneForm           initialData={d} onSave={save} onCancel={cancel} />}
+              {block.type === 'file'            && <FileForm            initialData={d} hubId={hubId} blockIndex={index} onSave={save} onCancel={cancel} />}
+              {block.type === 'collection_menu' && <CollectionMenuForm  initialData={d} onSave={save} onCancel={cancel} />}
             </div>
           )
         }
@@ -257,9 +262,10 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
       {addingType === 'image'     && <ImageForm     hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('image', d)} onCancel={() => setAddingType(null)} />}
       {addingType === 'timeline'  && <TimelineForm  onSave={d => saveBlock('timeline', d)}  onCancel={() => setAddingType(null)} />}
       {addingType === 'audio'     && <AudioForm     hubId={hubId} templateId={templateId} onSave={d => saveBlock('audio', d)} onCancel={() => setAddingType(null)} />}
-      {addingType === 'link'      && <LinkForm      onSave={d => saveBlock('link', d)}      onCancel={() => setAddingType(null)} />}
-      {addingType === 'phone'     && <PhoneForm     onSave={d => saveBlock('phone', d)}     onCancel={() => setAddingType(null)} />}
-      {addingType === 'file'      && <FileForm      hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('file', d)} onCancel={() => setAddingType(null)} />}
+      {addingType === 'link'            && <LinkForm           onSave={d => saveBlock('link', d)}            onCancel={() => setAddingType(null)} />}
+      {addingType === 'phone'           && <PhoneForm          onSave={d => saveBlock('phone', d)}           onCancel={() => setAddingType(null)} />}
+      {addingType === 'file'            && <FileForm           hubId={hubId} blockIndex={blocks.length} onSave={d => saveBlock('file', d)} onCancel={() => setAddingType(null)} />}
+      {addingType === 'collection_menu' && <CollectionMenuForm onSave={d => saveBlock('collection_menu', d)} onCancel={() => setAddingType(null)} />}
     </div>
   )
 }
@@ -790,6 +796,119 @@ function PhoneForm({ onSave, onCancel, initialData }: { onSave: (d: PhoneData) =
         placeholder="555-123-4567"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} /></div>
+    </FormShell>
+  )
+}
+
+// ── Collection menu form ──────────────────────────────────────────────────────
+
+function CollectionMenuForm({ onSave, onCancel, initialData }: {
+  onSave: (d: CollectionMenuData) => Promise<any>
+  onCancel: () => void
+  initialData?: CollectionMenuData
+}) {
+  const [collectionId, setCollectionId] = useState(initialData?.collection_id ?? '')
+  const [excludedIds, setExcludedIds] = useState<string[]>(initialData?.excluded_hub_ids ?? [])
+  const [collections, setCollections] = useState<{ id: string; title: string }[]>([])
+  const [hubs, setHubs] = useState<{ id: string; title: string; privacy_mode: string }[]>([])
+  const [loadingCollections, setLoadingCollections] = useState(true)
+  const [loadingHubs, setLoadingHubs] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function load() {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('collections')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .order('title')
+      setCollections(data ?? [])
+      setLoadingCollections(false)
+    }
+    load()
+  }, [])
+
+  useEffect(() => {
+    if (!collectionId) { setHubs([]); return }
+    setLoadingHubs(true)
+    async function load() {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('hubs')
+        .select('id, title, privacy_mode')
+        .eq('collection_id', collectionId)
+        .order('title')
+      setHubs(data ?? [])
+      setLoadingHubs(false)
+    }
+    load()
+  }, [collectionId])
+
+  function toggleExclude(id: string) {
+    setExcludedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  async function submit() {
+    if (!collectionId) { setError('Please select a collection.'); return }
+    setSaving(true)
+    const res = await onSave({ collection_id: collectionId, excluded_hub_ids: excludedIds })
+    if (res?.error) { setError(res.error); setSaving(false) }
+  }
+
+  return (
+    <FormShell title="Hub Collector" onCancel={onCancel}>
+      <div>
+        <label className="block text-xs font-medium text-gray-500 mb-1.5">Collection</label>
+        <select
+          value={collectionId}
+          onChange={e => { setCollectionId(e.target.value); setExcludedIds([]) }}
+          disabled={loadingCollections}
+          title="Select collection"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">{loadingCollections ? 'Loading…' : 'Select a collection…'}</option>
+          {collections.map(c => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </select>
+      </div>
+
+      {collectionId && (
+        <div>
+          <p className="text-xs font-medium text-gray-500 mb-2">
+            {loadingHubs ? 'Loading hubs…' : 'Visible hubs — uncheck to hide from the public menu'}
+          </p>
+          {!loadingHubs && hubs.length === 0 && (
+            <p className="text-sm text-gray-400 italic">No hubs in this collection yet.</p>
+          )}
+          {!loadingHubs && hubs.map(hub => (
+            <label key={hub.id} className="flex items-start gap-2.5 cursor-pointer mb-2">
+              <input
+                type="checkbox"
+                checked={!excludedIds.includes(hub.id)}
+                onChange={() => toggleExclude(hub.id)}
+                className="mt-0.5 rounded border-gray-300"
+              />
+              <span className="text-sm text-gray-700 flex-1">{hub.title}</span>
+              {hub.privacy_mode === 'private' && (
+                <span className="text-xs text-amber-500 mt-0.5 flex-shrink-0">private — won&apos;t show publicly</span>
+              )}
+              {hub.privacy_mode === 'unlisted' && (
+                <span className="text-xs text-gray-400 mt-0.5 flex-shrink-0">unlisted</span>
+              )}
+            </label>
+          ))}
+        </div>
+      )}
+
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <div className="flex gap-2" onClick={submit}><SaveButton saving={saving} /></div>
     </FormShell>

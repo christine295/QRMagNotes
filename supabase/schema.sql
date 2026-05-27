@@ -150,7 +150,7 @@ create policy "Users can delete own collections"
 create table public.content_blocks (
   id uuid primary key default gen_random_uuid(),
   hub_id uuid not null references public.hubs(id) on delete cascade,
-  type text not null check (type in ('text', 'image', 'audio', 'file', 'link', 'phone', 'checklist', 'timeline', 'note')),
+  type text not null check (type in ('text', 'image', 'audio', 'file', 'link', 'phone', 'checklist', 'timeline', 'note', 'collection_menu')),
   data jsonb not null,
   sort_order integer not null default 0,
   created_at timestamp with time zone default now(),
@@ -242,3 +242,11 @@ create policy "View hub_links based on hub privacy"
         and (hubs.privacy_mode in ('public', 'unlisted') or hubs.user_id = auth.uid())
     )
   );
+
+-- ==================
+-- Hub Collector: add collection_menu block type
+-- ==================
+-- Run in Supabase SQL Editor to enable the Hub Collector template
+ALTER TABLE public.content_blocks DROP CONSTRAINT IF EXISTS content_blocks_type_check;
+ALTER TABLE public.content_blocks ADD CONSTRAINT content_blocks_type_check
+  CHECK (type IN ('text', 'image', 'audio', 'file', 'link', 'phone', 'checklist', 'timeline', 'note', 'collection_menu'));

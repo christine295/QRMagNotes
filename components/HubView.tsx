@@ -191,11 +191,13 @@ function Section({ type, label, open, onToggle, children }: {
 
 // ── Main view ─────────────────────────────────────────────────────────────────
 
-export default function HubView({ hub, blocks, color, isOwner }: {
+export default function HubView({ hub, blocks, color, isOwner, username, collectionHubs }: {
   hub: any
   blocks: any[]
   color: string
   isOwner: boolean
+  username: string
+  collectionHubs?: Record<string, any[]>
 }) {
   const [open, setOpen] = useState<Record<string, boolean>>(() => {
     const s: Record<string, boolean> = {}
@@ -308,6 +310,43 @@ export default function HubView({ hub, blocks, color, isOwner }: {
                     {d.caption && (
                       <p className="text-xs text-stone-400 mt-2.5 leading-relaxed">{d.caption}</p>
                     )}
+                  </div>
+                )
+              }
+
+              // ── Collection menu — Linktree-style hub button grid ───────────
+              if (block.type === 'collection_menu') {
+                const menuHubs = collectionHubs?.[block.id] ?? []
+                if (menuHubs.length === 0) {
+                  return isOwner ? (
+                    <div key={block.id} className="py-4 text-sm text-stone-400 italic">
+                      Hub Collector — no visible hubs in this collection yet.
+                    </div>
+                  ) : null
+                }
+                return (
+                  <div key={block.id} className="py-5 space-y-3">
+                    {menuHubs.map((h: any) => (
+                      <a
+                        key={h.id}
+                        href={`/h/${username}/${h.slug}`}
+                        className="block rounded-xl px-5 py-4 transition-all hover:opacity-90 active:scale-[0.99]"
+                        style={{
+                          backgroundColor: `${h.theme_color ?? color}14`,
+                          borderLeft: `4px solid ${h.theme_color ?? color}`,
+                        }}
+                      >
+                        <div className="font-semibold text-stone-800 text-[0.9375rem] tracking-[-0.005em]">
+                          {h.title}
+                        </div>
+                        {h.description && (
+                          <div className="text-sm text-stone-500 mt-0.5 leading-snug">{h.description}</div>
+                        )}
+                        {isOwner && h.privacy_mode === 'private' && (
+                          <div className="text-xs text-amber-500 mt-1">Private — only visible to you</div>
+                        )}
+                      </a>
+                    ))}
                   </div>
                 )
               }

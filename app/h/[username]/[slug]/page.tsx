@@ -67,6 +67,22 @@ export default async function PublicHubPage({ params }: { params: Promise<{ user
     .eq('hub_id', hub.id)
     .order('sort_order')
 
+  // Pre-fetch hubs for any collection_menu blocks
+  const menuBlocks = (contentBlocks ?? []).filter((b: any) => b.type === 'collection_menu')
+  const collectionHubs: Record<string, any[]> = {}
+
+  await Promise.all(menuBlocks.map(async (block: any) => {
+    const { collection_id, excluded_hub_ids = [] } = block.data ?? {}
+    if (!collection_id) return
+    const { data: hubs } = await supabase
+      .from('hubs')
+      .select('id, title, description, theme_color, slug, privacy_mode, template_id')
+      .eq('collection_id', collection_id)
+      .order('updated_at', { ascending: false })
+    // RLS already filters private hubs for non-owners; also remove explicitly excluded ones
+    collectionHubs[block.id] = (hubs ?? []).filter((h: any) => !excluded_hub_ids.includes(h.id))
+  }))
+
   const color = hub.theme_color ?? '#3B82F6'
 
   return (
@@ -75,6 +91,8 @@ export default async function PublicHubPage({ params }: { params: Promise<{ user
       blocks={contentBlocks ?? []}
       color={color}
       isOwner={isOwner}
+      username={username}
+      collectionHubs={collectionHubs}
     />
   )
 }

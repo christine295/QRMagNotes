@@ -36,7 +36,7 @@ export type Collection = {
 export type ContentBlock = {
   id: string
   hub_id: string
-  type: 'text' | 'image' | 'audio' | 'file' | 'link' | 'phone' | 'checklist' | 'timeline' | 'note'
+  type: 'text' | 'image' | 'audio' | 'file' | 'link' | 'phone' | 'checklist' | 'timeline' | 'note' | 'collection_menu'
   data: any
   sort_order: number
   created_at: string
