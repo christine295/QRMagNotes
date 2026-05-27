@@ -923,24 +923,24 @@ export default function HubForm({ hub, userId, username, initialCollectionId }: 
         <div className="flex gap-3 pt-2">
           <button
             type="button"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => window.open(`/h/${username}/${slug}`, '_blank')}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
           >
-            Done
-          </button>
-          <button
-            type="button"
-            onClick={() => window.open(`/h/${username}/${slug}`, '_blank')}
-            className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            View hub
+            View Hub
           </button>
           <button
             type="button"
             onClick={() => router.push(`/dashboard/hub/${createdHubId}/edit`)}
             className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Edit settings
+            Edit Settings
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard')}
+            className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Collections
           </button>
         </div>
       </div>
