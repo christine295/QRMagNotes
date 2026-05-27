@@ -530,6 +530,11 @@ const AUDIO_SUGGESTIONS: Record<string, string[]> = {
   book:        ['Reading Reflection', 'Book Review', 'Favorite Passage', 'Character Notes', 'What Stayed With Me'],
   goal:        ['Progress Update', 'Weekly Review', 'Wins & Lessons', 'Motivation Check-in', 'What I Learned'],
   journal:     ['Morning Reflection', 'Evening Wind-Down', 'Gratitude', 'Daily Highlight', 'What I Want to Remember'],
+  garden:      ['Quick Garden Observation', 'What I Noticed', 'Pest or Disease Note', 'Harvest Note', 'Seasonal Update'],
+  grocery:     ['Shopping Reminder', 'Brand Note', 'What We Ran Out Of'],
+  packing:     ['Packing Reminder', 'Last-Minute Note', 'What I Forgot', 'Trip Note'],
+  vehicle:     ['Repair Note', 'What the Mechanic Said', 'Sound or Issue', 'Mileage Note'],
+  workout:     ['Post-Workout Note', 'Form Reminder', 'PR Celebration', 'How It Went', 'What to Adjust Next Time'],
   default:     ['Introduction', 'Overview', 'Notes', 'Story', 'Reflection', 'Tips & Ideas'],
 }
 
@@ -545,6 +550,11 @@ const CHECKLIST_LABEL_PLACEHOLDER: Record<string, string> = {
   book:        'Label — e.g. Reading Goals',
   goal:        'Label — e.g. Habit Checklist',
   journal:     'Label — e.g. Daily Intentions',
+  garden:      'Label — e.g. Planting List, Garden Tasks',
+  grocery:     'Label — e.g. Produce, Pantry',
+  packing:     'Label — e.g. Essentials, Clothing',
+  vehicle:     'Label — e.g. Routine Maintenance',
+  workout:     'Label — e.g. Warmup, Workout Exercises',
   default:     'Label — e.g. Steps to Complete',
 }
 

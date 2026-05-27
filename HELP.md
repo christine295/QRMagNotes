@@ -289,6 +289,88 @@ Creates **8 content blocks** via `Promise.all` to the API route.
 | 7 | Manuals or Documents | file | Related documents |
 | 8 | Additional Notes | text | Condition, fragile warnings, etc. |
 
+### Garden Planner (`garden`)
+Pre-fills: title "My Garden", teal theme (`#14B8A6`).  
+Creates **9 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Garden Overview | text | Pre-filled: Location, sunlight, soil notes, goals, seasonal plans |
+| 2 | Planting List | checklist | 6 items: Tomatoes, Basil, Peppers, Lettuce, Flowers, Herbs |
+| 3 | Companion Planting Notes | text | Pre-filled: what grows together, what to keep apart |
+| 4 | Garden Log | timeline | Seeds started, transplanted, fertilized, first harvest, pest issues |
+| 5 | Garden Tasks | checklist | 6 items: Water, Weed, Prune, Fertilize, Check pests, Harvest |
+| 6 | *(no label)* | image | Garden photos |
+| 7 | Quick Garden Observation | audio | Voice note recorded in the garden |
+| 8 | Planting Guide | link | Optional external planting guide or resource |
+| 9 | Harvest Notes | text | Yield, flavor, what to grow again |
+
+### Grocery List (`grocery`)
+Pre-fills: title "Grocery List", green theme (`#22C55E`).  
+Creates **10 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Meal Plan Notes | text | Pre-filled: meals for the week, recipe reminders, household requests |
+| 2 | Produce | checklist | 5 items: Lettuce/greens, Tomatoes, Onions, Potatoes, Fruit |
+| 3 | Meat & Seafood | checklist | 4 items: Chicken, Ground beef, Lunch meat, Fish/seafood |
+| 4 | Dairy & Eggs | checklist | 5 items: Milk, Eggs, Cheese, Yogurt, Butter |
+| 5 | Pantry | checklist | 5 items: Pasta/rice, Canned goods, Bread, Cereal, Snacks |
+| 6 | Spices & Baking | checklist | 5 items: Salt/pepper, Garlic powder, Flour, Sugar, Baking items |
+| 7 | Frozen | checklist | 3 items: Frozen vegetables, Frozen meals, Ice cream |
+| 8 | Household | checklist | 4 items: Paper towels, Toilet paper, Cleaning supplies, Trash bags |
+| 9 | Recipe Link | link | Optional — link to a recipe being shopped for |
+| 10 | Store Notes / Coupons | text | Coupon reminders, store-specific notes, brand preferences |
+
+### Travel Packing List (`packing`)
+Pre-fills: title "Packing List", amber theme (`#F59E0B`).  
+Creates **11 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Trip Details | text | Pre-filled: Destination, dates, weather, travel companions, notes |
+| 2 | Essentials | checklist | 6 items: Wallet, ID/passport, Keys, Phone, Charger, Medications |
+| 3 | Clothing | checklist | 7 items: Shirts, Pants/shorts, Pajamas, Socks, Underwear, Shoes, Jacket |
+| 4 | Toiletries | checklist | 6 items: Toothbrush, Toothpaste, Shampoo, Deodorant, Hairbrush, Makeup/skincare |
+| 5 | Tech | checklist | 5 items: Phone charger, Laptop/tablet, Headphones, Power bank, Camera |
+| 6 | Travel Documents | checklist | 5 items: Tickets, Hotel confirmation, Rental car, Insurance cards, Emergency contacts |
+| 7 | Itinerary / Tickets | file | Upload PDF or paste URL |
+| 8 | Hotel / Airbnb | link | Booking confirmation link |
+| 9 | Map / Directions | link | Maps, navigation, or offline directions |
+| 10 | Emergency Contact | phone | Tap-to-call emergency contact number |
+| 11 | Last-Minute Reminders | text | Things to do before leaving or on the way |
+
+### Vehicle Maintenance (`vehicle`)
+Pre-fills: title "My Vehicle", slate theme (`#64748B`).  
+Creates **9 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Vehicle Details | text | Pre-filled: Year, Make, Model/Trim, VIN, License Plate, Color |
+| 2 | Important Specs | text | Pre-filled: Oil type, Tire size, Wiper blade size, Battery type, Preferred fuel |
+| 3 | Maintenance Log | timeline | Oil changes, tire rotations, inspections, repairs |
+| 4 | Routine Maintenance | checklist | 8 items: Oil change, Tire pressure, Tire rotation, Wipers, Air filter, Cabin filter, Brakes, Inspection |
+| 5 | Mechanic | phone | Tap-to-call mechanic |
+| 6 | Roadside Assistance | phone | Tap-to-call roadside line |
+| 7 | Insurance / Registration | file | Upload or link insurance card and registration |
+| 8 | *(no label)* | image | Receipts / damage photos (caption pre-set) |
+| 9 | Notes for Next Service | text | What to mention, check, or fix at the next appointment |
+
+### Workout Tracker (`workout`)
+Pre-fills: title "My Workout", rose theme (`#F43F5E`).  
+Creates **8 content blocks** via `Promise.all` to the API route.
+
+| # | Label | Type | Notes |
+|---|-------|------|-------|
+| 1 | Workout Goal | text | Pre-filled: strength, endurance, mobility, weight loss, consistency, recovery prompt |
+| 2 | Warmup | checklist | 4 items: Light cardio, Dynamic stretching, Mobility work, Warmup sets |
+| 3 | Workout Exercises | checklist | 5 items: Exercise 1–5 with sets/reps/weight placeholder |
+| 4 | Current Weights / PRs | text | Pre-filled: track weights, reps, PRs, progress notes |
+| 5 | Workout Log | timeline | Log each session — date, what was completed, how it went |
+| 6 | Workout Playlist or Video | link | Spotify playlist or YouTube workout video |
+| 7 | Quick Gym Note | audio | Voice note recorded at the gym |
+| 8 | Post-Workout Notes | text | Pre-filled: how it felt, what to change next time |
+
 ---
 
 ## Public view design notes

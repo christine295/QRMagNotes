@@ -138,6 +138,51 @@ const TEMPLATES: Template[] = [
     hubDescription: '',
     themeColor: '#64748B',
   },
+  {
+    id: 'garden',
+    label: 'Garden Planner',
+    emoji: '🌱',
+    description: 'Plan and track your garden with planting lists, care tasks, and seasonal notes',
+    title: 'My Garden',
+    hubDescription: '',
+    themeColor: '#14B8A6',
+  },
+  {
+    id: 'grocery',
+    label: 'Grocery List',
+    emoji: '🛒',
+    description: 'A reusable household shopping list organized by category',
+    title: 'Grocery List',
+    hubDescription: '',
+    themeColor: '#22C55E',
+  },
+  {
+    id: 'packing',
+    label: 'Travel Packing List',
+    emoji: '🧳',
+    description: 'A reusable packing checklist for any trip',
+    title: 'Packing List',
+    hubDescription: '',
+    themeColor: '#F59E0B',
+  },
+  {
+    id: 'vehicle',
+    label: 'Vehicle Maintenance',
+    emoji: '🚗',
+    description: "Track your car's specs, maintenance history, and key service contacts",
+    title: 'My Vehicle',
+    hubDescription: '',
+    themeColor: '#64748B',
+  },
+  {
+    id: 'workout',
+    label: 'Workout Tracker',
+    emoji: '💪',
+    description: 'Log exercises, track weights, and note progress after every session',
+    title: 'My Workout',
+    hubDescription: '',
+    themeColor: '#F43F5E',
+  },
 ]
 
 const BOX_BLOCKS = [
@@ -462,6 +507,174 @@ const RITUAL_BLOCKS = [
   },
 ]
 
+const GARDEN_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Garden Overview', text: 'Location, sunlight, soil notes, garden goals, seasonal plans.' } },
+  { type: 'checklist' as const, data: { label: 'Planting List', items: [
+    { id: 'gd-p1', text: 'Tomatoes' },
+    { id: 'gd-p2', text: 'Basil' },
+    { id: 'gd-p3', text: 'Peppers' },
+    { id: 'gd-p4', text: 'Lettuce' },
+    { id: 'gd-p5', text: 'Flowers' },
+    { id: 'gd-p6', text: 'Herbs' },
+  ] } },
+  { type: 'text' as const, data: { label: 'Companion Planting Notes', text: 'What grows well together? What should be kept apart?' } },
+  { type: 'timeline' as const, data: { label: 'Garden Log', events: [] } },
+  { type: 'checklist' as const, data: { label: 'Garden Tasks', items: [
+    { id: 'gd-t1', text: 'Water' },
+    { id: 'gd-t2', text: 'Weed' },
+    { id: 'gd-t3', text: 'Prune' },
+    { id: 'gd-t4', text: 'Fertilize' },
+    { id: 'gd-t5', text: 'Check for pests' },
+    { id: 'gd-t6', text: 'Harvest' },
+  ] } },
+  { type: 'image' as const, data: { url: '', caption: '' } },
+  { type: 'audio' as const, data: { label: 'Quick Garden Observation', url: '' } },
+  { type: 'link' as const, data: { label: 'Planting Guide', url: '' } },
+  { type: 'text' as const, data: { label: 'Harvest Notes', text: '' } },
+]
+
+const GROCERY_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Meal Plan Notes', text: 'Meals planned for the week, recipe reminders, or household requests.' } },
+  { type: 'checklist' as const, data: { label: 'Produce', items: [
+    { id: 'gr-p1', text: 'Lettuce / greens' },
+    { id: 'gr-p2', text: 'Tomatoes' },
+    { id: 'gr-p3', text: 'Onions' },
+    { id: 'gr-p4', text: 'Potatoes' },
+    { id: 'gr-p5', text: 'Fruit' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Meat & Seafood', items: [
+    { id: 'gr-m1', text: 'Chicken' },
+    { id: 'gr-m2', text: 'Ground beef' },
+    { id: 'gr-m3', text: 'Lunch meat' },
+    { id: 'gr-m4', text: 'Fish / seafood' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Dairy & Eggs', items: [
+    { id: 'gr-d1', text: 'Milk' },
+    { id: 'gr-d2', text: 'Eggs' },
+    { id: 'gr-d3', text: 'Cheese' },
+    { id: 'gr-d4', text: 'Yogurt' },
+    { id: 'gr-d5', text: 'Butter' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Pantry', items: [
+    { id: 'gr-n1', text: 'Pasta / rice' },
+    { id: 'gr-n2', text: 'Canned goods' },
+    { id: 'gr-n3', text: 'Bread' },
+    { id: 'gr-n4', text: 'Cereal' },
+    { id: 'gr-n5', text: 'Snacks' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Spices & Baking', items: [
+    { id: 'gr-s1', text: 'Salt / pepper' },
+    { id: 'gr-s2', text: 'Garlic powder' },
+    { id: 'gr-s3', text: 'Flour' },
+    { id: 'gr-s4', text: 'Sugar' },
+    { id: 'gr-s5', text: 'Baking items' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Frozen', items: [
+    { id: 'gr-f1', text: 'Frozen vegetables' },
+    { id: 'gr-f2', text: 'Frozen meals' },
+    { id: 'gr-f3', text: 'Ice cream' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Household', items: [
+    { id: 'gr-h1', text: 'Paper towels' },
+    { id: 'gr-h2', text: 'Toilet paper' },
+    { id: 'gr-h3', text: 'Cleaning supplies' },
+    { id: 'gr-h4', text: 'Trash bags' },
+  ] } },
+  { type: 'link' as const, data: { label: 'Recipe Link', url: '' } },
+  { type: 'text' as const, data: { label: 'Store Notes / Coupons', text: '' } },
+]
+
+const PACKING_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Trip Details', text: 'Destination, dates, weather, travel companions, important notes.' } },
+  { type: 'checklist' as const, data: { label: 'Essentials', items: [
+    { id: 'pk-e1', text: 'Wallet' },
+    { id: 'pk-e2', text: 'ID / passport' },
+    { id: 'pk-e3', text: 'Keys' },
+    { id: 'pk-e4', text: 'Phone' },
+    { id: 'pk-e5', text: 'Charger' },
+    { id: 'pk-e6', text: 'Medications' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Clothing', items: [
+    { id: 'pk-cl1', text: 'Shirts' },
+    { id: 'pk-cl2', text: 'Pants / shorts' },
+    { id: 'pk-cl3', text: 'Pajamas' },
+    { id: 'pk-cl4', text: 'Socks' },
+    { id: 'pk-cl5', text: 'Underwear' },
+    { id: 'pk-cl6', text: 'Shoes' },
+    { id: 'pk-cl7', text: 'Jacket / sweater' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Toiletries', items: [
+    { id: 'pk-t1', text: 'Toothbrush' },
+    { id: 'pk-t2', text: 'Toothpaste' },
+    { id: 'pk-t3', text: 'Shampoo' },
+    { id: 'pk-t4', text: 'Deodorant' },
+    { id: 'pk-t5', text: 'Hairbrush' },
+    { id: 'pk-t6', text: 'Makeup / skincare' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Tech', items: [
+    { id: 'pk-tc1', text: 'Phone charger' },
+    { id: 'pk-tc2', text: 'Laptop / tablet' },
+    { id: 'pk-tc3', text: 'Headphones' },
+    { id: 'pk-tc4', text: 'Power bank' },
+    { id: 'pk-tc5', text: 'Camera' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Travel Documents', items: [
+    { id: 'pk-d1', text: 'Tickets' },
+    { id: 'pk-d2', text: 'Hotel confirmation' },
+    { id: 'pk-d3', text: 'Rental car info' },
+    { id: 'pk-d4', text: 'Insurance cards' },
+    { id: 'pk-d5', text: 'Emergency contacts' },
+  ] } },
+  { type: 'file' as const, data: { label: 'Itinerary / Tickets', url: '' } },
+  { type: 'link' as const, data: { label: 'Hotel / Airbnb', url: '' } },
+  { type: 'link' as const, data: { label: 'Map / Directions', url: '' } },
+  { type: 'phone' as const, data: { label: 'Emergency Contact', url: '' } },
+  { type: 'text' as const, data: { label: 'Last-Minute Reminders', text: '' } },
+]
+
+const VEHICLE_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Vehicle Details', text: 'Year:\n\nMake:\n\nModel / Trim:\n\nVIN:\n\nLicense Plate:\n\nColor:' } },
+  { type: 'text' as const, data: { label: 'Important Specs', text: 'Oil type:\n\nTire size:\n\nWiper blade size:\n\nBattery type:\n\nPreferred fuel:' } },
+  { type: 'timeline' as const, data: { label: 'Maintenance Log', events: [] } },
+  { type: 'checklist' as const, data: { label: 'Routine Maintenance', items: [
+    { id: 'vc-c1', text: 'Oil change' },
+    { id: 'vc-c2', text: 'Tire pressure check' },
+    { id: 'vc-c3', text: 'Tire rotation' },
+    { id: 'vc-c4', text: 'Wiper blades' },
+    { id: 'vc-c5', text: 'Air filter' },
+    { id: 'vc-c6', text: 'Cabin filter' },
+    { id: 'vc-c7', text: 'Brakes' },
+    { id: 'vc-c8', text: 'Inspection / registration' },
+  ] } },
+  { type: 'phone' as const, data: { label: 'Mechanic', url: '' } },
+  { type: 'phone' as const, data: { label: 'Roadside Assistance', url: '' } },
+  { type: 'file' as const, data: { label: 'Insurance / Registration', url: '' } },
+  { type: 'image' as const, data: { url: '', caption: 'Receipts / damage photos' } },
+  { type: 'text' as const, data: { label: 'Notes for Next Service', text: '' } },
+]
+
+const WORKOUT_BLOCKS = [
+  { type: 'text' as const, data: { label: 'Workout Goal', text: 'What are you working toward? Strength, endurance, mobility, weight loss, consistency, recovery, etc.' } },
+  { type: 'checklist' as const, data: { label: 'Warmup', items: [
+    { id: 'wt-w1', text: '5–10 minutes light cardio' },
+    { id: 'wt-w2', text: 'Dynamic stretching' },
+    { id: 'wt-w3', text: 'Mobility work' },
+    { id: 'wt-w4', text: 'Warmup sets' },
+  ] } },
+  { type: 'checklist' as const, data: { label: 'Workout Exercises', items: [
+    { id: 'wt-e1', text: 'Exercise 1 — sets / reps / weight' },
+    { id: 'wt-e2', text: 'Exercise 2 — sets / reps / weight' },
+    { id: 'wt-e3', text: 'Exercise 3 — sets / reps / weight' },
+    { id: 'wt-e4', text: 'Exercise 4 — sets / reps / weight' },
+    { id: 'wt-e5', text: 'Exercise 5 — sets / reps / weight' },
+  ] } },
+  { type: 'text' as const, data: { label: 'Current Weights / PRs', text: 'Track weights, reps, personal records, or progress notes here.' } },
+  { type: 'timeline' as const, data: { label: 'Workout Log', events: [] } },
+  { type: 'link' as const, data: { label: 'Workout Playlist or Video', url: '' } },
+  { type: 'audio' as const, data: { label: 'Quick Gym Note', url: '' } },
+  { type: 'text' as const, data: { label: 'Post-Workout Notes', text: 'How did it feel? What should change next time?' } },
+]
+
 const BLOCKS_BY_TEMPLATE: Record<string, { type: string; data: object }[]> = {
   artwork:     ARTWORK_BLOCKS,
   ritual:      RITUAL_BLOCKS,
@@ -474,6 +687,11 @@ const BLOCKS_BY_TEMPLATE: Record<string, { type: string; data: object }[]> = {
   book:        BOOK_BLOCKS,
   goal:        GOAL_BLOCKS,
   journal:     JOURNAL_BLOCKS,
+  garden:      GARDEN_BLOCKS,
+  grocery:     GROCERY_BLOCKS,
+  packing:     PACKING_BLOCKS,
+  vehicle:     VEHICLE_BLOCKS,
+  workout:     WORKOUT_BLOCKS,
 }
 
 const TAG_PLACEHOLDERS: Record<string, string> = {
@@ -488,6 +706,11 @@ const TAG_PLACEHOLDERS: Record<string, string> = {
   book:        'Type a tag and press Enter — e.g. fiction, recommended, 2024',
   goal:        'Type a tag and press Enter — e.g. fitness, learning, 2024',
   journal:     'Type a tag and press Enter — e.g. daily, gratitude, 2024',
+  garden:      'Type a tag and press Enter — e.g. vegetable, herb, spring',
+  grocery:     'Type a tag and press Enter — e.g. weekly, family, meal-prep',
+  packing:     'Type a tag and press Enter — e.g. vacation, weekend, family-trip',
+  vehicle:     'Type a tag and press Enter — e.g. honda, 2020, sedan',
+  workout:     'Type a tag and press Enter — e.g. strength, cardio, weekly',
 }
 
 type Props = {
