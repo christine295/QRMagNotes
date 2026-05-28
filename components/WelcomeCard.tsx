@@ -1,109 +1,159 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-const LABEL_STYLES: Record<string, string> = {
-  'Welcome':             'bg-teal-50 text-teal-700 border border-teal-200',
-  'Next best step':      'bg-blue-50 text-blue-700 border border-blue-200',
-  'Make this useful':    'bg-amber-50 text-amber-700 border border-amber-200',
-  'Your HubCollector tip': 'bg-stone-100 text-stone-500 border border-stone-200',
-  'Try this next':       'bg-green-50 text-green-700 border border-green-200',
-}
+// ── Feature announcement cards ────────────────────────────────────────────────
+// Add a new entry here each time a notable feature ships. Give it a unique key
+// and bump the version suffix (e.g. v2) if you update an existing announcement.
+// Feature cards show to all users with ≥ 1 Hub who haven't dismissed them yet.
+// Journey cards always take priority; feature cards appear once the journey
+// card for the current milestone has been dismissed or no longer applies.
 
-type CardState = {
+type FeatureCardDef = {
+  key: string
   label: string
   title: string
   body: string
   primaryButton?: { text: string; href?: string; onClick?: () => void }
-  secondaryButton?: { text: string; href: string }
-  footerLink?: { text: string; href: string }
-  isFounder?: boolean
 }
 
-function getCardState({
+const FEATURE_CARDS: FeatureCardDef[] = [
+  // {
+  //   key: 'feature-example-v1',
+  //   label: 'New feature',
+  //   title: 'Example feature announcement',
+  //   body: 'Description of what was added and why it matters.',
+  //   primaryButton: { text: 'Try it now', href: '/dashboard/hub/new' },
+  // },
+]
+
+// ── Styling ───────────────────────────────────────────────────────────────────
+
+const LABEL_STYLES: Record<string, string> = {
+  'Welcome':           'bg-teal-50 text-teal-700 border border-teal-200',
+  'Next step':         'bg-blue-50 text-blue-700 border border-blue-200',
+  'Getting organized': 'bg-amber-50 text-amber-700 border border-amber-200',
+  "You're rolling":    'bg-green-50 text-green-700 border border-green-200',
+  "You've got it":     'bg-stone-100 text-stone-500 border border-stone-200',
+  'New feature':       'bg-violet-50 text-violet-700 border border-violet-200',
+}
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type CardDef = {
+  key: string
+  label: string
+  title: string
+  body: string
+  isFounder?: boolean
+  primaryButton?: { text: string; href?: string; onClick?: () => void }
+  secondaryButton?: { text: string; href: string }
+  footerLink?: { text: string; href: string }
+}
+
+// ── localStorage helpers ──────────────────────────────────────────────────────
+
+const STORAGE_KEY = 'hc_dismissed_cards'
+
+function getDismissed(): string[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function saveDismissed(keys: string[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(keys))
+  } catch {}
+}
+
+// ── Card selection ────────────────────────────────────────────────────────────
+
+function getActiveCard({
   hubCount,
-  collectionCount,
-  allHubsPrivate,
-  hasHubCollector,
-  hasQuickAccessHub,
+  dismissed,
   firstHubId,
   onCreateCollection,
 }: {
   hubCount: number
-  collectionCount: number
-  allHubsPrivate: boolean
-  hasHubCollector: boolean
-  hasQuickAccessHub: boolean
+  dismissed: string[]
   firstHubId?: string
   onCreateCollection?: () => void
-}): CardState | null {
+}): CardDef | null {
+  const notSeen = (key: string) => !dismissed.includes(key)
 
-  if (hubCount === 0) {
-    return {
-      isFounder: true,
-      label: 'Welcome',
-      title: "Hi, I'm Christine",
-      body: "I built HubCollector to help you turn real-life things, routines, records, and memories into living digital ‘Hubs’ you can update anytime.",
-      primaryButton: { text: 'Create your first Hub', href: '/dashboard/hub/new' },
-      secondaryButton: { text: 'Open Help Guide', href: '/help' },
-      footerLink: { text: 'Watch the quick tour', href: '/help' },
+  // Journey cards — one per milestone, shown until dismissed or milestone passed
+  const journeyCard: CardDef | null = (() => {
+    if (hubCount === 0 && notSeen('journey-welcome-v1')) {
+      return {
+        key: 'journey-welcome-v1',
+        isFounder: true,
+        label: 'Welcome',
+        title: "Hi, I'm Christine",
+        body: "I built HubCollector to help you turn real-life things, routines, records, and memories into living digital 'Hubs' you can update anytime.",
+        primaryButton: { text: 'Create your first Hub', href: '/dashboard/hub/new' },
+        secondaryButton: { text: 'Open Help Guide', href: '/help' },
+        footerLink: { text: 'Watch the quick tour', href: '/help' },
+      }
     }
-  }
 
-  if (hubCount === 1) {
-    return {
-      label: 'Next best step',
-      title: 'Print or scan your QR code',
-      body: "Your Hub is live. Download the QR code and scan it with your phone — or print a card to attach to something physical.",
-      primaryButton: firstHubId
-        ? { text: 'Print QR card', href: `/dashboard/hub/${firstHubId}/print` }
-        : undefined,
+    if (hubCount === 1 && notSeen('journey-first-hub-v1')) {
+      return {
+        key: 'journey-first-hub-v1',
+        isFounder: true,
+        label: 'Next step',
+        title: "You've created your first Hub",
+        body: "The magic really happens when you print the QR code and attach it to something real. Try scanning it with your phone camera first — it's a good moment.",
+        primaryButton: firstHubId
+          ? { text: 'Print QR card', href: `/dashboard/hub/${firstHubId}/print` }
+          : undefined,
+      }
     }
-  }
 
-  if (hubCount >= 2 && collectionCount <= 1) {
-    return {
-      label: 'Make this useful',
-      title: 'Organize your Hubs with Collections',
-      body: "Collections keep related Hubs together — like Pets, Kitchen, or Home. Create one to stay organized as your list grows.",
-      primaryButton: onCreateCollection
-        ? { text: 'Create a Collection', onClick: onCreateCollection }
-        : undefined,
+    if (hubCount >= 2 && notSeen('journey-growing-v1')) {
+      return {
+        key: 'journey-growing-v1',
+        isFounder: true,
+        label: 'Getting organized',
+        title: "You're building something",
+        body: "As your Hubs grow, Collections are how this becomes a real system for your life. Group related Hubs together — like Pets, Kitchen, or Home.",
+        primaryButton: onCreateCollection
+          ? { text: 'Create a Collection', onClick: onCreateCollection }
+          : undefined,
+      }
     }
-  }
 
-  if (hubCount >= 2 && allHubsPrivate) {
-    return {
-      label: 'Your HubCollector tip',
-      title: "Your Hubs are private — that's okay",
-      body: "Private Hubs are only visible to you when signed in. When you're ready to share one, change its visibility to Unlisted or Public in the Hub's Settings tab.",
+    if (hubCount >= 4 && notSeen('journey-established-v1')) {
+      return {
+        key: 'journey-established-v1',
+        isFounder: true,
+        label: "You've got it",
+        title: "You've got the hang of it",
+        body: "From here, HubCollector grows with you. I'll keep sharing tips and new features as we go — reach out anytime. I'm still building this alongside you.",
+      }
     }
-  }
 
-  if (hubCount >= 4 && !hasHubCollector) {
-    return {
-      label: 'Try this next',
-      title: 'Tie your Hubs together with a Hub Menu',
-      body: "You have several Hubs now. A Hub Menu creates a single QR code with links to all of them — great for a fridge, a door, or anywhere central.",
-      primaryButton: { text: 'Create a Hub Menu', href: '/dashboard/hub/new' },
-    }
-  }
+    return null
+  })()
 
-  if (hasQuickAccessHub) {
-    return {
-      label: 'Make this useful',
-      title: 'Save HubCollector to your home screen',
-      body: "For Hubs you check regularly — shopping lists, workouts, maintenance logs — tap the share icon in your browser and choose 'Add to Home Screen' for one-tap access.",
-    }
-  }
+  // Feature cards — show to users with ≥ 1 Hub, after journey card is resolved
+  const featureCard = hubCount >= 1
+    ? (FEATURE_CARDS.find(f => notSeen(f.key)) ?? null)
+    : null
 
-  return null
+  // Journey card takes priority; feature card fills in when no journey card applies
+  return journeyCard ?? featureCard
 }
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function WelcomeCard({
   hubCount,
-  collectionCount,
+  collectionCount: _collectionCount,
   allHubs,
   onCreateCollection,
 }: {
@@ -112,41 +162,60 @@ export default function WelcomeCard({
   allHubs: any[]
   onCreateCollection?: () => void
 }) {
+  const [dismissed, setDismissed] = useState<string[]>([])
+  const [mounted, setMounted] = useState(false)
   const [photoError, setPhotoError] = useState(false)
-  const allHubsPrivate = hubCount > 0 && allHubs.every(h => h.privacy_mode === 'private')
-  const hasHubCollector = allHubs.some(h => h.template_id === 'hub_collector')
-  const hasQuickAccessHub = allHubs.some(h =>
-    ['grocery', 'workout', 'maintenance'].includes(h.template_id ?? '')
-  )
-  // allHubs is sorted by updated_at desc; use the oldest hub for "print your first QR"
-  const firstHub = allHubs[allHubs.length - 1]
 
-  const state = getCardState({
+  useEffect(() => {
+    setDismissed(getDismissed())
+    setMounted(true)
+  }, [])
+
+  function dismiss(key: string) {
+    const next = [...dismissed, key]
+    setDismissed(next)
+    saveDismissed(next)
+  }
+
+  // Avoid localStorage hydration mismatch — render nothing until client-mounted
+  if (!mounted) return null
+
+  const firstHub = allHubs[0]
+
+  const card = getActiveCard({
     hubCount,
-    collectionCount,
-    allHubsPrivate,
-    hasHubCollector,
-    hasQuickAccessHub,
+    dismissed,
     firstHubId: firstHub?.id,
     onCreateCollection,
   })
 
-  if (!state) return null
+  if (!card) return null
 
-  const labelStyle = LABEL_STYLES[state.label] ?? 'bg-stone-100 text-stone-500 border border-stone-200'
+  const labelStyle = LABEL_STYLES[card.label] ?? 'bg-stone-100 text-stone-500 border border-stone-200'
 
   return (
-    <div className={`rounded-2xl border px-5 py-4 mb-5 ${state.isFounder ? 'bg-stone-50 border-stone-200' : 'bg-white border-stone-100'}`}>
+    <div className={`relative rounded-2xl border px-5 py-4 mb-5 ${card.isFounder ? 'bg-stone-50 border-stone-200' : 'bg-white border-stone-100'}`}>
+
+      {/* Dismiss */}
+      <button
+        type="button"
+        onClick={() => dismiss(card.key)}
+        aria-label="Dismiss"
+        className="absolute top-3 right-3 text-stone-300 hover:text-stone-500 transition-colors text-xl leading-none"
+      >
+        ×
+      </button>
+
       {/* Label chip */}
       <div className="mb-3">
         <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${labelStyle}`}>
-          {state.label}
+          {card.label}
         </span>
       </div>
 
-      {/* Founder layout: photo + text side by side */}
-      {state.isFounder ? (
-        <div className="flex items-start gap-3 mb-4">
+      {/* Founder layout: photo + text */}
+      {card.isFounder ? (
+        <div className="flex items-start gap-3 mb-4 pr-5">
           {photoError ? (
             <span className="w-14 h-14 rounded-full bg-teal-100 border border-teal-200 flex-shrink-0 flex items-center justify-center text-teal-700 text-lg font-semibold">
               C
@@ -160,57 +229,57 @@ export default function WelcomeCard({
             />
           )}
           <div>
-            <h3 className="text-base font-semibold text-stone-800 leading-snug">{state.title}</h3>
-            <p className="text-sm text-stone-500 mt-1 leading-relaxed">{state.body}</p>
+            <h3 className="text-base font-semibold text-stone-800 leading-snug">{card.title}</h3>
+            <p className="text-sm text-stone-500 mt-1 leading-relaxed">{card.body}</p>
           </div>
         </div>
       ) : (
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-stone-800 mb-1">{state.title}</h3>
-          <p className="text-sm text-stone-500 leading-relaxed">{state.body}</p>
+        <div className="mb-4 pr-5">
+          <h3 className="text-sm font-semibold text-stone-800 mb-1">{card.title}</h3>
+          <p className="text-sm text-stone-500 leading-relaxed">{card.body}</p>
         </div>
       )}
 
       {/* Buttons */}
-      {(state.primaryButton || state.secondaryButton) && (
+      {(card.primaryButton || card.secondaryButton) && (
         <div className="flex gap-2 flex-wrap">
-          {state.primaryButton && (
-            state.primaryButton.href ? (
+          {card.primaryButton && (
+            card.primaryButton.href ? (
               <Link
-                href={state.primaryButton.href}
+                href={card.primaryButton.href}
                 className="text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                {state.primaryButton.text}
+                {card.primaryButton.text}
               </Link>
             ) : (
               <button
                 type="button"
-                onClick={state.primaryButton.onClick}
+                onClick={card.primaryButton.onClick}
                 className="text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                {state.primaryButton.text}
+                {card.primaryButton.text}
               </button>
             )
           )}
-          {state.secondaryButton && (
+          {card.secondaryButton && (
             <Link
-              href={state.secondaryButton.href}
+              href={card.secondaryButton.href}
               className="text-sm font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 px-4 py-2 rounded-lg transition-colors"
             >
-              {state.secondaryButton.text}
+              {card.secondaryButton.text}
             </Link>
           )}
         </div>
       )}
 
       {/* Footer link */}
-      {state.footerLink && (
+      {card.footerLink && (
         <div className="mt-3">
           <Link
-            href={state.footerLink.href}
+            href={card.footerLink.href}
             className="text-xs text-stone-400 hover:text-stone-600 underline transition-colors"
           >
-            {state.footerLink.text}
+            {card.footerLink.text}
           </Link>
         </div>
       )}
