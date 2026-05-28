@@ -1056,6 +1056,7 @@ export default function HubForm({ hub, userId, username, initialCollectionId }: 
         )}
 
         {activeTab === 'settings' && (
+          <>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Collection */}
             <div>
@@ -1356,6 +1357,7 @@ export default function HubForm({ hub, userId, username, initialCollectionId }: 
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Danger zone</p>
             <DeleteHubForm hubId={hub.id} />
           </div>
+          </>
         )}
       </div>
     )
