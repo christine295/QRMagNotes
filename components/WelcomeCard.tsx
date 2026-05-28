@@ -44,7 +44,7 @@ function getCardState({
       isFounder: true,
       label: 'Welcome',
       title: "Hi, I'm Christine",
-      body: "I built HubCollector to help you turn real-life things, routines, records, and memories into living digital hubs you can update anytime.",
+      body: "I built HubCollector to help you turn real-life things, routines, records, and memories into living digital ‘Hubs’ you can update anytime.",
       primaryButton: { text: 'Create your first Hub', href: '/dashboard/hub/new' },
       secondaryButton: { text: 'Open Help Guide', href: '/help' },
       footerLink: { text: 'Watch the quick tour', href: '/help' },
