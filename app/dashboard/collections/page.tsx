@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import HubCard from '@/components/HubCard'
 import SiteFooter from '@/components/SiteFooter'
+import WelcomeCard from '@/components/WelcomeCard'
 import { VERSION } from '@/lib/version'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -235,6 +236,16 @@ export default function DashboardPage() {
           </Link>
         </div>
 
+        {/* Welcome / suggestion card */}
+        {!loading && (
+          <WelcomeCard
+            hubCount={totalHubs}
+            collectionCount={totalFolders}
+            allHubs={allHubs}
+            onCreateCollection={() => setShowCreateFolder(true)}
+          />
+        )}
+
         {/* Search & filter */}
         <div className="mb-5 space-y-2">
           <input
@@ -317,9 +328,13 @@ export default function DashboardPage() {
                         <span className={`text-sm font-medium truncate ${isActive ? 'text-blue-800' : 'text-gray-800'}`}>
                           {folder.title}
                         </span>
-                        <span className={`text-xs shrink-0 ${isActive ? 'text-blue-400' : 'text-gray-400'}`}>
-                          {count} {count === 1 ? 'Hub' : 'Hubs'}
-                        </span>
+                        {count === 0 ? (
+                          <span className="text-xs text-gray-300 shrink-0 italic">empty</span>
+                        ) : (
+                          <span className={`text-xs shrink-0 ${isActive ? 'text-blue-400' : 'text-gray-400'}`}>
+                            {count} {count === 1 ? 'Hub' : 'Hubs'}
+                          </span>
+                        )}
                       </div>
 
                       <div className="relative shrink-0" onClick={e => e.stopPropagation()}>

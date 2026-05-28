@@ -195,10 +195,10 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
                 title={hasContent ? 'Has content' : 'Empty'}
                 className={`flex-shrink-0 w-2 h-2 rounded-full ${hasContent ? 'bg-emerald-400' : 'border border-gray-300'}`}
               />
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+              <span className="text-sm text-gray-700 truncate">{blockSummary(block)}</span>
+              <span className="text-[10px] text-gray-400 bg-gray-100 rounded px-1.5 py-0.5 flex-shrink-0 leading-none">
                 {BLOCK_TYPE_META[block.type as BlockType]?.label ?? block.type}
               </span>
-              <span className="text-sm text-gray-700 truncate">{blockSummary(block)}</span>
             </div>
             {savedBlockId === block.id ? (
               <span className="text-xs text-green-600 font-medium flex-shrink-0 border border-green-200 bg-green-50 rounded px-2 py-1">

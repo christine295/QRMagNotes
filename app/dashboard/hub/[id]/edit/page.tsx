@@ -3,7 +3,6 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import HubForm from '@/components/HubForm'
-import DeleteHubForm from '@/components/DeleteHubForm'
 
 export default async function EditHubPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -53,7 +52,6 @@ export default async function EditHubPage({ params }: { params: Promise<{ id: st
             >
               Print Card
             </Link>
-            <DeleteHubForm hubId={hub.id} />
           </div>
         </div>
       </header>

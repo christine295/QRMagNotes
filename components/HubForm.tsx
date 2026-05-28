@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Hub, Collection } from '@/lib/types'
 import { useCollections } from './useCollections'
 import ContentBlocksEditor from './ContentBlocksEditor'
+import DeleteHubForm from './DeleteHubForm'
 import { uploadPhoto } from '@/lib/supabase/uploadPhoto'
 
 const THEME_COLORS = [
@@ -1350,6 +1351,11 @@ export default function HubForm({ hub, userId, username, initialCollectionId }: 
               </button>
             </div>
           </form>
+
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Danger zone</p>
+            <DeleteHubForm hubId={hub.id} />
+          </div>
         )}
       </div>
     )
