@@ -153,7 +153,7 @@ export default function WelcomeCard({
             </span>
           ) : (
             <img
-              src="/christine.jpg"
+              src="/Christine.jpg"
               alt="Christine, founder of HubCollector"
               className="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border border-stone-200"
               onError={() => setPhotoError(true)}
