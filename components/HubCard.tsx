@@ -11,17 +11,25 @@ function formatDate(iso: string) {
 }
 
 const TEMPLATE_LABELS: Record<string, { emoji: string; label: string }> = {
-  artwork:     { emoji: '🎨', label: 'Artwork Archive' },
-  ritual:      { emoji: '🕯️', label: 'Ritual' },
-  recipe:      { emoji: '🍳', label: 'Recipe' },
-  box:         { emoji: '📦', label: "What's in the Box?" },
-  plant:       { emoji: '🪴', label: 'Plant Profile' },
-  maintenance: { emoji: '🔧', label: 'Home Maintenance' },
-  travel:      { emoji: '✈️', label: 'Travel Journal' },
-  pet:         { emoji: '🐾', label: 'Pet Profile' },
-  book:        { emoji: '📖', label: 'Book Notes' },
-  goal:        { emoji: '🎯', label: 'Goal Tracker' },
-  journal:     { emoji: '📓', label: 'Journal' },
+  artwork:      { emoji: '🎨', label: 'Artwork Archive' },
+  book:         { emoji: '📖', label: 'Book Notes' },
+  diary:        { emoji: '📔', label: 'Diary / Life Log' },
+  garden:       { emoji: '🌱', label: 'Garden Planner' },
+  goal:         { emoji: '🎯', label: 'Goal Tracker' },
+  grocery:      { emoji: '🛒', label: 'Grocery List' },
+  hub_collector:{ emoji: '🔗', label: 'Hub Menu' },
+  journal:      { emoji: '📓', label: 'Daily Reflection' },
+  maintenance:  { emoji: '🔧', label: 'Home Maintenance' },
+  packing:      { emoji: '🧳', label: 'Packing List' },
+  pet:          { emoji: '🐾', label: 'Pet Profile' },
+  plant:        { emoji: '🪴', label: 'Plant Profile' },
+  recipe:       { emoji: '🍳', label: 'Recipe' },
+  ritual:       { emoji: '🕯️', label: 'Ritual' },
+  shadow_work:  { emoji: '🌑', label: 'Shadow Work' },
+  travel:       { emoji: '✈️', label: 'Travel Journal' },
+  vehicle:      { emoji: '🚗', label: 'Vehicle' },
+  box:          { emoji: '📦', label: "What's in the Box?" },
+  workout:      { emoji: '💪', label: 'Workout' },
 }
 
 export default function HubCard({
@@ -65,7 +73,8 @@ export default function HubCard({
   return (
     <div
       onClick={() => router.push(`/dashboard/hub/${hub.id}/edit`)}
-      className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3.5 cursor-pointer hover:border-gray-300 hover:shadow transition-all"
+      className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3.5 cursor-pointer hover:shadow-md transition-all"
+      style={{ borderLeft: `3px solid ${hub.theme_color ?? '#E5E7EB'}` }}
     >
       <div className="flex items-start justify-between gap-3">
         {/* Left: info */}

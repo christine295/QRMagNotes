@@ -5,7 +5,7 @@ import HubCard from '@/components/HubCard'
 import SiteFooter from '@/components/SiteFooter'
 import WelcomeCard from '@/components/WelcomeCard'
 import { VERSION } from '@/lib/version'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 function EditCollectionModal({ open, onClose, onSave, collection }: any) {
@@ -119,6 +119,8 @@ export default function DashboardPage() {
   const [modeFilter, setModeFilter] = useState<'all' | 'landing' | 'redirect'>('all')
   const [privacyFilter, setPrivacyFilter] = useState<'all' | 'public' | 'unlisted' | 'private'>('all')
   const [tagFilter, setTagFilter] = useState('')
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsRef = useRef<HTMLDivElement>(null)
 
   function hubMatches(hub: any) {
     const q = searchQuery.toLowerCase()
@@ -166,6 +168,17 @@ export default function DashboardPage() {
     fetchData()
   }, [router])
 
+  useEffect(() => {
+    if (!settingsOpen) return
+    function handleClick(e: MouseEvent) {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [settingsOpen])
+
   async function handleCreateFolder(e: React.FormEvent) {
     e.preventDefault()
     setFolderError('')
@@ -196,28 +209,51 @@ export default function DashboardPage() {
     : null
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-4 py-4">
+    <div className="min-h-screen bg-[#FAF9F7]">
+      <header className="bg-white border-b border-gray-100 px-4 py-3.5">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">
             HubCollector™
             <span className="ml-2 text-xs font-normal text-gray-400">{VERSION}</span>
           </h1>
-          <div className="flex items-center gap-4">
-            <Link href="/help" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/help"
+              className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+            >
               Help
             </Link>
-            <button
-              type="button"
-              onClick={async () => {
-                const supabase = createClient()
-                await supabase.auth.signOut()
-                router.push('/login')
-              }}
-              className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
-            >
-              Sign out
-            </button>
+            <div ref={settingsRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(v => !v)}
+                aria-label="Settings"
+                className={`rounded-lg p-1.5 transition-colors ${settingsOpen ? 'bg-gray-100 text-gray-700' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path fillRule="evenodd" d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l1.18 2.044a1 1 0 01-.205 1.251l-1.267 1.113a7.047 7.047 0 010 2.228l1.267 1.113a1 1 0 01.206 1.25l-1.18 2.045a1 1 0 01-1.187.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H8.82a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-1.18-2.044a1 1 0 01.205-1.251l1.267-1.114a7.05 7.05 0 010-2.227L1.821 7.773a1 1 0 01-.206-1.25l1.18-2.045a1 1 0 011.187-.447l1.598.54A6.993 6.993 0 017.51 3.456l.33-1.652zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {settingsOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-xs text-gray-400">Account</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setSettingsOpen(false)
+                      const supabase = createClient()
+                      await supabase.auth.signOut()
+                      router.push('/login')
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -293,8 +329,12 @@ export default function DashboardPage() {
         {!loading && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Collections <span className="font-normal">({totalFolders})</span>
+              <h2 className="text-sm font-semibold text-gray-600 flex items-center gap-1.5">
+                <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-gray-400 flex-shrink-0">
+                  <path d="M.5 3a.5.5 0 00-.5.5v9a.5.5 0 00.5.5h15a.5.5 0 00.5-.5V5a.5.5 0 00-.5-.5H7.207L5.854 3.146A.5.5 0 005.5 3H.5z"/>
+                </svg>
+                Collections
+                <span className="text-xs font-normal text-gray-400">({totalFolders})</span>
               </h2>
               {(activeCollection || folderFilter === '__none__') && (
                 <button
@@ -479,10 +519,13 @@ export default function DashboardPage() {
           <>
             {/* Hubs section label */}
             <div className="mb-2">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-gray-600 flex items-center gap-1.5">
+                <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-gray-400 flex-shrink-0">
+                  <path d="M1 2.5A1.5 1.5 0 012.5 1h3A1.5 1.5 0 017 2.5v3A1.5 1.5 0 015.5 7h-3A1.5 1.5 0 011 5.5v-3zm8 0A1.5 1.5 0 0110.5 1h3A1.5 1.5 0 0115 2.5v3A1.5 1.5 0 0113.5 7h-3A1.5 1.5 0 019 5.5v-3zm-8 8A1.5 1.5 0 012.5 9h3A1.5 1.5 0 017 10.5v3A1.5 1.5 0 015.5 15h-3A1.5 1.5 0 011 13.5v-3zm8 0A1.5 1.5 0 0110.5 9h3a1.5 1.5 0 011.5 1.5v3a1.5 1.5 0 01-1.5 1.5h-3A1.5 1.5 0 019 13.5v-3z"/>
+                </svg>
                 {activeCollection ? activeCollection.title : folderFilter === '__none__' ? 'Uncollected' : 'All Hubs'}
                 {filteredHubs.length > 0 && (
-                  <span className="font-normal ml-1.5">({filteredHubs.length})</span>
+                  <span className="text-xs font-normal text-gray-400 ml-0.5">({filteredHubs.length})</span>
                 )}
               </h2>
             </div>
