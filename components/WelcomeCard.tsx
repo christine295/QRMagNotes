@@ -15,36 +15,41 @@ type FeatureCardDef = {
   label: string
   title: string
   body: string
+  isFounder?: boolean
   primaryButton?: { text: string; href?: string; onClick?: () => void }
 }
 
 const FEATURE_CARDS: FeatureCardDef[] = [
   {
     key: 'feature-explore-v1',
-    label: 'New feature',
-    title: 'Discover what others are making',
-    body: "The Explore page is live. Browse public Hubs from the community, filter by template type, and see what's trending.",
+    label: 'Just shipped',
+    isFounder: true,
+    title: 'I built you a place to explore',
+    body: "The Explore page is live — browse public Hubs from people in the community, filter by type, and see what's popular. You can save anything you find straight to your dashboard.",
     primaryButton: { text: 'Go to Explore »', href: '/explore' },
   },
   {
     key: 'feature-save-hubs-v1',
-    label: 'New feature',
-    title: 'Save Hubs from other people',
-    body: "Tap Save Hub on any public Hub to add it to your dashboard. Organise saved Hubs into Collections — even include them in Hub Collector pages.",
+    label: 'Just shipped',
+    isFounder: true,
+    title: "You can now save other people's Hubs",
+    body: "When you visit any public Hub that isn't yours, tap Save Hub to add it to your dashboard. Organise saved Hubs into Collections — even include them in Hub Collector pages.",
     primaryButton: { text: 'Browse Hubs to save »', href: '/explore' },
   },
   {
     key: 'feature-profile-v1',
-    label: 'New feature',
-    title: 'Your public profile is live',
-    body: "Add your name, bio, photo, and social links. Visitors can see your public Hubs and the badges you've earned. Your profile is at /h/your-username.",
-    primaryButton: { text: 'Edit your profile »', href: '/settings/profile' },
+    label: 'Just shipped',
+    isFounder: true,
+    title: 'Your profile page is live',
+    body: "Add your name, bio, photo, and social links — your profile at /h/your-username is public and shareable. You'll also earn badges as you use HubCollector.",
+    primaryButton: { text: 'Set up your profile »', href: '/settings/profile' },
   },
   {
     key: 'feature-social-v1',
-    label: 'New feature',
+    label: 'Just shipped',
+    isFounder: true,
     title: 'Hearts, shares, and views',
-    body: 'Other users can now heart your Hubs and share them directly from their phones. See your engagement counts on Hub cards and on your profile page.',
+    body: "Other people can now heart your Hubs and share them from their phones. You'll see your engagement counts on Hub cards and on your profile — and on the Explore leaderboard.",
   },
 ]
 
@@ -56,7 +61,7 @@ const LABEL_STYLES: Record<string, string> = {
   'Getting organized': 'bg-amber-50 text-amber-700 border border-amber-200',
   "You're rolling":    'bg-green-50 text-green-700 border border-green-200',
   "You've got it":     'bg-stone-100 text-stone-500 border border-stone-200',
-  'New feature':       'bg-violet-50 text-violet-700 border border-violet-200',
+  'Just shipped':      'bg-violet-50 text-violet-700 border border-violet-200',
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
