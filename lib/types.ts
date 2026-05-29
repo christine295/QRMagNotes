@@ -7,6 +7,7 @@ export type Profile = {
   avatar_url: string | null
   social_links: { label: string; url: string }[]
   saved_count?: number
+  badges?: string[]
   created_at: string
 }
 

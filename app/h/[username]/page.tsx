@@ -37,6 +37,12 @@ type BadgeData = {
   isIntroduced: boolean
 }
 
+// Manually awarded via SQL: UPDATE profiles SET badges = array_append(badges, 'founder') WHERE username = 'christine'
+const SPECIAL_BADGE_DISPLAY: Record<string, { name: string; emoji: string; className: string }> = {
+  founder: { name: 'Founder',     emoji: '👑', className: 'bg-purple-600 text-white shadow-sm' },
+  beta:    { name: 'Beta Tester', emoji: '🧪', className: 'bg-teal-100 text-teal-700 border border-teal-200' },
+}
+
 const ALL_BADGES = [
   { key: '1st-hub',       name: '1st Hub',       emoji: '🏷️', desc: 'Created your first hub',                    check: (d: BadgeData) => d.hubCount >= 1 },
   { key: 'archivist',     name: 'Archivist',      emoji: '📚', desc: '5 hubs created',                            check: (d: BadgeData) => d.hubCount >= 5 },
@@ -61,7 +67,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, username, display_name, bio, avatar_url, social_links, saved_count')
+    .select('id, username, display_name, bio, avatar_url, social_links, saved_count, badges')
     .eq('username', username)
     .single()
 
@@ -123,6 +129,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     isIntroduced,
   }
   const earnedBadges = ALL_BADGES.filter(b => b.check(badgeData))
+  const specialBadges = ((p.badges ?? []) as string[])
+    .filter(k => SPECIAL_BADGE_DISPLAY[k])
 
   const displayName = p.display_name || `@${profile.username}`
   const socialLinks: { label: string; url: string }[] = p.social_links ?? []
@@ -200,9 +208,22 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         </div>
 
         {/* Badges */}
-        {earnedBadges.length > 0 && (
+        {(specialBadges.length > 0 || earnedBadges.length > 0) && (
           <div className="mb-8">
             <div className="flex flex-wrap gap-1.5">
+              {/* Special badges (founder, beta) — shown first */}
+              {specialBadges.map(key => {
+                const s = SPECIAL_BADGE_DISPLAY[key]
+                return (
+                  <span
+                    key={key}
+                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${s.className}`}
+                  >
+                    {s.emoji} {s.name}
+                  </span>
+                )
+              })}
+              {/* Earned badges */}
               {earnedBadges.map(badge => (
                 badge.key === 'hub-collector' ? (
                   <span

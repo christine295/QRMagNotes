@@ -303,6 +303,13 @@ export default function DashboardPage() {
                   </div>
                   <button
                     type="button"
+                    onClick={() => { setSettingsOpen(false); router.push(`/h/${username}`) }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => { setSettingsOpen(false); router.push('/settings/profile') }}
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
