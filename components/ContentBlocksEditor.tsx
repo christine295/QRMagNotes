@@ -273,19 +273,20 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
           {blocks.map((block, index) => {
             const d = block.data as any
             if (editingBlockId === block.id) {
-              const close = () => openNextBlock(block.id)
-              const save  = (data: object) => updateBlock(block.id, data)
+              const close  = () => openNextBlock(block.id)
+              const save   = (data: object) => updateBlock(block.id, data)
+              const remove = async () => { await deleteBlock(block.id); setEditingBlockId(null) }
               return (
                 <div key={block.id}>
-                  {block.type === 'text'      && <TextForm      initialData={d} onSave={save} onClose={close} />}
-                  {block.type === 'checklist' && <ChecklistForm initialData={d} templateId={templateId} onSave={save} onClose={close} />}
-                  {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} />}
-                  {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onClose={close} />}
-                  {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} templateId={templateId} onSave={save} onClose={close} />}
-                  {block.type === 'link'            && <LinkForm            initialData={d} onSave={save} onClose={close} />}
-                  {block.type === 'phone'           && <PhoneForm           initialData={d} onSave={save} onClose={close} />}
-                  {block.type === 'file'            && <FileForm            initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} />}
-                  {block.type === 'collection_menu' && <CollectionMenuForm  initialData={d} onSave={save} onClose={close} />}
+                  {block.type === 'text'      && <TextForm      initialData={d} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'checklist' && <ChecklistForm initialData={d} templateId={templateId} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} templateId={templateId} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'link'            && <LinkForm            initialData={d} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'phone'           && <PhoneForm           initialData={d} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'file'            && <FileForm            initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} onRemove={remove} />}
+                  {block.type === 'collection_menu' && <CollectionMenuForm  initialData={d} onSave={save} onClose={close} onRemove={remove} />}
                 </div>
               )
             }
@@ -411,14 +412,15 @@ function FormShell({ title, children }: { title: string; children: React.ReactNo
 
 // ── Save + Close action buttons ───────────────────────────────────────────────
 
-function FormActions({ saving, disabled, onClose, onSubmit }: {
+function FormActions({ saving, disabled, onClose, onSubmit, onRemove }: {
   saving: boolean
   disabled?: boolean
   onClose: () => void
   onSubmit: () => void
+  onRemove?: () => void
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-2">
       <button
         type="button"
         onClick={onSubmit}
@@ -435,13 +437,23 @@ function FormActions({ saving, disabled, onClose, onSubmit }: {
       >
         Close
       </button>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          disabled={saving}
+          className="ml-auto text-sm text-red-400 hover:text-red-600 transition-colors"
+        >
+          Remove
+        </button>
+      )}
     </div>
   )
 }
 
 // ── Text form ─────────────────────────────────────────────────────────────────
 
-function TextForm({ onSave, onClose, initialData }: { onSave: (d: TextData) => Promise<any>; onClose: () => void; initialData?: TextData }) {
+function TextForm({ onSave, onClose, onRemove, initialData }: { onSave: (d: TextData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: TextData }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [text, setText] = useState(initialData?.text ?? '')
   const [date, setDate] = useState(initialData?.date ?? '')
@@ -482,14 +494,14 @@ function TextForm({ onSave, onClose, initialData }: { onSave: (d: TextData) => P
         />
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
 
 // ── Checklist form ────────────────────────────────────────────────────────────
 
-function ChecklistForm({ onSave, onClose, initialData, templateId }: { onSave: (d: ChecklistData) => Promise<any>; onClose: () => void; initialData?: ChecklistData; templateId?: string }) {
+function ChecklistForm({ onSave, onClose, onRemove, initialData, templateId }: { onSave: (d: ChecklistData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: ChecklistData; templateId?: string }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [items, setItems] = useState(initialData?.items?.length ? initialData.items : [{ id: uid(), text: '' }])
   const [saving, setSaving] = useState(false)
@@ -537,14 +549,14 @@ function ChecklistForm({ onSave, onClose, initialData, templateId }: { onSave: (
         + Add item
       </button>
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
 
 // ── Image form ────────────────────────────────────────────────────────────────
 
-function ImageForm({ hubId, blockIndex, onSave, onClose, initialData }: { hubId: string; blockIndex: number; onSave: (d: ImageData) => Promise<any>; onClose: () => void; initialData?: ImageData }) {
+function ImageForm({ hubId, blockIndex, onSave, onClose, onRemove, initialData }: { hubId: string; blockIndex: number; onSave: (d: ImageData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: ImageData }) {
   const [caption, setCaption] = useState(initialData?.caption ?? '')
   const [url, setUrl] = useState(initialData?.url ?? '')
   const [uploading, setUploading] = useState(false)
@@ -597,14 +609,14 @@ function ImageForm({ hubId, blockIndex, onSave, onClose, initialData }: { hubId:
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} disabled={uploading} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} disabled={uploading} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
 
 // ── Timeline form ─────────────────────────────────────────────────────────────
 
-function TimelineForm({ onSave, onClose, initialData }: { onSave: (d: TimelineData) => Promise<any>; onClose: () => void; initialData?: TimelineData }) {
+function TimelineForm({ onSave, onClose, onRemove, initialData }: { onSave: (d: TimelineData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: TimelineData }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [events, setEvents] = useState(initialData?.events?.length ? initialData.events : [{ id: uid(), date: '', text: '' }])
   const [saving, setSaving] = useState(false)
@@ -660,7 +672,7 @@ function TimelineForm({ onSave, onClose, initialData }: { onSave: (d: TimelineDa
         + Add event
       </button>
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
@@ -713,7 +725,7 @@ const CHECKLIST_LABEL_PLACEHOLDER: Record<string, string> = {
 
 function formatTime(s: number) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
 
-function AudioForm({ hubId, templateId, onSave, onClose, initialData }: { hubId: string; templateId?: string; onSave: (d: AudioData) => Promise<any>; onClose: () => void; initialData?: AudioData }) {
+function AudioForm({ hubId, templateId, onSave, onClose, onRemove, initialData }: { hubId: string; templateId?: string; onSave: (d: AudioData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: AudioData }) {
   const [mode, setMode] = useState<'record' | 'upload'>('record')
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [date, setDate] = useState(initialData?.date ?? '')
@@ -873,21 +885,33 @@ function AudioForm({ hubId, templateId, onSave, onClose, initialData }: { hubId:
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       {/* Close advances to next block without saving */}
-      <button
-        type="button"
-        onClick={onClose}
-        disabled={saving}
-        className="text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-      >
-        Close
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={saving}
+          className="text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+        >
+          Close
+        </button>
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            disabled={saving}
+            className="ml-auto text-sm text-red-400 hover:text-red-600 transition-colors"
+          >
+            Remove
+          </button>
+        )}
+      </div>
     </FormShell>
   )
 }
 
 // ── Link form ─────────────────────────────────────────────────────────────────
 
-function LinkForm({ onSave, onClose, initialData }: { onSave: (d: LinkData) => Promise<any>; onClose: () => void; initialData?: LinkData }) {
+function LinkForm({ onSave, onClose, onRemove, initialData }: { onSave: (d: LinkData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: LinkData }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [url, setUrl] = useState(initialData?.url ?? '')
   const [saving, setSaving] = useState(false)
@@ -917,14 +941,14 @@ function LinkForm({ onSave, onClose, initialData }: { onSave: (d: LinkData) => P
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
 
 // ── Phone form ────────────────────────────────────────────────────────────────
 
-function PhoneForm({ onSave, onClose, initialData }: { onSave: (d: PhoneData) => Promise<any>; onClose: () => void; initialData?: PhoneData }) {
+function PhoneForm({ onSave, onClose, onRemove, initialData }: { onSave: (d: PhoneData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: PhoneData }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [phone, setPhone] = useState(initialData?.url ?? '')
   const [saving, setSaving] = useState(false)
@@ -954,16 +978,17 @@ function PhoneForm({ onSave, onClose, initialData }: { onSave: (d: PhoneData) =>
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
 
 // ── Collection menu form ──────────────────────────────────────────────────────
 
-function CollectionMenuForm({ onSave, onClose, initialData }: {
+function CollectionMenuForm({ onSave, onClose, onRemove, initialData }: {
   onSave: (d: CollectionMenuData) => Promise<any>
   onClose: () => void
+  onRemove?: () => void
   initialData?: CollectionMenuData
 }) {
   const [collectionId, setCollectionId] = useState(initialData?.collection_id ?? '')
@@ -1067,14 +1092,14 @@ function CollectionMenuForm({ onSave, onClose, initialData }: {
       )}
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }
 
 // ── File form ─────────────────────────────────────────────────────────────────
 
-function FileForm({ hubId, blockIndex, onSave, onClose, initialData }: { hubId: string; blockIndex: number; onSave: (d: FileData) => Promise<any>; onClose: () => void; initialData?: FileData }) {
+function FileForm({ hubId, blockIndex, onSave, onClose, onRemove, initialData }: { hubId: string; blockIndex: number; onSave: (d: FileData) => Promise<any>; onClose: () => void; onRemove?: () => void; initialData?: FileData }) {
   const [label, setLabel] = useState(initialData?.label ?? '')
   const [url, setUrl] = useState(initialData?.url ?? '')
   const [uploading, setUploading] = useState(false)
@@ -1119,7 +1144,7 @@ function FileForm({ hubId, blockIndex, onSave, onClose, initialData }: { hubId: 
         {url && !uploading && <p className="text-xs text-green-600">{url === initialData?.url ? 'Current file will be kept.' : 'File uploaded successfully.'}</p>}
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} disabled={uploading || !url} onClose={onClose} onSubmit={submit} />
+      <FormActions saving={saving} disabled={uploading || !url} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
     </FormShell>
   )
 }

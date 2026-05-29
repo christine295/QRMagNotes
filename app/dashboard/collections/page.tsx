@@ -147,7 +147,7 @@ export default function DashboardPage() {
 
       const [{ data: hubsData }, { data: foldersData }, { data: profile }, { data: savedData }] = await Promise.all([
         supabase.from('hubs').select('*').eq('user_id', user.id).order('title', { ascending: true }),
-        supabase.from('collections').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('collections').select('*').eq('user_id', user.id).order('title', { ascending: true }),
         supabase.from('profiles').select('username, username_confirmed').eq('id', user.id).single(),
         supabase.from('saved_hubs')
           .select('id, hub_id, collection_id, last_viewed_at, created_at, hubs(id, title, slug, theme_color, template_id, updated_at, privacy_mode, user_id)')
@@ -279,6 +279,14 @@ export default function DashboardPage() {
             >
               Explore
             </Link>
+            {username && (
+              <Link
+                href={`/h/${username}`}
+                className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+              >
+                Profile
+              </Link>
+            )}
             <Link
               href="/help"
               className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"

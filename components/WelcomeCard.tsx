@@ -19,13 +19,33 @@ type FeatureCardDef = {
 }
 
 const FEATURE_CARDS: FeatureCardDef[] = [
-  // {
-  //   key: 'feature-example-v1',
-  //   label: 'New feature',
-  //   title: 'Example feature announcement',
-  //   body: 'Description of what was added and why it matters.',
-  //   primaryButton: { text: 'Try it now', href: '/dashboard/hub/new' },
-  // },
+  {
+    key: 'feature-explore-v1',
+    label: 'New feature',
+    title: 'Discover what others are making',
+    body: "The Explore page is live. Browse public Hubs from the community, filter by template type, and see what's trending.",
+    primaryButton: { text: 'Go to Explore »', href: '/explore' },
+  },
+  {
+    key: 'feature-save-hubs-v1',
+    label: 'New feature',
+    title: 'Save Hubs from other people',
+    body: "Tap Save Hub on any public Hub to add it to your dashboard. Organise saved Hubs into Collections — even include them in Hub Collector pages.",
+    primaryButton: { text: 'Browse Hubs to save »', href: '/explore' },
+  },
+  {
+    key: 'feature-profile-v1',
+    label: 'New feature',
+    title: 'Your public profile is live',
+    body: "Add your name, bio, photo, and social links. Visitors can see your public Hubs and the badges you've earned. Your profile is at /h/your-username.",
+    primaryButton: { text: 'Edit your profile »', href: '/settings/profile' },
+  },
+  {
+    key: 'feature-social-v1',
+    label: 'New feature',
+    title: 'Hearts, shares, and views',
+    body: 'Other users can now heart your Hubs and share them directly from their phones. See your engagement counts on Hub cards and on your profile page.',
+  },
 ]
 
 // ── Styling ───────────────────────────────────────────────────────────────────
