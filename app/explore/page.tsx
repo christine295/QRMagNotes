@@ -80,7 +80,7 @@ export default async function ExplorePage({
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const enrichedHubs = (hubs ?? []).map(h => ({
+  const enrichedHubs: any[] = (hubs ?? []).map(h => ({
     ...h,
     owner_username: usernameMap[h.user_id] ?? '',
     hearts: heartCounts[h.id] ?? 0,

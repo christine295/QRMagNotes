@@ -57,7 +57,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   ;(heartRows ?? []).forEach((h: any) => { heartCounts[h.hub_id] = (heartCounts[h.hub_id] ?? 0) + 1 })
 
   const isOwner = user?.id === profile.id
-  const publicHubs = hubs ?? []
+  const publicHubs: any[] = hubs ?? []
 
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
