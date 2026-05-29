@@ -2,6 +2,23 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { ContentBlock } from '@/lib/types'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 // ── Types & metadata ─────────────────────────────────────────────────────────
 
@@ -62,6 +79,63 @@ function blockSummary(block: ContentBlock): string {
     case 'collection_menu': return d.collection_id ? 'Collection linked' : 'No collection selected'
     default:                return block.type
   }
+}
+
+// ── Drag handle icon ─────────────────────────────────────────────────────────
+
+const GripIcon = () => (
+  <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <circle cx="5" cy="4" r="1.25" /><circle cx="11" cy="4" r="1.25" />
+    <circle cx="5" cy="8" r="1.25" /><circle cx="11" cy="8" r="1.25" />
+    <circle cx="5" cy="12" r="1.25" /><circle cx="11" cy="12" r="1.25" />
+  </svg>
+)
+
+// ── Sortable block row wrapper ────────────────────────────────────────────────
+
+function SortableBlockRow({
+  id,
+  children,
+}: {
+  id: string
+  children: (dragHandle: React.ReactNode) => React.ReactNode
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    position: isDragging ? ('relative' as const) : undefined,
+    zIndex: isDragging ? 1 : undefined,
+  }
+
+  const dragHandle = (
+    <button
+      ref={setActivatorNodeRef}
+      {...listeners}
+      {...attributes}
+      type="button"
+      className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors touch-none flex-shrink-0 p-0.5"
+      aria-label="Drag to reorder"
+    >
+      <GripIcon />
+    </button>
+  )
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children(dragHandle)}
+    </div>
+  )
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -158,6 +232,33 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
     )
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = blocks.findIndex(b => b.id === active.id)
+    const newIndex = blocks.findIndex(b => b.id === over.id)
+    const reordered = arrayMove(blocks, oldIndex, newIndex)
+    const normalized = reordered.map((b, i) => ({ ...b, sort_order: i }))
+    setBlocks(normalized)
+    const changed = normalized.filter(
+      nb => blocks.find(b => b.id === nb.id)?.sort_order !== nb.sort_order
+    )
+    await Promise.all(
+      changed.map(b =>
+        fetch(`/api/hub/${hubId}/content_blocks/${b.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sort_order: b.sort_order }),
+        })
+      )
+    )
+  }
+
   if (loading) return <div className="text-sm text-gray-400">Loading…</div>
 
   return (
@@ -166,46 +267,52 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
         <h2 className="text-base font-semibold text-gray-800 pb-1 border-b border-gray-100">{hubTitle}</h2>
       )}
       {/* Existing blocks */}
-      {blocks.map((block, index) => {
-        const d = block.data as any
-        if (editingBlockId === block.id) {
-          const close = () => openNextBlock(block.id)
-          const save  = (data: object) => updateBlock(block.id, data)
-          return (
-            <div key={block.id}>
-              {block.type === 'text'      && <TextForm      initialData={d} onSave={save} onClose={close} />}
-              {block.type === 'checklist' && <ChecklistForm initialData={d} templateId={templateId} onSave={save} onClose={close} />}
-              {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} />}
-              {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onClose={close} />}
-              {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} templateId={templateId} onSave={save} onClose={close} />}
-              {block.type === 'link'            && <LinkForm            initialData={d} onSave={save} onClose={close} />}
-              {block.type === 'phone'           && <PhoneForm           initialData={d} onSave={save} onClose={close} />}
-              {block.type === 'file'            && <FileForm            initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} />}
-              {block.type === 'collection_menu' && <CollectionMenuForm  initialData={d} onSave={save} onClose={close} />}
-            </div>
-          )
-        }
-        const hasContent = blockHasContent(block)
-        return (
-          <div key={block.id} className={`flex items-center border rounded-xl px-3 py-3 gap-2 ${hasContent ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200'}`}>
-            <div className="flex flex-col gap-0.5 flex-shrink-0">
-              <button
-                type="button"
-                disabled={index === 0}
-                onClick={() => moveBlock(index, 'up')}
-                className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
-              >
-                ▲
-              </button>
-              <button
-                type="button"
-                disabled={index === blocks.length - 1}
-                onClick={() => moveBlock(index, 'down')}
-                className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
-              >
-                ▼
-              </button>
-            </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-3">
+          {blocks.map((block, index) => {
+            const d = block.data as any
+            if (editingBlockId === block.id) {
+              const close = () => openNextBlock(block.id)
+              const save  = (data: object) => updateBlock(block.id, data)
+              return (
+                <div key={block.id}>
+                  {block.type === 'text'      && <TextForm      initialData={d} onSave={save} onClose={close} />}
+                  {block.type === 'checklist' && <ChecklistForm initialData={d} templateId={templateId} onSave={save} onClose={close} />}
+                  {block.type === 'image'     && <ImageForm     initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} />}
+                  {block.type === 'timeline'  && <TimelineForm  initialData={d} onSave={save} onClose={close} />}
+                  {block.type === 'audio'     && <AudioForm     initialData={d} hubId={hubId} templateId={templateId} onSave={save} onClose={close} />}
+                  {block.type === 'link'            && <LinkForm            initialData={d} onSave={save} onClose={close} />}
+                  {block.type === 'phone'           && <PhoneForm           initialData={d} onSave={save} onClose={close} />}
+                  {block.type === 'file'            && <FileForm            initialData={d} hubId={hubId} blockIndex={index} onSave={save} onClose={close} />}
+                  {block.type === 'collection_menu' && <CollectionMenuForm  initialData={d} onSave={save} onClose={close} />}
+                </div>
+              )
+            }
+            const hasContent = blockHasContent(block)
+            return (
+              <SortableBlockRow key={block.id} id={block.id}>
+                {dragHandle => (
+                <div className={`flex items-center border rounded-xl px-3 py-3 gap-2 ${hasContent ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200'}`}>
+                  {dragHandle}
+                  <div className="flex flex-col gap-0.5 flex-shrink-0">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => moveBlock(index, 'up')}
+                      className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === blocks.length - 1}
+                      onClick={() => moveBlock(index, 'down')}
+                      className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-xs leading-none px-1 transition-colors"
+                    >
+                      ▼
+                    </button>
+                  </div>
             <div className="min-w-0 flex-1 flex items-center gap-2">
               <span
                 title={hasContent ? 'Has content' : 'Empty'}
@@ -236,9 +343,14 @@ export default function ContentBlocksEditor({ hubId, hubTitle, templateId }: { h
             >
               ×
             </button>
+                </div>
+                )}
+              </SortableBlockRow>
+            )
+          })}
           </div>
-        )
-      })}
+        </SortableContext>
+      </DndContext>
 
       {/* Add block */}
       {!pickingType && !addingType && (

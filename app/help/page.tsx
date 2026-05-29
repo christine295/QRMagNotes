@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import SiteFooter from '@/components/SiteFooter'
 import { createClient } from '@/lib/supabase/server'
+import HelpTemplateGrid, { type HelpTemplate } from '@/components/HelpTemplateGrid'
 
 const POPULAR_USES = [
   { emoji: '🍳', label: 'QR recipe cards' },
@@ -64,7 +65,7 @@ const BLOCK_TYPES = [
   {
     name: 'Hub Collector',
     emoji: '🔗',
-    description: 'A public button menu built from a collection of hubs. Each hub appears as a tappable card with title and description — a Linktree-style navigation page across your content.',
+    description: 'A public button menu built from a Collection of Hubs. Each Hub appears as a tappable card with title and description — a Linktree-style navigation page across your content.',
   },
 ]
 
@@ -230,12 +231,12 @@ const TEMPLATES = [
     name: 'Hub Collector',
     templateId: 'hub_collector',
     emoji: '🔗',
-    tagline: 'A public-facing button menu of hubs from a collection.',
-    description: 'Turns a collection into a Linktree-style page. Add intro text and link to one or more collections.',
+    tagline: 'A public-facing button menu of Hubs from a Collection.',
+    description: 'Turns a Collection into a Linktree-style page. Add intro text and link to one or more Collections.',
     borderClass: 'border-l-blue-500',
     blocks: [
       { label: 'Introduction', type: 'Text', note: 'Optional intro text shown above the hub menu' },
-      { label: 'Hub Menu', type: 'Hub Collector', note: 'Select a collection — hubs appear as tappable cards' },
+      { label: 'Hub Menu', type: 'Hub Collector', note: 'Select a Collection — Hubs appear as tappable cards' },
     ],
   },
   {
@@ -440,19 +441,16 @@ export default async function HelpPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const isLoggedIn = !!user
 
-  function createHubUrl(templateId: string) {
-    return isLoggedIn
-      ? `/dashboard/hub/new?template=${templateId}`
-      : `/login?next=/dashboard/hub/new?template=${templateId}`
-  }
-
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
       <header className="bg-white border-b border-stone-200 px-4 py-4 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-              ← Dashboard
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-700 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Dashboard
             </Link>
             <h1 className="text-base font-semibold text-stone-900">HubCollector™ — Help & Reference</h1>
           </div>
@@ -507,61 +505,7 @@ export default async function HelpPage() {
             Start with a template and everything is already laid out — just fill in what matters to you.
           </p>
 
-          {/* Template cards */}
-          <div className="grid grid-cols-2 gap-2.5 mb-10">
-            {TEMPLATES.map(t => (
-              <div
-                key={t.name}
-                className={`bg-white rounded-xl border border-stone-100 border-l-[3px] ${t.borderClass} p-4 flex flex-col`}
-              >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xl leading-none">{t.emoji}</span>
-                  <span className="text-sm font-semibold text-stone-800 leading-snug">{t.name}</span>
-                </div>
-                <p className="text-xs text-stone-500 leading-[1.55]">{t.tagline}</p>
-                {t.blocks.length > 0 && (
-                  <p className="text-[10px] text-stone-400 mt-2">{t.blocks.length} blocks included</p>
-                )}
-                <div className="mt-3 pt-3 border-t border-stone-100">
-                  <Link
-                    href={createHubUrl(t.templateId)}
-                    className="text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                  >
-                    Create this hub →
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Template details */}
-          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-4">Template details</h3>
-          <div className="space-y-8">
-            {TEMPLATES.filter(t => t.blocks.length > 0).map(t => (
-              <div key={t.name}>
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <span className="text-base leading-none">{t.emoji}</span>
-                  <span className="text-sm font-semibold text-stone-700">{t.name}</span>
-                  <span className="text-xs text-stone-400">— {t.description}</span>
-                  <Link
-                    href={createHubUrl(t.templateId)}
-                    className="ml-auto text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors whitespace-nowrap"
-                  >
-                    Create this hub →
-                  </Link>
-                </div>
-                <div className="divide-y divide-stone-100">
-                  {t.blocks.map(b => (
-                    <div key={b.label} className="py-2 flex gap-3 items-baseline">
-                      <span className="text-xs font-medium text-stone-600 w-44 flex-shrink-0">{b.label}</span>
-                      <span className="text-[10px] text-stone-400 w-16 flex-shrink-0">{b.type}</span>
-                      {b.note && <span className="text-[10px] text-stone-400 leading-[1.5]">{b.note}</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <HelpTemplateGrid templates={TEMPLATES as HelpTemplate[]} isLoggedIn={isLoggedIn} />
         </section>
 
         {/* How hubs work */}
