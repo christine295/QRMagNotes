@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import SiteFooter from '@/components/SiteFooter'
+import { BETA_PHASE } from '@/lib/config'
 
 const TEMPLATE_LABELS: Record<string, { emoji: string; label: string }> = {
   artwork:      { emoji: '🎨', label: 'Artwork Archive' },
@@ -129,7 +130,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     isIntroduced,
   }
   const earnedBadges = ALL_BADGES.filter(b => b.check(badgeData))
-  const specialBadges = ((p.badges ?? []) as string[])
+  const specialBadges = [
+    ...(BETA_PHASE ? ['beta'] : []),
+    ...((p.badges ?? []) as string[]),
+  ].filter((k, i, arr) => arr.indexOf(k) === i) // deduplicate
     .filter(k => SPECIAL_BADGE_DISPLAY[k])
 
   const displayName = p.display_name || `@${profile.username}`
