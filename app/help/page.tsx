@@ -446,11 +446,8 @@ export default async function HelpPage() {
       <header className="bg-white border-b border-stone-200 px-4 py-4 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-700 transition-colors">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-              Dashboard
+            <Link href="/dashboard" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
+              « Dashboard
             </Link>
             <h1 className="text-base font-semibold text-stone-900">HubCollector™ — Help & Reference</h1>
           </div>

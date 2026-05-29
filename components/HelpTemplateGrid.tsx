@@ -14,12 +14,6 @@ export type HelpTemplate = {
   blocks: Block[]
 }
 
-const ChevronRight = () => (
-  <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-)
-
 export default function HelpTemplateGrid({
   templates,
   isLoggedIn,
@@ -54,10 +48,9 @@ export default function HelpTemplateGrid({
             <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
               <Link
                 href={createHubUrl(t.templateId)}
-                className="flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                className="text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
               >
-                Create this Hub
-                <ChevronRight />
+                Create this Hub »
               </Link>
               {t.blocks.length > 0 && (
                 <button
@@ -115,10 +108,9 @@ export default function HelpTemplateGrid({
               <span className="text-[11px] text-stone-400">{active.blocks.length} blocks included</span>
               <Link
                 href={createHubUrl(active.templateId)}
-                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
               >
-                Create this Hub
-                <ChevronRight />
+                Create this Hub »
               </Link>
             </div>
           </div>

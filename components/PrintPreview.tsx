@@ -43,12 +43,9 @@ export default function PrintPreview({ hub, username }: { hub: Hub; username: st
           <div className="max-w-2xl mx-auto flex items-center gap-4">
             <Link
               href={`/dashboard/hub/${hub.id}/edit`}
-              className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-sm transition-colors"
+              className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-              Back
+              « Back
             </Link>
             <h1 className="text-lg font-semibold text-gray-900">Print Card</h1>
           </div>

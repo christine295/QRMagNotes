@@ -1172,7 +1172,10 @@ export default function HubForm({ hub, userId, username, initialCollectionId, in
 
             {/* Mode */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mode</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mode</label>
+              <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+                What happens when someone scans the QR code or visits this Hub&apos;s URL.
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -1465,7 +1468,10 @@ export default function HubForm({ hub, userId, username, initialCollectionId, in
 
       {/* Mode */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Mode</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Mode</label>
+        <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+          What happens when someone scans the QR code or visits this Hub&apos;s URL.
+        </p>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -1475,9 +1481,9 @@ export default function HubForm({ hub, userId, username, initialCollectionId, in
             }`}
           >
             <div className={`font-medium text-sm ${mode === 'landing' ? 'text-blue-700' : 'text-gray-700'}`}>
-              Landing Page
+              Interactive Page
             </div>
-            <div className="text-xs text-gray-400 mt-0.5">Show a page with links</div>
+            <div className="text-xs text-gray-400 mt-0.5">Show a page with content</div>
           </button>
           <button
             type="button"
@@ -1489,7 +1495,7 @@ export default function HubForm({ hub, userId, username, initialCollectionId, in
             <div className={`font-medium text-sm ${mode === 'redirect' ? 'text-amber-700' : 'text-gray-700'}`}>
               Redirect Link
             </div>
-            <div className="text-xs text-gray-400 mt-0.5">Send visitors to a URL</div>
+            <div className="text-xs text-gray-400 mt-0.5">Send visitors instantly to another URL</div>
           </button>
         </div>
       </div>

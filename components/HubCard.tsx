@@ -80,6 +80,11 @@ export default function HubCard({
         {/* Left: info */}
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-gray-900 leading-snug">{hub.title}</h3>
+          {hub.mode === 'redirect' && hub.redirect_url && (
+            <p className="text-[11px] text-amber-500 leading-tight mt-0.5 truncate max-w-[180px]">
+              » {hub.redirect_url}
+            </p>
+          )}
           <div className="mt-0.5">
             {currentCollection ? (
               <div className="flex gap-1.5 items-start">
