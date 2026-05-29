@@ -2,8 +2,14 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import HubView from '@/components/HubView'
 
-export default async function PublicHubPage({ params }: { params: Promise<{ username: string; slug: string }> }) {
-  const { username, slug } = await params
+export default async function PublicHubPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ username: string; slug: string }>
+  searchParams: Promise<{ save?: string }>
+}) {
+  const [{ username, slug }, { save: autoSaveParam }] = await Promise.all([params, searchParams])
   const supabase = await createClient()
 
   const { data: profile } = await supabase
@@ -145,6 +151,8 @@ export default async function PublicHubPage({ params }: { params: Promise<{ user
   }
 
   const color = hub.theme_color ?? '#3B82F6'
+  // Auto-save: triggered when returning from login with ?save=1 and hub not already saved
+  const autoSave = autoSaveParam === '1' && !!user && !isOwner && !isSaved
 
   return (
     <HubView
@@ -158,6 +166,7 @@ export default async function PublicHubPage({ params }: { params: Promise<{ user
       isSaved={isSaved}
       heartCount={heartCount ?? 0}
       userHearted={userHearted}
+      autoSave={autoSave}
     />
   )
 }

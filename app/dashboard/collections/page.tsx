@@ -255,6 +255,14 @@ export default function DashboardPage() {
   const activeCollection = (folderFilter && folderFilter !== '__none__')
     ? folders.find((f: any) => f.id === folderFilter)
     : null
+  const totalSaved = savedHubs.length
+
+  // Filter saved hubs to match the active collection filter
+  const filteredSavedHubs = savedHubs.filter(s => {
+    if (folderFilter === null) return true
+    if (folderFilter === '__none__') return s.collection_id === null
+    return s.collection_id === folderFilter
+  })
 
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
@@ -310,7 +318,11 @@ export default function DashboardPage() {
         {/* Stats + primary CTA */}
         <div className="flex items-center justify-between mb-5">
           <p className="text-sm text-gray-400">
-            {!loading && `${totalHubs} ${totalHubs === 1 ? 'Hub' : 'Hubs'} · ${totalFolders} ${totalFolders === 1 ? 'Collection' : 'Collections'}`}
+            {!loading && [
+              `${totalHubs} ${totalHubs === 1 ? 'Hub' : 'Hubs'}`,
+              `${totalFolders} ${totalFolders === 1 ? 'Collection' : 'Collections'}`,
+              totalSaved > 0 ? `${totalSaved} Saved` : null,
+            ].filter(Boolean).join(' · ')}
           </p>
           <Link
             href="/dashboard/hub/new"
@@ -605,7 +617,7 @@ export default function DashboardPage() {
         )}
 
         {/* Saved Hubs section */}
-        {!loading && savedHubs.length > 0 && (
+        {!loading && totalSaved > 0 && (
           <div className="mt-8">
             <div className="mb-3">
               <h2 className="text-sm font-semibold text-gray-600 flex items-center gap-1.5">
@@ -613,21 +625,29 @@ export default function DashboardPage() {
                   <path d="M2 2a2 2 0 012-2h8a2 2 0 012 2v13.5a.5.5 0 01-.777.416L8 13.101l-5.223 2.815A.5.5 0 012 15.5V2zm2-1a1 1 0 00-1 1v12.566l4.723-2.482a.5.5 0 01.554 0L13 14.566V2a1 1 0 00-1-1H4z"/>
                 </svg>
                 Saved Hubs
-                <span className="text-xs font-normal text-gray-400">({savedHubs.length})</span>
+                <span className="text-xs font-normal text-gray-400">
+                  ({filteredSavedHubs.length}{filteredSavedHubs.length !== totalSaved ? ` of ${totalSaved}` : ''})
+                </span>
               </h2>
               <p className="text-[11px] text-gray-400 mt-0.5 ml-5">Hubs saved from other people</p>
             </div>
-            <div className="space-y-2">
-              {savedHubs.map(savedHub => (
-                <SavedHubCard
-                  key={savedHub.id}
-                  savedHub={savedHub}
-                  folders={folders}
-                  onUnsave={handleSavedHubUnsave}
-                  onCollectionChange={handleSavedHubCollectionChange}
-                />
-              ))}
-            </div>
+            {filteredSavedHubs.length > 0 ? (
+              <div className="space-y-2">
+                {filteredSavedHubs.map(savedHub => (
+                  <SavedHubCard
+                    key={savedHub.id}
+                    savedHub={savedHub}
+                    folders={folders}
+                    onUnsave={handleSavedHubUnsave}
+                    onCollectionChange={handleSavedHubCollectionChange}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400 text-sm">
+                No saved Hubs in this Collection.
+              </div>
+            )}
           </div>
         )}
 
