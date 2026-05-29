@@ -569,6 +569,49 @@ export default async function HelpPage() {
           </div>
         </section>
 
+        {/* Sharing & Social */}
+        <section>
+          <h2 className="text-lg font-semibold text-stone-800 mb-4">Sharing &amp; Social</h2>
+          <p className="text-sm text-stone-500 leading-[1.65] mb-5 max-w-prose">
+            Public and unlisted Hubs can be saved and hearted by other logged-in users — no setup required.
+          </p>
+          <div className="space-y-3">
+            <div className="bg-white rounded-xl border border-stone-100 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-base leading-none">🔖</span>
+                <span className="text-sm font-semibold text-stone-800">Save Hub</span>
+              </div>
+              <p className="text-xs text-stone-500 leading-[1.6]">
+                Tap <strong>Save Hub</strong> at the top of any Hub you don&apos;t own to add it to the{' '}
+                <em>Saved Hubs</em> section of your dashboard. Saved Hubs can be assigned to your own
+                Collections and will appear in Hub Collector pages alongside your owned Hubs.
+                Not signed in? You&apos;ll be taken to the login screen and returned automatically.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-stone-100 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-base leading-none">🔔</span>
+                <span className="text-sm font-semibold text-stone-800">Updated badge</span>
+              </div>
+              <p className="text-xs text-stone-500 leading-[1.6]">
+                When a saved Hub has been updated since your last visit, a blue <strong>Updated</strong> badge
+                appears on the card in your dashboard. Visiting the Hub clears it automatically.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-stone-100 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-base leading-none">♡</span>
+                <span className="text-sm font-semibold text-stone-800">Hearts</span>
+              </div>
+              <p className="text-xs text-stone-500 leading-[1.6]">
+                Tap the heart icon on any public or unlisted Hub to show appreciation.
+                The count is visible to all visitors. Hub owners see their total heart counts
+                on each of their Hub cards in the dashboard.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Block types */}
         <section>
           <h2 className="text-lg font-semibold text-stone-800 mb-2">Block types</h2>
@@ -651,6 +694,15 @@ export default async function HelpPage() {
             <li>
               <strong>Content indicator dots.</strong> In the block editor, a green dot means the block has content;
               a hollow ring means it&apos;s empty. Useful for scanning after applying a template to see what still needs filling in.
+            </li>
+            <li>
+              <strong>Saving someone else&apos;s Hub.</strong> Tap <em>Save Hub</em> at the top of any public or unlisted Hub
+              to bookmark it to your own dashboard. You can organise saved Hubs into Collections and include them in Hub Collector pages —
+              just like your own Hubs. You cannot edit a saved Hub; only the owner can do that.
+            </li>
+            <li>
+              <strong>Hearts are public.</strong> The heart count on a Hub is visible to all visitors, including
+              logged-out users. Hub owners see their per-Hub heart counts directly on their dashboard cards.
             </li>
           </ul>
         </section>

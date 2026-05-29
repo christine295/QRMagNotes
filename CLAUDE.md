@@ -55,6 +55,7 @@ components/
   HubView.tsx              — PUBLIC hub renderer (client component); all interactive logic
   ContentBlocksEditor.tsx  — block editor; auto-opens first block on load; sequential Save/Close flow (openNextBlock advances to next block); FormActions component renders [Save][Close] side by side; FormShell is now a plain container (no Cancel button); green dot = has content, hollow ring = empty; drag-and-drop block reordering via dnd-kit (6-dot grip handle); ▲▼ arrow buttons kept as accessibility fallback
   WelcomeCard.tsx          — founder onboarding card shown on dashboard; journey-based states keyed in localStorage (hc_dismissed_cards); four journey cards + FEATURE_CARDS array for new-feature announcements; see WelcomeCard section below
+  SavedHubCard.tsx         — dashboard card for saved (non-owned) hubs; shows title, owner @username, template badge, Updated badge (hub.updated_at > saved_hub.last_viewed_at), collection badge; links to public view; ⋮ kebab (View Hub / Remove from Saved / Move to Collection)
   ChecklistBlock.tsx       — standalone checklist component (used only in edit preview)
   DeleteHubForm.tsx        — delete confirmation; used in HubForm Settings danger zone (not in edit page header)
   QRButton.tsx             — downloads QR PNG via qrcode package
@@ -63,6 +64,8 @@ components/
 app/api/hub/[hubId]/
   content_blocks/route.ts      — GET (list), POST (create) content blocks
   content_blocks/[id]/route.ts — PATCH (update data or sort_order), DELETE
+  save/route.ts                — POST (save hub), DELETE (unsave), PATCH (update collection_id on saved_hubs row)
+  heart/route.ts               — POST (heart hub), DELETE (unheart)
 
 lib/
   types.ts                    — Hub, ContentBlock, Profile types
@@ -84,6 +87,8 @@ Tables — all with RLS enabled:
 - **hubs** — owned by user; publicly readable for `/h/[slug]`; columns include `collection_id` (FK → collections), `privacy_mode`, `tags text[]`, `template_id text`
 - **collections** — user-owned folders; hubs.collection_id references this
 - **content_blocks** — belongs to hub; type + data (JSONB) + sort_order
+- **saved_hubs** — user saves another user's hub; columns: `user_id`, `hub_id`, `collection_id` (FK → collections, nullable), `last_viewed_at` (timestamptz); UNIQUE(user_id, hub_id); RLS: users manage their own rows; a second SELECT policy allows public reads of collection-assigned non-private saved hubs (for Hub Collector pages)
+- **hub_hearts** — user hearts a hub; columns: `user_id`, `hub_id`; UNIQUE(user_id, hub_id); RLS: anyone can read (SELECT USING true); only the user can insert/delete their own hearts
 
 `hub_links` table has been fully removed. All content is now in `content_blocks`.
 
@@ -149,7 +154,14 @@ Each block has `type`, `data` (JSONB), and `sort_order`. Supported types:
 
 ## Public view (HubView.tsx)
 
-`app/h/[username]/[slug]/page.tsx` is a server component that looks up the profile by username, then the hub by user_id + slug, and passes props to `HubView`. It also pre-fetches `collectionHubs: Record<string, any[]>` (keyed by block ID) for any `collection_menu` blocks and passes it as a prop. All interactive rendering is in `components/HubView.tsx` (client component). HubView never fetches hub data directly.
+`app/h/[username]/[slug]/page.tsx` is a server component that looks up the profile by username, then the hub by user_id + slug, and passes props to `HubView`. It also:
+- Pre-fetches `collectionHubs: Record<string, any[]>` (keyed by block ID) for any `collection_menu` blocks — including saved hubs the page owner has assigned to each collection (owner_username attached to each hub for correct public URL generation)
+- Fetches `heartCount` (visible to all), `isSaved`, and `userHearted` for the current visitor
+- Updates `saved_hubs.last_viewed_at` (best-effort await) when a logged-in non-owner who has saved the hub visits the page
+
+All interactive rendering is in `components/HubView.tsx` (client component). HubView never fetches hub data directly.
+
+**HubView visitor bar:** shown for non-owners (both logged-in and logged-out); sticky top bar with heart toggle + count on the left and Save Hub / ✓ Saved button on the right. Clicking either while logged out redirects to `/login?next=…`.
 
 **Design system:**
 - Background: `#FAF9F7` (warm cream) via `bg-[#FAF9F7]`
@@ -207,6 +219,8 @@ New blocks are inserted with `sort_order: blocks.length`.
 - **Search & filters** (search input + All modes + All visibility dropdowns): placed **below Collections**, directly above the hub list — they filter the list they're adjacent to
 - **Hub list** sorted alphabetically A→Z by `title` (DB query uses `.order('title', { ascending: true })`)
 - **All Hubs** section header: grid SVG icon + `text-sm font-semibold`
+- **Saved Hubs section**: rendered below the owned hub list; only shown when the user has saved hubs; uses `SavedHubCard`; loads via parallel query in `fetchData`; also loads owner usernames (separate profiles query) and heart counts for owned hubs
+- **Heart counts**: loaded for all owned hubs and passed as `heartCount` prop to `HubCard`; displayed as ♥ N in bottom-right of card when > 0
 
 ## WelcomeCard
 
@@ -294,9 +308,10 @@ Both files must stay template-agnostic in general sections. Template-specific co
 3. Templates — 2-col card grid (via HelpTemplateGrid) + lightbox modal for block details; each card has "Create this Hub »" CTA and "See blocks" button
 4. How hubs work — mode cards (2-col) + privacy cards (3-col)
 5. Collections & Organization
-6. Block types — 2-col card grid with emoji
-7. Advanced styling — ceremonial text + collapse behavior
-8. Good to know — 6 tips
+6. Sharing & Social — 3 cards: Save Hub, Updated badge, Hearts
+7. Block types — 2-col card grid with emoji
+8. Advanced styling — ceremonial text + collapse behavior
+9. Good to know — 8 tips (includes saving and hearts)
 
 ## Known Next.js 16 notes
 
@@ -324,6 +339,42 @@ ALTER TABLE public.content_blocks DROP CONSTRAINT IF EXISTS content_blocks_type_
 ALTER TABLE public.content_blocks ADD CONSTRAINT content_blocks_type_check
   CHECK (type IN ('text', 'image', 'audio', 'file', 'link', 'phone', 'checklist', 'timeline', 'note', 'collection_menu'));
 -- collection_menu added for Hub Collector feature (2026-05-27)
+
+-- saved_hubs, hub_hearts, updated_at triggers (2026-05-29)
+CREATE TABLE public.saved_hubs (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  hub_id uuid NOT NULL REFERENCES public.hubs(id) ON DELETE CASCADE,
+  collection_id uuid REFERENCES public.collections(id) ON DELETE SET NULL,
+  last_viewed_at timestamptz,
+  created_at timestamptz DEFAULT now() NOT NULL,
+  UNIQUE(user_id, hub_id)
+);
+ALTER TABLE public.saved_hubs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own saved hubs" ON public.saved_hubs FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Public reads collection-assigned saved hubs" ON public.saved_hubs FOR SELECT USING (
+  collection_id IS NOT NULL AND EXISTS (SELECT 1 FROM public.hubs WHERE id = saved_hubs.hub_id AND privacy_mode != 'private')
+);
+
+CREATE TABLE public.hub_hearts (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  hub_id uuid NOT NULL REFERENCES public.hubs(id) ON DELETE CASCADE,
+  created_at timestamptz DEFAULT now() NOT NULL,
+  UNIQUE(user_id, hub_id)
+);
+ALTER TABLE public.hub_hearts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read hearts" ON public.hub_hearts FOR SELECT USING (true);
+CREATE POLICY "Users can heart" ON public.hub_hearts FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can unheart" ON public.hub_hearts FOR DELETE USING (auth.uid() = user_id);
+
+-- Auto-update hubs.updated_at
+CREATE OR REPLACE FUNCTION public.set_updated_at() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER hubs_set_updated_at BEFORE UPDATE ON public.hubs FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- Touch hubs.updated_at when content_blocks change (powers Updated badge)
+CREATE OR REPLACE FUNCTION public.update_hub_on_block_change() RETURNS TRIGGER AS $$ BEGIN UPDATE public.hubs SET updated_at = NOW() WHERE id = COALESCE(NEW.hub_id, OLD.hub_id); RETURN COALESCE(NEW, OLD); END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER content_blocks_touch_hub AFTER INSERT OR UPDATE OR DELETE ON public.content_blocks FOR EACH ROW EXECUTE FUNCTION public.update_hub_on_block_change();
 ```
 
 **Still needs to be run** (username + per-user slug uniqueness):

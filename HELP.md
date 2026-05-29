@@ -80,7 +80,13 @@ The dashboard (`/dashboard`) shows your collections at the top and your hubs bel
 - Click anywhere on a hub card to open the edit page.
 - The ⋮ button opens a menu: **Edit**, **View** (opens public page), **Copy link**, **Download QR**, **Print card**, **Move to collection**.
 - Tags appear at the bottom-left of the card and are clickable to filter the hub list by that tag.
-- The updated date appears bottom-right on each card.
+- The updated date appears bottom-right on each card. A small ♥ count appears next to the date if the hub has received hearts.
+
+**Saved Hubs section:**
+- Appears below the hub list when the user has saved any Hubs from other people.
+- Each saved Hub card shows the hub title, owner `@username`, template badge, collection assignment, and an **Updated** badge when the hub has changed since last view.
+- Clicking a saved Hub card opens the public Hub page (not the edit page — saved Hubs are not editable).
+- The ⋮ menu on a saved Hub card: **View Hub**, **Remove from Saved**, **Move to Collection** (a collection assignment selector).
 
 **Assigning a hub to a collection:**
 - At creation time: a Collection selector appears in the hub creation form.
@@ -90,6 +96,42 @@ The dashboard (`/dashboard`) shows your collections at the top and your hubs bel
 **Hub type badge:**
 - When creating a hub from a template, the template name (e.g. "🐾 Pet Profile") appears as a badge on the dashboard card.
 - For hubs created from Blank, or to re-label any hub, go to the hub's **Settings tab → Hub type** dropdown. Changing this adds the badge only — it does not add or remove content blocks.
+
+---
+
+## Saving & social features
+
+### Saving a Hub
+
+Any logged-in user can save a Hub that belongs to someone else. To save: visit a public or unlisted Hub (not your own), then tap **Save Hub** in the bar at the top of the page. The button changes to **✓ Saved**. Tap again to remove it.
+
+If you are not signed in when you tap Save Hub, you will be redirected to `/login?next=…` and returned to the Hub after signing in.
+
+Private Hubs cannot be saved — only the owner can view them.
+
+Saved Hubs appear in a dedicated **Saved Hubs** section at the bottom of the dashboard, visually distinct from owned Hubs, showing the owner's `@username`. They link to the public Hub page — they cannot be edited.
+
+**Organizing saved Hubs:** Open the ⋮ menu on a saved Hub card and choose **Move to Collection** to assign it to any of your own Collections. Saved Hubs assigned to a collection also appear in **Hub Collector** (`collection_menu`) blocks on your own public Hubs — the same way owned Hubs do.
+
+### Updated badge
+
+When a saved Hub is updated (content blocks added, removed, or edited; or hub settings changed) since your last visit, a blue **Updated** badge appears on the saved Hub card in your dashboard. Visiting the Hub page clears the badge automatically.
+
+Internally, `saved_hubs.last_viewed_at` is set server-side on each page load; the badge shows when `hubs.updated_at > last_viewed_at`.
+
+### Hearts
+
+Logged-in non-owners can heart any public or unlisted Hub by tapping the heart icon (♡) in the visitor bar at the top of the public Hub page. Tapping again removes the heart. The total heart count is visible to all visitors, including those not signed in.
+
+Hub owners see the heart count for each of their Hubs on the dashboard Hub card — a small ♥ count next to the updated date at the bottom-right of the card.
+
+### Visitor bar
+
+Non-owners (both logged-in and logged-out) see a persistent bar at the top of every public/unlisted Hub page containing:
+- **Left:** heart icon + count (always visible; interactive toggle for logged-in non-owners)
+- **Right:** Save Hub / ✓ Saved button
+
+Owners see their existing **Your Hub** bar with the Edit button instead.
 
 ---
 
