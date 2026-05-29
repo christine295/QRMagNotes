@@ -177,29 +177,34 @@ export default async function ExplorePage({
             {enrichedHubs.map(hub => {
               const template = hub.template_id ? TEMPLATE_LABELS[hub.template_id] : null
               return (
-                <a
+                <div
                   key={hub.id}
-                  href={`/h/${hub.owner_username}/${hub.slug}`}
-                  className="block bg-white rounded-xl border border-stone-100 px-4 py-4 hover:shadow-md transition-all"
+                  className="bg-white rounded-xl border border-stone-100 hover:shadow-md transition-all overflow-hidden"
                   style={{ borderLeft: `3px solid ${hub.theme_color ?? '#E5E7EB'}` }}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <h2 className="font-semibold text-stone-900 leading-snug text-sm truncate">{hub.title}</h2>
-                      {hub.description && (
-                        <p className="text-xs text-stone-400 mt-0.5 leading-snug line-clamp-2">{hub.description}</p>
+                  {/* Hub link — title + description */}
+                  <a
+                    href={`/h/${hub.owner_username}/${hub.slug}`}
+                    className="block px-4 pt-4 pb-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h2 className="font-semibold text-stone-900 leading-snug text-sm truncate">{hub.title}</h2>
+                        {hub.description && (
+                          <p className="text-xs text-stone-400 mt-0.5 leading-snug line-clamp-2">{hub.description}</p>
+                        )}
+                      </div>
+                      {template && (
+                        <span className="shrink-0 text-[11px] text-stone-400 bg-stone-50 px-1.5 py-px rounded-full whitespace-nowrap">
+                          {template.emoji} {template.label}
+                        </span>
                       )}
                     </div>
-                    {template && (
-                      <span className="shrink-0 text-[11px] text-stone-400 bg-stone-50 px-1.5 py-px rounded-full whitespace-nowrap">
-                        {template.emoji} {template.label}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-2.5">
+                  </a>
+                  {/* Footer row — profile link + counts */}
+                  <div className="flex items-center justify-between px-4 pb-3.5">
                     <a
                       href={`/h/${hub.owner_username}`}
-                      onClick={e => e.stopPropagation()}
                       className="text-[11px] text-stone-400 hover:text-stone-600 transition-colors"
                     >
                       @{hub.owner_username}
@@ -225,7 +230,7 @@ export default async function ExplorePage({
                       </span>
                     )}
                   </div>
-                </a>
+                </div>
               )
             })}
           </div>
