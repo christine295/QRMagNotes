@@ -143,11 +143,15 @@ The dashboard (`/dashboard`) shows your collections at the top and your hubs bel
 - A default "My Hubs" collection is created automatically on first login if you have none.
 - Create a new collection with the **+ New collection** dashed button at the bottom of the collection list.
 
+**Header navigation:** HubCollector™ logo · **Explore** · **Profile** (links to your public `/h/[username]` page) · **Help** · ⚙ Settings gear (View Profile · Edit Profile · Sign out).
+
+**Collections** are sorted **A–Z by name**. Uncollected always appears last. Create, rename, and delete via the ⋮ button on each collection card.
+
 **Hub cards:**
 - Click anywhere on a hub card to open the edit page.
 - The ⋮ button opens a menu: **Edit**, **View** (opens public page), **Copy link**, **Download QR**, **Print card**, **Move to collection**.
 - Tags appear at the bottom-left of the card and are clickable to filter the hub list by that tag.
-- The updated date appears bottom-right on each card. A small ♥ count appears next to the date if the hub has received hearts.
+- The updated date appears bottom-right on each card. ♥ and 🔖 counts appear next to the date once the hub has hearts or saves.
 
 **Saved Hubs section:**
 - Appears below the hub list when the user has saved any Hubs from other people.
@@ -574,6 +578,8 @@ Block inserts run automatically via `handleSubmit` — no per-template branching
 In the block editor, each block row shows a small dot on the left:
 - **Solid green dot** — the block has content (text entered, URL filled, items or events added)
 - **Hollow gray ring** — the block is empty
+
+When a block is open in edit mode, three buttons appear: **Save** (saves and advances to next block), **Close** (advances without saving), and **Remove** (deletes the block entirely, no confirmation). Remove is only shown when editing an existing block — not when adding a new one.
 - Empty block rows also render on a light gray background as an additional visual cue
 
 This makes it easy to scan the editor and see what still needs to be filled in after applying a template.

@@ -56,8 +56,8 @@ components/
   HubForm.tsx              — create/edit form; TEMPLATES array; BLOCKS_BY_TEMPLATE map; all *_BLOCKS consts; tabs on edit (Content / Settings); Settings tab includes danger zone with DeleteHubForm at the bottom; accepts initialTemplateId prop (skips template picker, pre-applies template); mode selector has inline explanation text and destination URL field appears immediately below the buttons when Redirect Link is selected
   HelpTemplateGrid.tsx     — client component for the help page template section; renders 2-col card grid with "Create this Hub »" CTA and "See blocks" button; "See blocks" opens a lightbox modal with block-by-block detail table and prominent Create CTA; accepts templates and isLoggedIn props
   HubView.tsx              — PUBLIC hub renderer (client component); all interactive logic
-  ContentBlocksEditor.tsx  — block editor; auto-opens first block on load; sequential Save/Close flow (openNextBlock advances to next block); FormActions component renders [Save][Close] side by side; FormShell is now a plain container (no Cancel button); green dot = has content, hollow ring = empty; drag-and-drop block reordering via dnd-kit (6-dot grip handle); ▲▼ arrow buttons kept as accessibility fallback
-  WelcomeCard.tsx          — founder onboarding card shown on dashboard; journey-based states keyed in localStorage (hc_dismissed_cards); four journey cards + FEATURE_CARDS array for new-feature announcements; see WelcomeCard section below
+  ContentBlocksEditor.tsx  — block editor; auto-opens first block on load; sequential Save/Close/Remove flow; FormActions renders [Save][Close][Remove] — Remove deletes block and clears editing state, only shown when editing existing blocks (not adding new); FormShell is now a plain container (no Cancel button); green dot = has content, hollow ring = empty; drag-and-drop block reordering via dnd-kit (6-dot grip handle); ▲▼ arrow buttons kept as accessibility fallback
+  WelcomeCard.tsx          — founder onboarding card shown on dashboard; 8 cards total (3 journey + 4 feature + 1 closing journey); all isFounder=true with Christine's photo; localStorage key hc_dismissed_cards; see WelcomeCard section
   SavedHubCard.tsx         — dashboard card for saved (non-owned) hubs; shows title, owner @username, template badge, Updated badge (hub.updated_at > saved_hub.last_viewed_at), collection badge; links to public view; ⋮ kebab (View Hub / Remove from Saved / Move to Collection); shows title, owner @username, template badge, Updated badge (hub.updated_at > saved_hub.last_viewed_at), collection badge; links to public view; ⋮ kebab (View Hub / Remove from Saved / Move to Collection)
   ChecklistBlock.tsx       — standalone checklist component (used only in edit preview)
   DeleteHubForm.tsx        — delete confirmation; used in HubForm Settings danger zone (not in edit page header)
@@ -82,6 +82,8 @@ lib/
   supabase/uploadAudio.ts     — upload audio to hub-audio Storage bucket
   supabase/uploadAvatar.ts    — upload avatar to hub-photos bucket under avatars/${userId}/ prefix
 
+lib/config.ts               — global feature flags; `BETA_PHASE = true` auto-assigns 🧪 Beta Tester badge to all profile pages; set to false when beta ends
+
 proxy.ts            — Next.js 16 proxy (replaces middleware.ts); protects /dashboard routes; preserves full path+search as ?next= when redirecting unauthenticated users to /login
 supabase/schema.sql — full DB schema + RLS policies
 HELP.md             — developer reference: block shapes, design notes, template authoring guide
@@ -94,6 +96,7 @@ Tables — all with RLS enabled:
 - **hubs** — owned by user; publicly readable for `/h/[slug]`; columns include `collection_id` (FK → collections), `privacy_mode`, `tags text[]`, `template_id text`
 - **collections** — user-owned folders; hubs.collection_id references this
 - **content_blocks** — belongs to hub; type + data (JSONB) + sort_order
+- **profiles** (extended) — `display_name`, `bio`, `avatar_url`, `social_links jsonb`, `saved_count integer` (trigger-maintained), `badges text[]` (manually assigned via SQL; `BETA_PHASE` in `lib/config.ts` overlays 'beta' for everyone automatically)
 - **saved_hubs** — user saves another user's hub; columns: `user_id`, `hub_id`, `collection_id` (FK → collections, nullable), `last_viewed_at` (timestamptz); UNIQUE(user_id, hub_id); RLS: users manage their own rows; a second SELECT policy allows public reads of collection-assigned non-private saved hubs (for Hub Collector pages)
 - **hub_hearts** — user hearts a hub; columns: `user_id`, `hub_id`; UNIQUE(user_id, hub_id); RLS: anyone can read (SELECT USING true); only the user can insert/delete their own hearts
 
@@ -219,10 +222,10 @@ New blocks are inserted with `sort_order: blocks.length`.
 **File:** `app/dashboard/collections/page.tsx` (client component)
 
 - Background: `bg-[#FAF9F7]` (warm cream, matches public hub view)
-- Header: HubCollector™ logo + bordered **Help** button + ⚙ **Settings gear** dropdown (contains Sign out; future settings items go here)
-- Stats line: `X Hubs · X Collections` above the `+ New Hub` CTA
+- Header: HubCollector™ logo + bordered **Explore**, **Profile** (`/h/[username]`), **Help** links + ⚙ **Settings gear** dropdown (View Profile · Edit Profile · Sign out)
+- Stats line: `X Hubs · X Collections · X Saved` (Saved only shown when > 0) above the `+ New Hub` CTA
 - **WelcomeCard** renders below stats (see WelcomeCard section)
-- **Collections** section: folder SVG icon + `text-sm font-semibold`; empty collections show `empty` in muted italic instead of `0 Hubs`
+- **Collections** section: sorted **A→Z by title** (DB query uses `.order('title', { ascending: true })`); empty collections show `empty` in muted italic instead of `0 Hubs`; **Uncollected** (computed) always renders last
 - **Search & filters** (search input + All modes + All visibility dropdowns): placed **below Collections**, directly above the hub list — they filter the list they're adjacent to
 - **Hub list** sorted alphabetically A→Z by `title` (DB query uses `.order('title', { ascending: true })`)
 - **All Hubs** section header: grid SVG icon + `text-sm font-semibold`
@@ -235,17 +238,20 @@ New blocks are inserted with `sort_order: blocks.length`.
 
 **localStorage key:** `hc_dismissed_cards` — JSON array of dismissed card keys. Each card has a unique key; dismissed cards never reappear unless the key changes.
 
-**Two types of cards (priority: journey first, then feature):**
+**Display order** (first undismissed card wins):
 
-**Journey cards** — shown based on current `hubCount`, one at a time, until dismissed or naturally outgrown:
-| Key | Condition | Message |
-|-----|-----------|---------|
-| `journey-welcome-v1` | hubCount === 0 | "Hi, I'm Christine" — founder intro with photo |
-| `journey-first-hub-v1` | hubCount === 1 | "You've created your first Hub" — suggests printing QR |
-| `journey-growing-v1` | hubCount >= 2 | "You're building something" — suggests Collections |
-| `journey-established-v1` | hubCount >= 4 | "You've got the hang of it" — closing message |
+| # | Key | Condition | Title |
+|---|-----|-----------|-------|
+| 1 | `journey-welcome-v1` | hubCount === 0 | "Hi, I'm Christine" — founder intro, create first hub CTA |
+| 2 | `journey-first-hub-v1` | hubCount === 1 | "You've created your first Hub" — print QR CTA |
+| 3 | `journey-growing-v1` | hubCount >= 2 | "You're building something" — create Collection CTA |
+| 4 | `feature-explore-v1` | hubCount >= 1 | "I built you a place to explore" — Explore page CTA |
+| 5 | `feature-save-hubs-v1` | hubCount >= 1 | "You can now save other people's Hubs" |
+| 6 | `feature-profile-v1` | hubCount >= 1 | "Your profile page is live" — Edit Profile CTA |
+| 7 | `feature-social-v1` | hubCount >= 1 | "Hearts, shares, and views" |
+| 8 | `journey-established-v1` | hubCount >= 4 | "You've got the hang of it" — closing, shown only after feature cards 4–7 are dismissed |
 
-**Feature cards** — add a new entry to `FEATURE_CARDS` array in `WelcomeCard.tsx` when shipping a notable feature. Shows to all users with ≥ 1 Hub who haven't dismissed that key. Bump the key version suffix (`v2`) to re-surface an updated announcement.
+All cards use `isFounder: true` — Christine's photo + warm first-person voice. Label chip: journey cards use milstone labels (`Welcome`, `Next step`, etc.); feature cards use `Just shipped`. **Adding a new feature card:** add an entry to `FEATURE_CARDS` in `WelcomeCard.tsx`; bump key suffix (`v2`) to resurface an updated announcement.
 
 All cards have an × dismiss button. Founder photo: `/public/Christine.jpg` (circular avatar, `object-top` crop). Falls back to teal "C" initial if photo missing.
 
@@ -272,7 +278,7 @@ The `✓ Saved` chip appears for 2.5s after a block is updated (`savedBlockId` s
 
 **FormShell** is now a plain container (title + children only). No Cancel button.
 
-**FormActions** component renders `[Save] [Close]` side by side — Save is primary blue, Close is bordered secondary. Used by all block forms except AudioForm (which has multiple inline save paths and a standalone Close button).
+**FormActions** component renders `[Save] [Close]` with an optional `[Remove]` pushed right (red text, `ml-auto`). Remove only appears when `onRemove` prop is provided — it is passed when editing an existing block but NOT when adding a new one. AudioForm has its own Close + Remove buttons (it doesn't use FormActions).
 
 Block rows show a **content indicator dot**: solid green (`bg-emerald-400`) if the block has content, hollow gray ring (`border border-gray-300`) if empty. Empty block rows also render on `bg-gray-50` instead of white.
 
