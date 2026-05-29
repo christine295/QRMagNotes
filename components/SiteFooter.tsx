@@ -6,6 +6,8 @@ export default function SiteFooter({ className }: { className?: string }) {
       <div className="max-w-2xl mx-auto px-5 py-5 flex flex-col items-center text-center">
         {/* Nav links — sit higher, more visual separation from copyright block */}
         <div className="flex items-center gap-2 flex-wrap justify-center mb-3 text-[11px] md:text-sm text-stone-500">
+          <Link href="/explore" className="hover:text-stone-700 transition-colors whitespace-nowrap">Explore</Link>
+          <span className="text-stone-300">·</span>
           <Link href="/privacy" className="hover:text-stone-700 transition-colors whitespace-nowrap">Privacy</Link>
           <span className="text-stone-300">·</span>
           <Link href="/terms" className="hover:text-stone-700 transition-colors whitespace-nowrap">Terms</Link>

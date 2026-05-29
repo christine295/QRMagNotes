@@ -274,6 +274,12 @@ export default function DashboardPage() {
           </h1>
           <div className="flex items-center gap-2">
             <Link
+              href="/explore"
+              className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+            >
+              Explore
+            </Link>
+            <Link
               href="/help"
               className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
             >

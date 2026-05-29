@@ -190,6 +190,55 @@ function Section({ type, label, open, onToggle, children }: {
   )
 }
 
+// ── Bar helpers ───────────────────────────────────────────────────────────────
+
+function EngagementCounts({ hearts, saveCount }: { hearts: number; saveCount: number }) {
+  if (hearts === 0 && saveCount === 0) return null
+  return (
+    <span className="flex items-center gap-1.5 text-[11px] text-stone-400 select-none">
+      {hearts > 0 && (
+        <span className="flex items-center gap-0.5">
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+          </svg>
+          {hearts}
+        </span>
+      )}
+      {hearts > 0 && saveCount > 0 && <span className="text-stone-200">·</span>}
+      {saveCount > 0 && (
+        <span className="flex items-center gap-0.5">
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+          </svg>
+          {saveCount}
+        </span>
+      )}
+    </span>
+  )
+}
+
+function ShareButton({ copied, onShare }: { copied: boolean; onShare: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onShare}
+      className="flex items-center gap-1 text-xs text-stone-500 hover:text-stone-700 transition-colors"
+      aria-label="Share this hub"
+    >
+      {copied ? (
+        <span className="text-emerald-600 font-medium">Copied!</span>
+      ) : (
+        <>
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
+          </svg>
+          <span className="hidden sm:inline">Share</span>
+        </>
+      )}
+    </button>
+  )
+}
+
 // ── Main view ─────────────────────────────────────────────────────────────────
 
 export default function HubView({ hub, blocks, color, isOwner, username, collectionHubs, currentUserId, isSaved: initialIsSaved, heartCount: initialHeartCount, userHearted: initialUserHearted, autoSave: initialAutoSave }: {
@@ -215,6 +264,7 @@ export default function HubView({ hub, blocks, color, isOwner, username, collect
   const [hearts, setHearts] = useState(initialHeartCount ?? 0)
   const [savePending, setSavePending] = useState(false)
   const [heartPending, setHeartPending] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   // Auto-save when returning from login with ?save=1
   useEffect(() => {
@@ -229,6 +279,17 @@ export default function HubView({ hub, blocks, color, isOwner, username, collect
       setSavePending(false)
     })()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleShare() {
+    const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/h/${username}/${hub.slug}`
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try { await navigator.share({ title: hub.title, url }) } catch {}
+    } else {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   const toggle = (id: string) => setOpen(p => ({ ...p, [id]: !p[id] }))
 
@@ -264,41 +325,47 @@ export default function HubView({ hub, blocks, color, isOwner, username, collect
 
       {/* Owner bar */}
       {isOwner && (
-        <div className="bg-white/90 backdrop-blur-sm border-b border-stone-200 px-4 py-2.5 flex items-center justify-between sticky top-0 z-20">
-          <span className="text-[0.6875rem] text-stone-400 tracking-[0.05em] uppercase">Your Hub</span>
-          <a href={`/dashboard/hub/${hub.id}/edit`}
-            className="text-xs font-medium text-stone-600 border border-stone-200 rounded-lg px-3 py-1.5 hover:bg-stone-50 transition-colors"
-          >
-            Edit
-          </a>
+        <div className="bg-white/90 backdrop-blur-sm border-b border-stone-200 px-4 py-2.5 flex items-center justify-between gap-2 sticky top-0 z-20">
+          <span className="text-[0.6875rem] text-stone-400 tracking-[0.05em] uppercase shrink-0">Your Hub</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <EngagementCounts hearts={hearts} saveCount={hub.save_count ?? 0} />
+            <ShareButton copied={copied} onShare={handleShare} />
+            <a href={`/dashboard/hub/${hub.id}/edit`}
+              className="text-xs font-medium text-stone-600 border border-stone-200 rounded-lg px-3 py-1.5 hover:bg-stone-50 transition-colors"
+            >
+              Edit
+            </a>
+          </div>
         </div>
       )}
 
       {/* Visitor bar — for non-owners */}
       {!isOwner && (
-        <div className="bg-white/90 backdrop-blur-sm border-b border-stone-200 px-4 py-2.5 flex items-center justify-between sticky top-0 z-20">
-          {/* Left: dashboard link (logged-in) or empty spacer (logged-out) */}
+        <div className="bg-white/90 backdrop-blur-sm border-b border-stone-200 px-4 py-2.5 flex items-center justify-between gap-2 sticky top-0 z-20">
+          {/* Left: nav context */}
           {currentUserId ? (
-            <a
-              href="/dashboard"
-              className="text-[0.6875rem] text-stone-400 tracking-[0.05em] uppercase hover:text-stone-600 transition-colors"
+            <a href="/dashboard"
+              className="text-[0.6875rem] text-stone-400 tracking-[0.05em] uppercase hover:text-stone-600 transition-colors shrink-0"
             >
               « Dashboard
             </a>
           ) : (
-            <span />
+            <a href={`/h/${username}`}
+              className="text-[0.6875rem] text-stone-400 hover:text-stone-600 transition-colors truncate"
+            >
+              @{username}
+            </a>
           )}
 
-          {/* Right: heart + save */}
-          <div className="flex items-center gap-2">
+          {/* Right: engagement + share + save */}
+          <div className="flex items-center gap-2 shrink-0">
+            <EngagementCounts hearts={hearts} saveCount={hub.save_count ?? 0} />
             <button
               type="button"
               onClick={handleHeartClick}
               disabled={heartPending}
               aria-label={hearted ? 'Remove heart' : 'Heart this hub'}
-              className={`flex items-center gap-1.5 transition-colors ${
-                hearted ? 'text-rose-500' : 'text-stone-400 hover:text-rose-400'
-              }`}
+              className={`flex items-center gap-1 transition-colors ${hearted ? 'text-rose-500' : 'text-stone-400 hover:text-rose-400'}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24"
                 fill={hearted ? 'currentColor' : 'none'}
@@ -306,8 +373,8 @@ export default function HubView({ hub, blocks, color, isOwner, username, collect
               >
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
               </svg>
-              {hearts > 0 && <span className="text-xs font-medium">{hearts}</span>}
             </button>
+            <ShareButton copied={copied} onShare={handleShare} />
             <button
               type="button"
               onClick={handleSaveClick}

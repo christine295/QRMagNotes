@@ -21,6 +21,7 @@ export type Hub = {
   tags: string[]
   created_at: string
   updated_at: string
+  save_count?: number
 }
 export type Collection = {
   id: string
