@@ -12,6 +12,7 @@ function NewHubPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const collectionId = searchParams.get('collection') || undefined
+  const templateId = searchParams.get('template') || undefined
   const [userId, setUserId] = useState<string | null>(null)
   const [username, setUsername] = useState<string>('')
   const [loading, setLoading] = useState(true)
@@ -47,7 +48,7 @@ function NewHubPageContent() {
         </div>
       </header>
       <main className="max-w-xl mx-auto px-4 py-8">
-        <HubForm userId={userId} username={username} initialCollectionId={collectionId} />
+        <HubForm userId={userId} username={username} initialCollectionId={collectionId} initialTemplateId={templateId} />
       </main>
     </div>
   )

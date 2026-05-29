@@ -39,9 +39,11 @@ function LoginForm() {
   }
 
   async function handleGoogleLogin() {
+    const callbackUrl = new URL(`${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`)
+    if (next !== '/dashboard') callbackUrl.searchParams.set('next', next)
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` },
+      options: { redirectTo: callbackUrl.toString() },
     })
   }
 

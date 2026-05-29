@@ -789,6 +789,7 @@ type Props = {
   userId: string
   username?: string
   initialCollectionId?: string
+  initialTemplateId?: string
 }
 
 function slugify(val: string) {
@@ -799,7 +800,7 @@ function slugify(val: string) {
     .replace(/^-|-$/g, '')
 }
 
-export default function HubForm({ hub, userId, username, initialCollectionId }: Props) {
+export default function HubForm({ hub, userId, username, initialCollectionId, initialTemplateId }: Props) {
   const { collections, setCollections, loading: collectionsLoading } = useCollections(userId)
   const [collectionId, setCollectionId] = useState<string | null>(hub?.collection_id ?? initialCollectionId ?? null)
   const [showNewCollection, setShowNewCollection] = useState(false)
@@ -810,17 +811,21 @@ export default function HubForm({ hub, userId, username, initialCollectionId }: 
   const supabase = createClient()
   const isEditing = !!hub
 
-  const [templateChosen, setTemplateChosen] = useState(isEditing)
+  const preselected = !isEditing && initialTemplateId
+    ? TEMPLATES.find(t => t.id === initialTemplateId) ?? null
+    : null
 
-  const [title, setTitle] = useState(hub?.title ?? '')
-  const [slug, setSlug] = useState(hub?.slug ?? '')
+  const [templateChosen, setTemplateChosen] = useState(isEditing || !!preselected)
+
+  const [title, setTitle] = useState(hub?.title ?? preselected?.title ?? '')
+  const [slug, setSlug] = useState(hub?.slug ?? (preselected ? slugify(preselected.title) : ''))
   const [mode, setMode] = useState<'landing' | 'redirect'>(
     (hub?.mode as 'landing' | 'redirect') ?? 'landing'
   )
   const [redirectUrl, setRedirectUrl] = useState(hub?.redirect_url ?? '')
-  const [description, setDescription] = useState(hub?.description ?? '')
+  const [description, setDescription] = useState(hub?.description ?? preselected?.hubDescription ?? '')
   const [imageUrl, setImageUrl] = useState(hub?.image_url ?? '')
-  const [themeColor, setThemeColor] = useState(hub?.theme_color ?? '#3B82F6')
+  const [themeColor, setThemeColor] = useState(hub?.theme_color ?? preselected?.themeColor ?? '#3B82F6')
   const [privacyMode, setPrivacyMode] = useState<'public' | 'unlisted' | 'private'>(
     hub?.privacy_mode ?? 'private'
   )
@@ -830,7 +835,7 @@ export default function HubForm({ hub, userId, username, initialCollectionId }: 
   const [slugError, setSlugError] = useState('')
   const [createdHubId, setCreatedHubId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content')
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(hub?.template_id ?? null)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(hub?.template_id ?? preselected?.id ?? null)
 
   async function createCollection() {
     if (!newCollectionTitle.trim()) return

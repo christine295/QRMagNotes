@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import SiteFooter from '@/components/SiteFooter'
+import { createClient } from '@/lib/supabase/server'
 
 const POPULAR_USES = [
   { emoji: '🍳', label: 'QR recipe cards' },
@@ -70,6 +71,7 @@ const BLOCK_TYPES = [
 const TEMPLATES = [
   {
     name: 'Blank',
+    templateId: 'blank',
     emoji: '➕',
     tagline: 'Start from scratch with your own structure.',
     description: 'Empty hub — no pre-built blocks. Use this when building something custom or when no existing template fits.',
@@ -78,6 +80,7 @@ const TEMPLATES = [
   },
   {
     name: 'Artwork Archive',
+    templateId: 'artwork',
     emoji: '🎨',
     tagline: 'Document and archive a piece of artwork.',
     description: 'Photos, materials, story, and status. Attach to the back of a painting or use as a standalone record.',
@@ -95,6 +98,7 @@ const TEMPLATES = [
   },
   {
     name: 'Book / Reading Notes',
+    templateId: 'book',
     emoji: '📖',
     tagline: 'Capture quotes, reflections, and reading progress.',
     description: 'Notes, quotes, and reflections about a book.',
@@ -111,6 +115,7 @@ const TEMPLATES = [
   },
   {
     name: 'Daily Reflection / Journal',
+    templateId: 'journal',
     emoji: '📓',
     tagline: 'A guided space for introspection, gratitude, and intention.',
     description: 'End-of-day reflection oriented toward meaning — what it meant, not just what happened.',
@@ -130,6 +135,7 @@ const TEMPLATES = [
   },
   {
     name: 'Diary / Life Log',
+    templateId: 'diary',
     emoji: '📔',
     tagline: 'A casual daily record of what happened — events, people, photos.',
     description: 'Focused on capturing real life as it unfolds, not interpreting it.',
@@ -149,6 +155,7 @@ const TEMPLATES = [
   },
   {
     name: 'Garden Planner',
+    templateId: 'garden',
     emoji: '🪴',
     tagline: 'Track plantings, tasks, and garden observations.',
     description: 'Plot overview, planting checklist, care tasks, and growth log.',
@@ -167,6 +174,7 @@ const TEMPLATES = [
   },
   {
     name: 'Goal / Habit Tracker',
+    templateId: 'goal',
     emoji: '🎯',
     tagline: 'Define a goal, track habits, and log milestones.',
     description: 'Goal overview, daily habit checklist, progress log, and voice check-ins.',
@@ -182,6 +190,7 @@ const TEMPLATES = [
   },
   {
     name: 'Grocery List',
+    templateId: 'grocery',
     emoji: '🛒',
     tagline: 'Organized shopping list by category with meal plan notes.',
     description: 'Meal plan, category checklists, and store notes.',
@@ -201,6 +210,7 @@ const TEMPLATES = [
   },
   {
     name: 'Home Maintenance Log',
+    templateId: 'maintenance',
     emoji: '🔧',
     tagline: 'Log repairs, warranties, and service contacts.',
     description: 'Attach to an appliance, breaker box, HVAC unit, or any area of the home.',
@@ -218,6 +228,7 @@ const TEMPLATES = [
   },
   {
     name: 'Hub Collector',
+    templateId: 'hub_collector',
     emoji: '🔗',
     tagline: 'A public-facing button menu of hubs from a collection.',
     description: 'Turns a collection into a Linktree-style page. Add intro text and link to one or more collections.',
@@ -229,6 +240,7 @@ const TEMPLATES = [
   },
   {
     name: 'Pet Profile',
+    templateId: 'pet',
     emoji: '🐾',
     tagline: 'Care tasks, health history, vet info, and photos.',
     description: 'Attach to a pet carrier, food station, or pet folder.',
@@ -246,6 +258,7 @@ const TEMPLATES = [
   },
   {
     name: 'Plant Profile',
+    templateId: 'plant',
     emoji: '🪴',
     tagline: 'Care instructions, growth log, and watering reminders.',
     description: 'Attach to a pot or shelf tag.',
@@ -263,6 +276,7 @@ const TEMPLATES = [
   },
   {
     name: 'Recipe',
+    templateId: 'recipe',
     emoji: '🍳',
     tagline: 'Photos, ingredients, instructions, and cooking notes.',
     description: 'Attach to a cookbook, a kitchen item, or share a family recipe via QR.',
@@ -280,6 +294,7 @@ const TEMPLATES = [
   },
   {
     name: 'Ritual',
+    templateId: 'ritual',
     emoji: '🕯️',
     tagline: 'A complete space for ritual practice and reflection.',
     description: '14 blocks in ceremonial order. Adapt labels and content to any practice.',
@@ -303,6 +318,7 @@ const TEMPLATES = [
   },
   {
     name: 'Shadow Work Journal',
+    templateId: 'shadow_work',
     emoji: '🌑',
     tagline: 'A private space for exploring your hidden or wounded self.',
     description: 'Prompted inner work — triggers, patterns, inner dialogue, compassion, and closing insight.',
@@ -324,6 +340,7 @@ const TEMPLATES = [
   },
   {
     name: 'Travel Journal',
+    templateId: 'travel',
     emoji: '✈️',
     tagline: 'Trip overview, timeline, packing list, and reflections.',
     description: 'Capture a trip with photos, timeline, packing list, and reflections.',
@@ -340,6 +357,7 @@ const TEMPLATES = [
   },
   {
     name: 'Travel Packing List',
+    templateId: 'packing',
     emoji: '🧳',
     tagline: 'Packing checklists, trip details, and travel documents.',
     description: 'Essentials, clothing, toiletries, tech, and travel documents by category.',
@@ -360,6 +378,7 @@ const TEMPLATES = [
   },
   {
     name: 'Vehicle Maintenance',
+    templateId: 'vehicle',
     emoji: '🚗',
     tagline: 'Track oil changes, repairs, specs, and service contacts.',
     description: 'Vehicle details, maintenance log, routine checklist, and service contacts.',
@@ -378,6 +397,7 @@ const TEMPLATES = [
   },
   {
     name: "What's in the Box?",
+    templateId: 'box',
     emoji: '📦',
     tagline: 'Label any storage box with a contents list and photo.',
     description: 'Attach a QR code to any box so you always know what\'s inside.',
@@ -395,6 +415,7 @@ const TEMPLATES = [
   },
   {
     name: 'Workout Tracker',
+    templateId: 'workout',
     emoji: '💪',
     tagline: 'Log workouts, track PRs, and stay consistent.',
     description: 'Goal, warmup, exercises, progress log, and session notes.',
@@ -414,7 +435,17 @@ const TEMPLATES = [
 
 const CEREMONIAL_LABELS = ['invocation', 'words to speak', 'quote', 'passage', 'poem', 'prayer', 'sacred']
 
-export default function HelpPage() {
+export default async function HelpPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isLoggedIn = !!user
+
+  function createHubUrl(templateId: string) {
+    return isLoggedIn
+      ? `/dashboard/hub/new?template=${templateId}`
+      : `/login?next=/dashboard/hub/new?template=${templateId}`
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
       <header className="bg-white border-b border-stone-200 px-4 py-4 sticky top-0 z-10">
@@ -481,7 +512,7 @@ export default function HelpPage() {
             {TEMPLATES.map(t => (
               <div
                 key={t.name}
-                className={`bg-white rounded-xl border border-stone-100 border-l-[3px] ${t.borderClass} p-4`}
+                className={`bg-white rounded-xl border border-stone-100 border-l-[3px] ${t.borderClass} p-4 flex flex-col`}
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-xl leading-none">{t.emoji}</span>
@@ -491,6 +522,14 @@ export default function HelpPage() {
                 {t.blocks.length > 0 && (
                   <p className="text-[10px] text-stone-400 mt-2">{t.blocks.length} blocks included</p>
                 )}
+                <div className="mt-3 pt-3 border-t border-stone-100">
+                  <Link
+                    href={createHubUrl(t.templateId)}
+                    className="text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    Create this hub →
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
@@ -500,10 +539,16 @@ export default function HelpPage() {
           <div className="space-y-8">
             {TEMPLATES.filter(t => t.blocks.length > 0).map(t => (
               <div key={t.name}>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="text-base leading-none">{t.emoji}</span>
                   <span className="text-sm font-semibold text-stone-700">{t.name}</span>
                   <span className="text-xs text-stone-400">— {t.description}</span>
+                  <Link
+                    href={createHubUrl(t.templateId)}
+                    className="ml-auto text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors whitespace-nowrap"
+                  >
+                    Create this hub →
+                  </Link>
                 </div>
                 <div className="divide-y divide-stone-100">
                   {t.blocks.map(b => (
