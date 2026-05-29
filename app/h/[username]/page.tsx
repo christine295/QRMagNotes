@@ -40,11 +40,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const [{ data: hubs }, { data: { user } }] = await Promise.all([
     supabase
       .from('hubs')
-      .select('id, title, description, slug, theme_color, template_id, save_count')
+      .select('id, title, description, slug, theme_color, template_id, updated_at')
       .eq('user_id', profile.id)
       .eq('privacy_mode', 'public')
       .eq('mode', 'landing')
-      .order('save_count', { ascending: false })
       .order('updated_at', { ascending: false }),
     supabase.auth.getUser(),
   ])

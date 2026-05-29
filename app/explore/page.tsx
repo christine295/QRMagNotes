@@ -50,10 +50,9 @@ export default async function ExplorePage({
 
   let query = supabase
     .from('hubs')
-    .select('id, title, description, slug, theme_color, template_id, save_count, user_id')
+    .select('id, title, description, slug, theme_color, template_id, user_id, updated_at')
     .eq('privacy_mode', 'public')
     .eq('mode', 'landing')
-    .order('save_count', { ascending: false })
     .order('updated_at', { ascending: false })
     .limit(48)
 
