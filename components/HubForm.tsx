@@ -1027,12 +1027,23 @@ export default function HubForm({ hub, userId, username, initialCollectionId, in
           return
         }
       } else {
+        // Auto-resolve slug collisions: try slug, slug-2, slug-3, …
+        let resolvedSlug = slug
+        for (let i = 0; i <= 10; i++) {
+          const candidate = i === 0 ? slug : `${slug}-${i + 1}`
+          const { data: taken } = await supabase
+            .from('hubs').select('id').eq('user_id', userId).eq('slug', candidate).maybeSingle()
+          if (!taken) { resolvedSlug = candidate; break }
+          if (i === 10) resolvedSlug = `${slug}-${Date.now()}`
+        }
+        if (resolvedSlug !== slug) setSlug(resolvedSlug)
+
         const { data: newHub, error: hubError } = await supabase
           .from('hubs')
           .insert({
             user_id: userId,
             title,
-            slug,
+            slug: resolvedSlug,
             mode,
             redirect_url: mode === 'redirect' ? redirectUrl : null,
             description: mode === 'landing' ? description || null : null,
