@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import ModerationPanel from '@/components/ModerationPanel'
 
 const ADMIN_EMAIL = 'christine@websketching.com'
 
@@ -41,7 +42,7 @@ export default async function AdminUserPage({
     { data: blocks },
   ] = await Promise.all([
     adminClient.auth.admin.getUserById(id),
-    adminClient.from('profiles').select('*').eq('id', id).single(),
+    adminClient.from('profiles').select('*, account_status').eq('id', id).single(),
     adminClient.from('hubs').select('id, title, slug, mode, privacy_mode, template_id, updated_at, created_at').eq('user_id', id).order('updated_at', { ascending: false }),
     adminClient.from('collections').select('id, title, created_at').eq('user_id', id).order('title'),
     adminClient.from('content_blocks').select('hub_id').in('hub_id', []),
@@ -124,6 +125,14 @@ export default async function AdminUserPage({
             </div>
           </div>
         </div>
+
+        {/* Moderation */}
+        <ModerationPanel
+          userId={id}
+          username={username}
+          initialStatus={(profile?.account_status as any) ?? 'active'}
+          hubCount={hubs?.length ?? 0}
+        />
 
         {/* Hubs */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
