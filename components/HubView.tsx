@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import SiteFooter from '@/components/SiteFooter'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -116,20 +115,26 @@ function ChecklistItems({ blockId, items, color }: {
 
   return (
     <div>
-      <ul className="space-y-3.5">
+      <ul className="space-y-1">
         {items.map(item => (
           <li key={item.id}>
             <button type="button" onClick={() => toggle(item.id)}
-              className="flex items-start gap-3.5 w-full text-left"
+              className="flex items-center gap-4 w-full text-left py-2.5 min-h-[44px]"
             >
               <span
-                className="mt-[0.35rem] w-2 h-2 rounded-full flex-shrink-0 border transition-all duration-200"
+                className="w-5 h-5 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all duration-200"
                 style={{
                   borderColor: checked.has(item.id) ? color : '#c7c4bf',
                   backgroundColor: checked.has(item.id) ? color : 'transparent',
                 }}
-              />
-              <span className={`text-[0.9375rem] leading-[1.6] tracking-[-0.005em] transition-colors duration-200 ${
+              >
+                {checked.has(item.id) && (
+                  <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                )}
+              </span>
+              <span className={`text-base leading-snug transition-colors duration-200 ${
                 checked.has(item.id) ? 'line-through text-stone-300' : 'text-stone-600'
               }`}>
                 {item.text}
@@ -141,7 +146,7 @@ function ChecklistItems({ blockId, items, color }: {
       {allDone && (
         <button type="button"
           onClick={() => { setChecked(new Set()); try { localStorage.removeItem(`checklist-${blockId}`) } catch {} }}
-          className="mt-5 text-[0.6875rem] tracking-[0.06em] uppercase text-stone-300 hover:text-stone-500 transition-colors"
+          className="mt-4 text-[0.6875rem] tracking-[0.06em] uppercase text-stone-300 hover:text-stone-500 transition-colors"
         >
           Begin again
         </button>
@@ -585,7 +590,14 @@ export default function HubView({ hub, blocks, color, isOwner, username, collect
         )}
       </main>
 
-      <SiteFooter />
+      <footer className="border-t border-stone-100 py-5 text-center">
+        <p className="text-xs text-stone-400">
+          Created with{' '}
+          <a href="https://hubcollector.com" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 transition-colors underline underline-offset-2">
+            HubCollector™
+          </a>
+        </p>
+      </footer>
     </div>
   )
 }

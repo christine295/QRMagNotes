@@ -127,6 +127,7 @@ export default function DashboardPage() {
   const settingsRef = useRef<HTMLDivElement>(null)
   const [userEmail, setUserEmail] = useState<string>('')
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [hamburgerOpen, setHamburgerOpen] = useState(false)
 
   function hubMatches(hub: any) {
     const q = searchQuery.toLowerCase()
@@ -270,33 +271,43 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
-      <header className="bg-white border-b border-gray-100 px-4 py-3.5">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+      <header className="bg-white border-b border-gray-100">
+        <div className="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">
             HubCollector™
-            <span className="ml-2 text-xs font-normal text-gray-400">{VERSION}</span>
+            <span className="ml-2 text-xs font-normal text-gray-400 hidden sm:inline">{VERSION}</span>
           </h1>
           <div className="flex items-center gap-2">
-            <Link
-              href="/explore"
-              className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-            >
+            {/* Desktop nav */}
+            <Link href="/explore" className="hidden sm:inline-flex text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors">
               Explore
             </Link>
             {username && (
-              <Link
-                href={`/h/${username}`}
-                className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-              >
+              <Link href={`/h/${username}`} className="hidden sm:inline-flex text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors">
                 Profile
               </Link>
             )}
-            <Link
-              href="/help"
-              className="text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-            >
+            <Link href="/help" className="hidden sm:inline-flex text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors">
               Help
             </Link>
+
+            {/* Mobile hamburger */}
+            <button
+              type="button"
+              onClick={() => setHamburgerOpen(v => !v)}
+              aria-label="Menu"
+              className={`sm:hidden rounded-lg p-1.5 transition-colors ${hamburgerOpen ? 'bg-gray-100 text-gray-700' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+            >
+              {hamburgerOpen ? (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12h18M3 6h18M3 18h18" />
+                </svg>
+              )}
+            </button>
             <div ref={settingsRef} className="relative">
               <button
                 type="button"
@@ -365,6 +376,29 @@ export default function DashboardPage() {
           </div>
         </div>
       </header>
+
+      {/* Mobile nav menu */}
+      {hamburgerOpen && (
+        <div className="sm:hidden bg-white border-b border-gray-100 shadow-sm z-20">
+          <Link href="/explore" onClick={() => setHamburgerOpen(false)}
+            className="flex items-center justify-between px-6 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 border-b border-gray-50 transition-colors">
+            Explore
+            <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </Link>
+          {username && (
+            <Link href={`/h/${username}`} onClick={() => setHamburgerOpen(false)}
+              className="flex items-center justify-between px-6 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 border-b border-gray-50 transition-colors">
+              Profile
+              <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            </Link>
+          )}
+          <Link href="/help" onClick={() => setHamburgerOpen(false)}
+            className="flex items-center justify-between px-6 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            Help
+            <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </Link>
+        </div>
+      )}
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         {/* Stats + primary CTA */}

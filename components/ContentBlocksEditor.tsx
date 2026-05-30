@@ -531,25 +531,27 @@ function ChecklistForm({ onSave, onClose, onRemove, initialData, templateId }: {
       <div className="space-y-2">
         {items.map((item, idx) => (
           <div key={item.id} className="flex gap-2 items-center">
-            <span className="text-gray-300 text-sm select-none w-4">☐</span>
             <input
               type="text"
               value={item.text}
               onChange={e => updateItem(item.id, e.target.value)}
               placeholder={`Item ${idx + 1}`}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {items.length > 1 && (
-              <button type="button" onClick={() => removeItem(item.id)} className="text-gray-300 hover:text-red-400 text-xl leading-none transition-colors">×</button>
+              <button type="button" onClick={() => removeItem(item.id)} className="text-gray-300 hover:text-red-400 text-xl leading-none transition-colors p-1">×</button>
             )}
           </div>
         ))}
       </div>
-      <button type="button" onClick={addItem} className="text-xs text-blue-600 hover:text-blue-800 transition-colors">
+      <button type="button" onClick={addItem}
+        className="w-full text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors border border-dashed border-blue-200 rounded-lg py-3 mt-1">
         + Add item
       </button>
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
+      <div className="pt-2">
+        <FormActions saving={saving} onClose={onClose} onSubmit={submit} onRemove={onRemove} />
+      </div>
     </FormShell>
   )
 }
