@@ -26,15 +26,60 @@ function userStatus(lastSignIn: string | null | undefined, hubCount: number) {
 // ── Welcome Cards reference data ──────────────────────────────────────────────
 
 const CARDS = [
-  { key: 'journey-welcome-v1',    label: 'Welcome',           condition: 'hubCount = 0',                      title: 'Hi, I\'m Christine' },
-  { key: 'journey-first-hub-v1', label: 'Next step',         condition: 'hubCount = 1',                      title: 'You\'ve created your first Hub' },
-  { key: 'journey-growing-v1',   label: 'Getting organized', condition: 'hubCount ≥ 2',                      title: 'You\'re building something' },
-  { key: 'feature-clone-v1',     label: 'Just shipped',      condition: 'hubCount ≥ 1',                      title: 'Build it once, reuse it forever' },
-  { key: 'feature-explore-v1',   label: 'Just shipped',      condition: 'hubCount ≥ 1',                      title: 'I built you a place to explore' },
-  { key: 'feature-save-hubs-v1', label: 'Just shipped',      condition: 'hubCount ≥ 1',                      title: 'You can now save other people\'s Hubs' },
-  { key: 'feature-profile-v1',   label: 'Just shipped',      condition: 'hubCount ≥ 1',                      title: 'Your profile page is live' },
-  { key: 'feature-social-v1',    label: 'Just shipped',      condition: 'hubCount ≥ 1',                      title: 'Hearts, shares, and views' },
-  { key: 'journey-established-v1', label: 'You\'ve got it',  condition: 'hubCount ≥ 4 + all feature cards dismissed', title: 'You\'ve got the hang of it' },
+  {
+    key: 'journey-welcome-v1', label: 'Welcome', condition: 'hubCount = 0',
+    title: "Hi, I'm Christine",
+    body: "I built HubCollector to help you turn real-life things, routines, records, and memories into living digital 'Hubs' you can update anytime.",
+    cta: 'Create your first Hub · Open Help Guide',
+  },
+  {
+    key: 'journey-first-hub-v1', label: 'Next step', condition: 'hubCount = 1',
+    title: "You've created your first Hub",
+    body: "The magic really happens when you print the QR code and attach it to something real. Try scanning it with your phone camera first — it's a good moment.",
+    cta: 'Print QR card',
+  },
+  {
+    key: 'journey-growing-v1', label: 'Getting organized', condition: 'hubCount ≥ 2',
+    title: "You're building something",
+    body: "As your Hubs grow, Collections are how this becomes a real system for your life. Group related Hubs together — like Pets, Kitchen, or Home.",
+    cta: 'Create a Collection',
+  },
+  {
+    key: 'feature-clone-v1', label: 'Just shipped', condition: 'hubCount ≥ 1',
+    title: 'Build it once, reuse it forever',
+    body: "Every Hub card now has a 'Clone as new list' button. Create a master packing list, grocery list, or any checklist — then clone it before each trip or shopping run. Pick the categories you need, name it, and start fresh. Your original stays untouched for next time.",
+    cta: 'Try the Packing List template »',
+  },
+  {
+    key: 'feature-explore-v1', label: 'Just shipped', condition: 'hubCount ≥ 1',
+    title: 'I built you a place to explore',
+    body: "The Explore page is live — browse public Hubs from people in the community, filter by type, and see what's popular. You can save anything you find straight to your dashboard.",
+    cta: 'Go to Explore »',
+  },
+  {
+    key: 'feature-save-hubs-v1', label: 'Just shipped', condition: 'hubCount ≥ 1',
+    title: "You can now save other people's Hubs",
+    body: "When you visit any public Hub that isn't yours, tap Save Hub to add it to your dashboard. Organise saved Hubs into Collections — even include them in Hub Collector pages.",
+    cta: 'Browse Hubs to save »',
+  },
+  {
+    key: 'feature-profile-v1', label: 'Just shipped', condition: 'hubCount ≥ 1',
+    title: 'Your profile page is live',
+    body: "Add your name, bio, photo, and social links — your profile at /h/your-username is public and shareable. You'll also earn badges as you use HubCollector.",
+    cta: 'Set up your profile »',
+  },
+  {
+    key: 'feature-social-v1', label: 'Just shipped', condition: 'hubCount ≥ 1',
+    title: 'Hearts, shares, and views',
+    body: "Other people can now heart your Hubs and share them from their phones. You'll see your engagement counts on Hub cards and on your profile — and on the Explore leaderboard.",
+    cta: null,
+  },
+  {
+    key: 'journey-established-v1', label: "You've got it", condition: 'hubCount ≥ 4 + all feature cards dismissed',
+    title: "You've got the hang of it",
+    body: "From here, HubCollector grows with you. I'll keep sharing tips and new features as we go — reach out anytime. I'm still building this alongside you.",
+    cta: null,
+  },
 ]
 
 // ── Roadmap ───────────────────────────────────────────────────────────────────
@@ -95,11 +140,22 @@ export default async function AdminPage({
 
   let feedback: any[] = []
   try {
-    const { data } = await adminClient
+    const { data: feedbackData } = await adminClient
       .from('feedback')
-      .select('id, message, status, created_at, user_id, profiles(username, email)')
+      .select('id, message, status, created_at, user_id')
       .order('created_at', { ascending: false })
-    feedback = data ?? []
+
+    if (feedbackData && feedbackData.length > 0) {
+      const userIds = [...new Set(feedbackData.map((f: any) => f.user_id).filter(Boolean))]
+      const { data: fbProfiles } = userIds.length > 0
+        ? await adminClient.from('profiles').select('id, username, email').in('id', userIds)
+        : { data: [] }
+      const profileById = new Map((fbProfiles ?? []).map((p: any) => [p.id, p]))
+      feedback = feedbackData.map((f: any) => ({
+        ...f,
+        profiles: f.user_id ? (profileById.get(f.user_id) ?? null) : null,
+      }))
+    }
   } catch {
     // feedback table may not exist yet
   }
@@ -259,40 +315,32 @@ export default async function AdminPage({
 
         {/* ── WELCOME CARDS ── */}
         {activeTab === 'cards' && (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700">Welcome Cards ({CARDS.length})</h2>
-              <p className="text-xs text-gray-400 mt-0.5">localStorage key: <code className="bg-gray-100 px-1 rounded">hc_dismissed_cards</code></p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wide">
-                    <th className="text-left px-5 py-2.5 font-medium">#</th>
-                    <th className="text-left px-5 py-2.5 font-medium">Key</th>
-                    <th className="text-left px-5 py-2.5 font-medium">Label</th>
-                    <th className="text-left px-5 py-2.5 font-medium">Condition</th>
-                    <th className="text-left px-5 py-2.5 font-medium">Title</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {CARDS.map((c, i) => (
-                    <tr key={c.key} className="hover:bg-gray-50">
-                      <td className="px-5 py-3 text-gray-400">{i + 1}</td>
-                      <td className="px-5 py-3 font-mono text-xs text-gray-600">{c.key}</td>
-                      <td className="px-5 py-3 text-gray-500">{c.label}</td>
-                      <td className="px-5 py-3 text-gray-500 text-xs">{c.condition}</td>
-                      <td className="px-5 py-3 text-gray-800 font-medium">{c.title}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="px-5 py-3.5 border-t border-gray-100 bg-gray-50">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-1">
               <p className="text-xs text-gray-400">
-                To resurface a card: bump the version suffix in <code className="bg-gray-100 px-1 rounded">components/WelcomeCard.tsx</code> (e.g. v1 → v2). New key = shown again to everyone.
+                localStorage key: <code className="bg-gray-100 px-1 rounded">hc_dismissed_cards</code> ·
+                To resurface: bump version suffix in <code className="bg-gray-100 px-1 rounded">WelcomeCard.tsx</code>
               </p>
             </div>
+            {CARDS.map((c, i) => (
+              <div key={c.key} className="bg-white rounded-xl border border-gray-200 p-5">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-medium text-gray-400 w-5 text-center">{i + 1}</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
+                      {c.label}
+                    </span>
+                    <span className="text-xs text-gray-400">{c.condition}</span>
+                  </div>
+                  <code className="text-[10px] text-gray-400 font-mono shrink-0">{c.key}</code>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-1 ml-7">{c.title}</p>
+                <p className="text-sm text-gray-500 leading-relaxed ml-7">{c.body}</p>
+                {c.cta && (
+                  <p className="text-xs text-blue-500 mt-2 ml-7">CTA: {c.cta}</p>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
